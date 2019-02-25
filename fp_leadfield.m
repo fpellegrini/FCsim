@@ -80,6 +80,7 @@ for id = 1:numel(patientID)
         close all
         figure
         showfield_general(lf,loc);
+        colormap('jet')
 %         caxis([-(10^-12) 10^-12])
 %         title(sprintf('Patient %s, node %d, direction %d', patientID{id}, inode, idir))
     
