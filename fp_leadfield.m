@@ -5,8 +5,9 @@ function leadfield = fp_leadfield(patientNumber, changeFilePaths, calculateBF, f
 %refChannel (string with channel name), plotOn (0 or 1),inode (node
 %number), idir (1 2 or 3)
 
-% fp_addpath
 cd ~/Dropbox/MEG_Project/Data
+DIROUT = '~/Dropbox/MEG_Project/Data/figures/topo_leadfields/';
+if ~exist(DIROUT); mkdir(DIROUT); end
 
 if strcmp(patientNumber,'all')
     %change filenames
@@ -84,7 +85,7 @@ for id = 1:numel(patientID)
 %         caxis([-(10^-12) 10^-12])
 %         title(sprintf('Patient %s, node %d, direction %d', patientID{id}, inode, idir))
     
-        outname = sprintf('%s/figures/lf_patient%s_node%d_dir%d.png',pwd,patientID{id},inode,idir);
+        outname = sprintf('%slf_patient%s_node%d_dir%d.png',DIROUT,patientID{id},inode,idir);
         print(outname,'-dpng');
         close all
     end 
