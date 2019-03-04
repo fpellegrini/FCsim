@@ -37,7 +37,7 @@ for id = 1:numel(patientID)
     end 
     
    
-    %Now calculate power, cross spectrum and filters. In P, CS and A, bad
+    %calculate power, cross spectrum and filters. In P, CS and A, bad
     %channels are already sorted out. 
     
     %power
@@ -61,12 +61,13 @@ for id = 1:numel(patientID)
         Pv(ifq,:,:) = cat(2,A,eye(nvox,nlfp)) * P(:,ifq);
     end
     
+    keyboard
     %coherence
     coh = CSv;
     for ijack = 1
         for ifreq = 1:nfreq
             coh(ifreq, :, :, ijack) = squeeze(CSv(ifreq, :, :, ijack)) ...
-                ./ sqrt(Pv(ifreq,:)'*P(end-nlfp+1:end,ifreq)');
+                ./ sqrt(Pv(ifreq,:)'*P(ifreq,end-nlfp+1:end));
         end
     end
     
