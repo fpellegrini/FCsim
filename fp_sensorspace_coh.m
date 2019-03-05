@@ -98,6 +98,7 @@ function fp_plot_sensorspace_coh(coh,frqs, frq_inds, loc,c_scale, outname)
     [max_f, max_chan] = find(coh==temp);
     clear temp
     
+    figure
     figone(30,30)
     pars.scale = c_scale;
     %plot right channels
