@@ -22,13 +22,39 @@ for id = 1:numel(patientID)
 %     plot(a,b,'.')
 %     grid on
 
-    dist = pdist(c);
-    dist_ = squareform(dist);
-    imagesc(dist_)
+   
 
 
     
     c=sources.grid.pos;
+    
+    for in = 1:length(c)
+        u= c(in,:);
+        u1 = find(round(c(:,3),4)==round(u(3),4) & round(c(:,2),4)==round(u(2),4));
+        u1(u1==in) = [];
+%         if numel(u1)==1
+%             flipID(in) = u1;
+        if isempty(u1)
+            flipID(in) = nan;
+        else
+            u1(sign(c(u1,1))== sign(c(in,1)))=[];
+            flipID(in) = u1(find(abs(c(u1,1)+c(in,1))== min(abs(c(u1,1)+c(in,1)))));
+        end
+        clear u u1 
+    end 
+
+    
+    dist = pdist(c);
+    dist_ = squareform(dist);
+    for inode =1:size(dist_,1)
+        o = dist_(inode,:);
+        o(inode)=inf;
+        
+        flipID(inode) = find(o==min(o));
+    end
+    imagesc(dist_)
+    
+    
     d=c;
     d(:,1)=-c(:,1);
     
