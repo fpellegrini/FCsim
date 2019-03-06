@@ -46,7 +46,7 @@ for id = 1:numel(patientID)
     P = fp_get_pow(X, fres, id_meg_chan, id_lfp_chan, id_meg_trials, id_lfp_trials);
     
     %cross spectrum
-    CS = fp_tsdata_to_cpsd(X,1,fres,id_meg_chan, id_lfp_chan, id_meg_trials, id_lfp_trials);
+    CS = fp_tsdata_to_cpsd(X,0,fres,id_meg_chan, id_lfp_chan, id_meg_trials, id_lfp_trials);
     
     %leadfield
     L1 = inverse.MEG.L;
@@ -56,25 +56,16 @@ for id = 1:numel(patientID)
     end     
     
     %filter
-    A=zeros(nmeg,ns,nfreq);
-    
-    for ifrq = 1:nfreq
-        currentCS = squeeze(CS(id_meg_chan,id_meg_chan,ifrq));
-        A(:,:,ifrq) = fp_filter(currentCS, L);
-    end 
-    
-    
+    load(sprintf('Filter_Patient%s.mat',patientID{id}));
+
 %     A1=inverse.MEG.W;
 %     for i =1:length(A1)
 %         A2(i,:) = real(A1{i});
 %     end
     
-    %select only the cross spectrum between meg and lfp channels 
-    CScross = CS(id_meg_chan, end-nlfp+1:end,:);
-    
     %project cross spectrum and power to voxel space
     for ifq = 1:nfreq
-        CSv(ifq,:,:) = A(:,:,ifq)' * CScross(:,:,ifq);
+        CSv(ifq,:,:) = A(:,:,ifq)' * CS(:,:,ifq);
         Pv(ifq,:,:) = cat(2,A(:,:,ifq)',eye(ns,nlfp)) * P(:,ifq);
     end
     
