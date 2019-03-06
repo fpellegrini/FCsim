@@ -27,7 +27,9 @@ for id = 1:numel(patientID)
     
     id_meg_chan = 1:125;
     id_meg_chan(data.D.badchannels)=[];
+    nmeg = numel(id_meg_chan);
     id_lfp_chan = 126:131;
+    nlfp = numel(id_lfp_chan);
     id_meg_trials = 1:n_trials;
     
     if shuffle == 1
@@ -37,37 +39,50 @@ for id = 1:numel(patientID)
     end 
     
    
-    %Now calculate power, cross spectrum and filters. In P, CS and A, bad
+    %Now calculate power, cross spectrum and filters. In P, CS, L and A, bad
     %channels are already sorted out. 
     
     %power
     P = fp_get_pow(X, fres, id_meg_chan, id_lfp_chan, id_meg_trials, id_lfp_trials);
     
     %cross spectrum
-    CS = fp_tsdata_to_cpsd(X,0,fres,id_meg_chan, id_lfp_chan, id_meg_trials, id_lfp_trials);
+    CS = fp_tsdata_to_cpsd(X,1,fres,id_meg_chan, id_lfp_chan, id_meg_trials, id_lfp_trials);
+    
+    %leadfield
+    L1 = inverse.MEG.L;
+    ns = numel(L1);
+    for is=1:ns
+        L(:,is,:)= L1{is};
+    end     
     
     %filter
-    A1=inverse.MEG.W;
-    for i =1:length(A1)
-        A(i,:) = real(A1{i});
-    end
+    A=zeros(nmeg,ns,nfreq);
     
-    nvox = size(A,1);
-    nlfp = numel(id_lfp_chan);
+    for ifrq = 1:nfreq
+        currentCS = squeeze(CS(id_meg_chan,id_meg_chan,ifrq));
+        A(:,:,ifrq) = fp_filter(currentCS, L);
+    end 
+    
+    
+%     A1=inverse.MEG.W;
+%     for i =1:length(A1)
+%         A2(i,:) = real(A1{i});
+%     end
+    
+    %select only the cross spectrum between meg and lfp channels 
+    CScross = CS(id_meg_chan, end-nlfp+1:end,:);
     
     %project cross spectrum and power to voxel space
     for ifq = 1:nfreq
-        CSv(ifq,:,:) = A * CS(:,:,ifq);
-        Pv(ifq,:,:) = cat(2,A,eye(nvox,nlfp)) * P(:,ifq);
+        CSv(ifq,:,:) = A(:,:,ifq)' * CScross(:,:,ifq);
+        Pv(ifq,:,:) = cat(2,A(:,:,ifq)',eye(ns,nlfp)) * P(:,ifq);
     end
     
     %coherence
     coh = CSv;
-    for ijack = 1
-        for ifreq = 1:nfreq
-            coh(ifreq, :, :, ijack) = squeeze(CSv(ifreq, :, :, ijack)) ...
-                ./ sqrt(Pv(ifreq,:)'*P(end-nlfp+1:end,ifreq)');
-        end
+    for ifreq = 1:nfreq
+        coh(ifreq, :, :) = squeeze(CSv(ifreq, :, :)) ...
+            ./ sqrt(Pv(ifreq,:)'*P(end-nlfp+1:end,ifreq)');
     end
     
     P_all{id} = P;
