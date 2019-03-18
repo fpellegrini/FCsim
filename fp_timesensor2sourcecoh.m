@@ -81,6 +81,11 @@ for id = 1:numel(patientID)
     CSv_all{id} = CSv;
     COH_all{id} = coh;  
     
+    if numel(patientID)==1
+        clear COH_all
+        COH_all = coh;
+    end
+    
     clearvars -except patientID id P_all Pv_all CSv_all COH_all
 end
 
