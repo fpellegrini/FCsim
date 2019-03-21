@@ -9,8 +9,9 @@ else
 end
 
 minnbchan = 1;
+lfpchan = 2;
 
-fs = D.fsample;
+fs = 300;
 fres = fs;
 frqs = sfreqs(fres, fs);
 frq_inds = find(frqs > 13 & frqs < 30);
@@ -33,17 +34,28 @@ for id = 1:numel(patientID)
         end
     end
 
-    onoff = p < 0.95;
+    onoff = p < 0.01;
     
-    onoff1 = squeeze(onoff(:,:,1))';
-    conn = fp_find_neighbours(patientID{id});
-    
-    [cluster, total] = findcluster(onoff1, conn,conn, minnbchan);
-    
-    a = find(cluster==1);
-    scatter3(c(:,1),c(:,2),c(:,3))
-    hold on
-    scatter3(c(a,1),c(a,2),c(a,3),'r+')
+    for lfpchan = 1:6
+        figure
+        onoff1 = squeeze(onoff(:,:,lfpchan))';
+        conn = fp_find_neighbours(patientID{id});
+
+        [cluster, total] = findcluster(onoff1, conn,conn, minnbchan);
+
+        if total>0
+            x = hist(cluster,0:total);
+            cluSize = max(x(2:end));
+            mask = cluster==(find(x==max(x(2:end)))-1);
+        end
+
+        c = sources.grid.pos;
+        scatter3(c(:,1),c(:,2),c(:,3),5,[0.85 0.85 0.85])
+        hold on
+        col = -log(squeeze(p(:,:,lfpchan)));
+        scatter3(c(mask,1),c(mask,2),c(mask,3),20,col(mask)','filled')
+        colormap jet
+    end 
     
     
     

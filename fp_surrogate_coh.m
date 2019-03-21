@@ -1,4 +1,4 @@
-function fp_surrogate_coh(patientNumber, njack)
+function fp_surrogate_coh(patientNumber, nit)
 
 cd ~/Dropbox/MEG_Project/Data
 
@@ -11,8 +11,8 @@ else
     patientID{1} = patientNumber;
 end
 
-if ~exist('njack','var')
-    njack = 1000;
+if ~exist('nit','var')
+    nit = 50;
 end
 
 for id = 1:numel(patientID)
@@ -20,10 +20,11 @@ for id = 1:numel(patientID)
     %true coherence 
     [~,~,~, coh(1,:,:,:)] = fp_timesensor2sourcecoh(patientID{id}, 0);
 
-    for ijack = 1:njack
+    for iit = 1:nit
         
+        iit
         %shuffled coherences
-        [~,~,~,coh(ijack+1,:,:,:)] = fp_timesensor2sourcecoh(patientID{id}, 1);
+        [~,~,~,coh(iit+1,:,:,:)] = fp_timesensor2sourcecoh(patientID{id}, 1);
     end 
 
     outname = sprintf('%sCoherences_Patient%s',DIROUT, patientID{id});

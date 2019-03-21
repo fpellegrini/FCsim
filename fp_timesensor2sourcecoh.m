@@ -48,25 +48,26 @@ for id = 1:numel(patientID)
     %cross spectrum
     CS = fp_tsdata_to_cpsd(X,0,fres,id_meg_chan, id_lfp_chan, id_meg_trials, id_lfp_trials);
     
-    %leadfield
-    L1 = inverse.MEG.L;
-    ns = numel(L1);
-    for is=1:ns
-        L(:,is,:)= L1{is};
-    end     
-    
-    %filter
-    load(sprintf('Filter_Patient%s.mat',patientID{id}));
+%     %leadfield
+%     L1 = inverse.MEG.L;
+%     for is=1:ns
+%         L(:,is,:)= L1{is};
+%     end     
 
 %     A1=inverse.MEG.W;
 %     for i =1:length(A1)
 %         A2(i,:) = real(A1{i});
 %     end
+
+    %filter
+    load(sprintf('Filter_Patient%s.mat',patientID{id}));
+    
+    ns = size(A,2);
     
     %project cross spectrum and power to voxel space
     for ifq = 1:nfreq
         CSv(ifq,:,:) = A(:,:,ifq)' * CS(:,:,ifq);
-        Pv(ifq,:,:) = cat(2,A(:,:,ifq)',eye(ns,nlfp)) * P(:,ifq);
+        Pv(ifq,:) = cat(2,A(:,:,ifq)',eye(ns,nlfp)) * P(:,ifq);
     end
     
     %coherence

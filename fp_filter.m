@@ -1,5 +1,5 @@
 function A = fp_filter(CS, L)
-
+keyboard
 ns = size(L,2);
 lambda = mean(diag(real(CS)))/100;
 
@@ -11,7 +11,7 @@ for is=1:ns %iterate across nodes
     filter = pinv(Lloc'*CSinv*Lloc)*Lloc'*CSinv; %create filter
 
     %select best orientation 
-    csd = filter* real(CS)*filter';
+    csd = filter*real(CS)*filter';
     [u,~,~] = svd(csd);
     LF = Lloc*u(:,1);
 
