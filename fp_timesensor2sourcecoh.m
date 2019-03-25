@@ -21,8 +21,9 @@ for id = 1:numel(patientID)
     n_trials = length(D_ft.trial);
     
     fs = data.D.fsample;
-    fres = fs;
+    fres = 75;
     frqs = sfreqs(fres, fs);
+    frqs(frqs>90) = [];
     nfreq = numel(frqs);
     
     id_meg_chan = 1:125;

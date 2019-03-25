@@ -21,9 +21,10 @@ for id = 1:numel(patientID)
     id_meg_trials = 1:n_trials;
     id_lfp_trials = 1:n_trials;
     
-    fs = data.D.fsample;
-    fres = fs;
+    fs = D.fsample;
+    fres = 75;
     frqs = sfreqs(fres, fs);
+    frqs(frqs>90) = [];
     nfreq = numel(frqs);
     
     id_meg_chan = 1:125;
@@ -57,7 +58,7 @@ for id = 1:numel(patientID)
     end 
     
     outname = sprintf('%sFilter_Patient%s',DIROUT, patientID{id});
-    save(outname,'A','-v7.3')
+    save(outname,'A','CS','-v7.3')
     clearvars -except DIROUT patientID id
     
 end

@@ -37,10 +37,10 @@ for id = 1:numel(patientID)
     conn = data2spwctrgc(data, fres, nlags, cond, nboot, [], {'CS'});        
     COH = cs2coh(conn.CS);
     absCOH = abs(COH(:, meg_inds, lfp_inds));
-    imCOH = imag(COH(:, meg_inds, lfp_inds));
+    imCOH = abs(imag(COH(:, meg_inds, lfp_inds)));
     
     loc = mk_sensors_plane(D_ft.grad.chanpos(:, [2 1 3]));
-    frq_inds = find(frqs > 15 & frqs < 23);
+    frq_inds = find(frqs > 13 & frqs < 30);
 
     
 %     figone(17,38)
@@ -75,14 +75,14 @@ for id = 1:numel(patientID)
     clear outname
     outname = sprintf('%scoh_imag_Patient%s_right.png',DIROUT,patientID{id});
         
-    fp_plot_sensorspace_coh(rim_COH,frqs, frq_inds, loc, [-0.15 0.15],outname)
+    fp_plot_sensorspace_coh(rim_COH,frqs, frq_inds, loc, [0 0.15],outname)
     
     %left
     lim_COH = mean(imCOH(frq_inds,:,4:6),3); %15 x 125
     clear outname
     outname = sprintf('%scoh_imag_Patient%s_left.png',DIROUT,patientID{id});
         
-    fp_plot_sensorspace_coh(lim_COH,frqs, frq_inds, loc,[-0.15 0.15],outname)
+    fp_plot_sensorspace_coh(lim_COH,frqs, frq_inds, loc,[0 0.15],outname)
     
     clear fileName D D_ft data conn COH absCOH imCOH loc l_COH r_COH lim_COH rim_COH
     

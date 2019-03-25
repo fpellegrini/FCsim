@@ -11,10 +11,10 @@ end
 minnbchan = 1;
 lfpchan = 2;
 
-fs = 300;
-fres = fs;
+fs = D.fsample;
+fres = 75;
 frqs = sfreqs(fres, fs);
-frq_inds = find(frqs > 13 & frqs < 30);
+frq_inds = find(frqs > 12 & frqs < 31);
 
 for id = 1:numel(patientID)
     
