@@ -1,4 +1,5 @@
-function flipped_gridpos = fp_flip_vol(ori_gridpos)
+function flipped = fp_flip_vol(mni_pos)
+%flips positions along sagittal axis 
 
-flipped_gridpos = ori_gridpos;
-flipped_gridpos(:,1) = -flipped_gridpos(:,1); 
+flipped = mni_pos;
+flipped(:,1) = -flipped(:,1); 

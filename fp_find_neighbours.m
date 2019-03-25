@@ -2,12 +2,8 @@ function neighb = fp_find_neighbours(patientNumber)
 
 cd ~/Dropbox/MEG_Project/Data
 
-load(sprintf('BF_Patient%s.mat',patientNumber));
-c=sources.grid.pos;
-
-if mean(abs(c(:,1)),1)<1
-    c = c.*1000; %avoid numerical errors 
-end
+mni_pos = fp_getMNIpos(patientNumber);
+c = fp_symmetric_vol(mni_pos);
 
 dist = pdist(c); %eucledean distance
 dist1 = squareform(dist);
@@ -20,15 +16,17 @@ neighb = zeros(size(dist1));
 for inode =1:size(neighb,1)
     o = dist1(inode,:);
     
-    neighb(inode,find(o<ceil(gridsiz)+2))=1;
+    neighb(inode,find(o==gridsiz))=1;
     clear o
     
 end
-
-% %check wether only outer gridpoints have fewer than 6 neighbours
+% 
+% %check visually wether only outer gridpoints have fewer than 6 neighbours
 % outerpoints = find(sum(neighb,1)<6); 
+% figure
 % scatter3(c(:,1),c(:,2),c(:,3))
 % hold on
 % scatter3(c(outerpoints,1),c(outerpoints,2),c(outerpoints,3),'r+')
+% pause(2)
 
 
