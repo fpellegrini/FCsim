@@ -39,10 +39,7 @@ for id = 1:numel(patientID)
     %channels are already sorted out. 
 
     %cross spectrum
-    %%
-    
-    id_meg_chan = 1:5;
-    CS = fp_tsdata_to_cpsd(X,1,fres,id_meg_chan, id_lfp_chan, id_meg_trials, id_lfp_trials);
+    CS = fp_tsdata_to_cpsd(X1,1,fres,id_meg_chan, id_lfp_chan, id_meg_trials, id_lfp_trials);
     
     %leadfield
     L1 = inverse.MEG.L;

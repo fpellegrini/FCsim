@@ -18,13 +18,13 @@ end
 for id = 1:numel(patientID)
     
     %true coherence 
-    [~,~,~, coh(1,:,:,:)] = fp_timesensor2sourcecoh(patientID{id}, 0);
+    [coh(1,:,:,:)] = fp_timesensor2sourcecoh(patientID{id}, 0);
 
     for iit = 1:nit
         
         iit
         %shuffled coherences
-        [~,~,~,coh(iit+1,:,:,:)] = fp_timesensor2sourcecoh(patientID{id}, 1);
+        [coh(iit+1,:,:,:)] = fp_timesensor2sourcecoh(patientID{id}, 1);
     end 
 
     outname = sprintf('%sCoherences_Patient%s',DIROUT, patientID{id});

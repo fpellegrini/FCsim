@@ -1,5 +1,6 @@
 function S = cpsd_welch(X,n,h,window,noverlap)
 
+keyboard
 nfft = 2*(h-1);
 
 S = complex(zeros(n,n,h));

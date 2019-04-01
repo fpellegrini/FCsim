@@ -1,4 +1,4 @@
-function [P_all, Pv_all, CSv_all, COH_all] = fp_timesensor2sourcecoh(patientNumber, shuffle)
+function [COH_all] = fp_timesensor2sourcecoh(patientNumber, shuffle)
 %pipeline to get from time-series data to coherence on source level
 
 cd ~/Dropbox/MEG_Project/Data
@@ -40,47 +40,42 @@ for id = 1:numel(patientID)
     end 
     
    
-    %Now calculate power, cross spectrum and filters. In P, CS, L and A, bad
-    %channels are already sorted out. 
-    
-    %power
-    P = fp_get_pow(X, fres, id_meg_chan, id_lfp_chan, id_meg_trials, id_lfp_trials);
-    
-    %cross spectrum
-    CS = fp_tsdata_to_cpsd(X,0,fres,id_meg_chan, id_lfp_chan, id_meg_trials, id_lfp_trials);
-    
-%     %leadfield
-%     L1 = inverse.MEG.L;
-%     for is=1:ns
-%         L(:,is,:)= L1{is};
-%     end     
+    %Now load/ calculate power, cross spectrum and filters. In P, CS, and A, bad
+    %channels are already sorted out.
 
-%     A1=inverse.MEG.W;
-%     for i =1:length(A1)
-%         A2(i,:) = real(A1{i});
-%     end
-
-    %filter
+    %load filter and whole CS
     load(sprintf('Filter_Patient%s.mat',patientID{id}));
-    
     ns = size(A,2);
     
-    %project cross spectrum and power to voxel space
-    for ifq = 1:nfreq
-        CSv(ifq,:,:) = A(:,:,ifq)' * CS(:,:,ifq);
-        Pv(ifq,:) = cat(2,A(:,:,ifq)',eye(ns,nlfp)) * P(:,ifq);
+    %throw away all frequencies above 90 Hz (in filters already done) 
+    CS(:,:,nfreq+1:end)=[];
+    
+    %cross spectrum
+    if shuffle ==1
+        %when trials are shuffled, the CS between meg and lfp must be
+        %re-calculated
+        cCS = fp_tsdata_to_cpsd(X,0,fres,id_meg_chan, id_lfp_chan, id_meg_trials, id_lfp_trials);
+    else 
+        cCS = CS(1:(end-nlfp),end-nlfp+1:end,:);
     end
     
+    %project cross spectrum to voxel space
+    for ifq = 1:nfreq
+        CSv(ifq,:,:) = A(:,:,ifq)' * cCS(:,:,ifq);
+    end
+    
+    %get voxel power
+    Pv = fp_project_power(CS,A);
+   
     %coherence
     coh = CSv;
     for ifreq = 1:nfreq
+        clear Plfp
+        Plfp = diag(CS(nmeg+1:end,nmeg:end,ifreq)); %power of lfp channels
         coh(ifreq, :, :) = squeeze(CSv(ifreq, :, :)) ...
-            ./ sqrt(Pv(ifreq,:)'*P(end-nlfp+1:end,ifreq)');
+            ./ sqrt(Pv(:,ifreq)*Plfp');
     end
     
-    P_all{id} = P;
-    Pv_all{id} = Pv;
-    CSv_all{id} = CSv;
     COH_all{id} = coh;  
     
     if numel(patientID)==1

@@ -9,7 +9,7 @@ function S = fp_tsdata_to_cpsd(X,wholeCS,fres,id_meg_chan, id_lfp_chan, id_meg_t
 MEG_CHAN = 1:125;
 LFP_CHAN = 126:131;
 [~,n_times,n_trials] = size(X);
-n = numel(id_meg_chan) + numel(id_lfp_chan);
+nchan = numel(id_meg_chan) + numel(id_lfp_chan);
 X = demean(X);
 X = permute(X,[2 1 3]); % transpose row, col (works for single-trial data too)
 
@@ -38,8 +38,8 @@ if wholeCS==1
     S = S/n_trials; % average across trials; formerly: S = pi*S/N; 
 
     % now fill other half of cpsd matrix with complex conjugates
-    for i = 1:n
-        for j = i+1:n
+    for i = 1:nchan
+        for j = i+1:nchan
             S(j,i,:) = conj(S(i,j,:));
         end
     end
