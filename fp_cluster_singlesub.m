@@ -53,6 +53,7 @@ for id = 1:numel(patientID)
     else
         error('Method unknown!')
     end 
+    
     %mean across lfp channels (already flipped) and across frequencies
     avg_coh = squeeze(median(median(abs_coh(:,frq_id,:,:),4),2));
     
