@@ -3,7 +3,6 @@ function [flipped_pos, flip_id] = fp_flip_vol(mni_pos)
 
 flip_id = nan(size(mni_pos,1),1);
 mni_pos= round(mni_pos);
-[~, noEq] = fp_symmetric_vol(mni_pos);
 
 for i = 1:size(mni_pos,1)
     clear a

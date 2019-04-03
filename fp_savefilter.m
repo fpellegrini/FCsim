@@ -18,8 +18,6 @@ for id = 1:numel(patientID)
     X = data.D(:,:,:);
     D_ft = ftraw(data.D);
     n_trials = length(D_ft.trial);
-    id_meg_trials = 1:n_trials;
-    id_lfp_trials = 1:n_trials;
     
     fs = data.D.fsample;
     fres = 75;
@@ -32,6 +30,8 @@ for id = 1:numel(patientID)
     nmeg = numel(id_meg_chan);
     id_lfp_chan = 126:131;
     nlfp = numel(id_lfp_chan);
+    id_meg_trials = 1:n_trials;
+    id_lfp_trials = 1:n_trials;
     
     
    
@@ -39,9 +39,7 @@ for id = 1:numel(patientID)
     %channels are already sorted out. 
 
     %cross spectrum
-    %%
-    
-    id_meg_chan = 1:5;
+
     CS = fp_tsdata_to_cpsd(X,1,fres,id_meg_chan, id_lfp_chan, id_meg_trials, id_lfp_trials);
     
     %leadfield
