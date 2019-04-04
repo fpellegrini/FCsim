@@ -58,7 +58,7 @@ for id = 1:numel(patientID)
         clear currentCS
     end 
     
-    CS(:,:,end-nfreq+1:end)=[];
+    CS(:,:,nfreq+1:end)=[];
     
     outname = sprintf('%sFilter_Patient%s',DIROUT, patientID{id});
     save(outname,'A','CS','-v7.3')

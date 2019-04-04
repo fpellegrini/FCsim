@@ -9,7 +9,7 @@ else
 end
 
 if isempty(threshold_coh)
-    threshold_coh = 0.085;
+    threshold_coh = 0.045;
 end
 if isempty(frq_band)
     frq_band = [13 30];
