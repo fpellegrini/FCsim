@@ -15,7 +15,6 @@ end
 
 for id = 1:numel(patientID)
     load(sprintf('BF_Patient%s.mat',patientID{id}));
-    
     X = data.D(:,:,:);
     D_ft = ftraw(data.D);
     n_trials = length(D_ft.trial);
@@ -65,15 +64,15 @@ for id = 1:numel(patientID)
     end
     
     %get voxel power
-    Pv = fp_project_power(CS,A);
+    pv = fp_project_power(CS,A);
    
     %coherence
     coh = CSv;
     for ifreq = 1:nfreq
-        clear Plfp
-        Plfp = diag(CS(nmeg+1:end,nmeg:end,ifreq)); %power of lfp channels
+        clear plfp
+        plfp = diag(squeeze(CS(nmeg+1:end,nmeg+1:end,ifreq))); %power of lfp channels
         coh(ifreq, :, :) = squeeze(CSv(ifreq, :, :)) ...
-            ./ sqrt(Pv(:,ifreq)*Plfp');
+            ./ sqrt(pv(:,ifreq)*plfp');
     end
     
     COH_all{id} = coh;  
@@ -83,6 +82,6 @@ for id = 1:numel(patientID)
         COH_all = coh;
     end
     
-    clearvars -except patientID id P_all Pv_all CSv_all COH_all
+    clearvars -except patientID id COH_all
 end
 
