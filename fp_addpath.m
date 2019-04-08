@@ -13,3 +13,4 @@ close all
 addpath(genpath('~/Dropbox/Master/Masterarbeit/MasterThesis/data/'))
 addpath(genpath('~/Dropbox/Master/Masterarbeit/MasterThesis/figures/'))
 addpath(genpath('~/Dropbox/MEG_Project'))
+addpath(genpath('~/Dropbox/Data_MEG_Project'))

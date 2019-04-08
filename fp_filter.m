@@ -1,5 +1,5 @@
 function A = fp_filter(CS, L)
-keyboard
+
 ns = size(L,2);
 lambda = mean(diag(real(CS)))/100;
 

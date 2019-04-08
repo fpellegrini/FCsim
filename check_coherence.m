@@ -1,8 +1,8 @@
 patientNumber = '04';
 
-cd ~/Dropbox/MEG_Project/Data
+cd ~/Dropbox/Data_MEG_Project/
 
-fileName = '../../Data/redPLFP04_off.mat';
+fileName = 'redPLFP04_off.mat';
 
 % spm_eeg_load(fileName)
 D = wjn_meg_correct_mri(fileName);

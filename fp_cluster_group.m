@@ -1,18 +1,24 @@
-function p = fp_cluster_group(threshold_coh, minnbchan,abs_imag)
+function p = fp_cluster_group(minnbchan,abs_imag)
 
-cd ~/Dropbox/MEG_Project/Data
+cd ~/Dropbox/Data_MEG_Project/
+
+DIROUT = '~/Dropbox/Data_MEG_Project/';
+if ~exist(DIROUT); mkdir(DIROUT); end
 
 patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
 
-if isempty(threshold_coh)
-    threshold_coh = 0.085;
-end
 if isempty(minnbchan)
     minnbchan = 2;
 end 
 if isempty(abs_imag)
     abs_imag = 'abs';
 end 
+
+if strcmp(abs_imag,'abs')
+    threshold= 0.0698; %mean of singlesub thresholds 
+else 
+    threshold = 0.0549; 
+end
 
 nsubs = numel(patientID);
 nit = 51;
@@ -56,7 +62,7 @@ for id = 1:nsubs
 end
 
 avg_coh = squeeze(sum(COH,1));
-onoff = avg_coh>threshold_coh;
+onoff = avg_coh>threshold;
 
 big_clusters = zeros(nit,nfreq,ns);
 
@@ -80,6 +86,9 @@ clustercoh = sum(sum(a,2),3);
 shufCoh = clustercoh(2:end);
 trueCoh = clustercoh(1);
 p = sum(shufCoh>trueCoh)/numel(shufCoh);
+
+outname = sprintf('%sp_group_%s',DIROUT,abs_imag);
+save(outname,'p','-v7.3')
 
 
 

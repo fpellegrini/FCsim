@@ -1,9 +1,9 @@
 function fp_savefilter(patientNumber)
 %pipeline to get from time-series data to coherence on source level
 
-cd ~/Dropbox/MEG_Project/Data
+cd ~/Dropbox/Data_MEG_Project/
 
-DIROUT = '~/Dropbox/MEG_Project/Data/';
+DIROUT = '~/Dropbox/Data_MEG_Project/';
 if ~exist(DIROUT); mkdir(DIROUT); end
 
 if ~exist('patientNumber','var')

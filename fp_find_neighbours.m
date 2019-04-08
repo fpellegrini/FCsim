@@ -1,6 +1,6 @@
 function neighb = fp_find_neighbours(patientNumber)
 
-cd ~/Dropbox/MEG_Project/Data
+cd ~/Dropbox/Data_MEG_Project/
 
 mni_pos = fp_getMNIpos(patientNumber);
 c = fp_symmetric_vol(mni_pos);
