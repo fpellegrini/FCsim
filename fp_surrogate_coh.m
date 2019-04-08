@@ -1,8 +1,8 @@
 function fp_surrogate_coh(patientNumber, nit)
 
-cd ~/Dropbox/MEG_Project/Data
+cd ~/Dropbox/Data_MEG_Project/
 
-DIROUT = '~/Dropbox/MEG_Project/Data/';
+DIROUT = '~/Dropbox/Data_MEG_Project/';
 if ~exist(DIROUT); mkdir(DIROUT); end
 
 if isempty(patientNumber)

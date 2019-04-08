@@ -1,7 +1,7 @@
 function [COH_all] = fp_timesensor2sourcecoh(patientNumber, shuffle)
 %pipeline to get from time-series data to coherence on source level
 
-cd ~/Dropbox/MEG_Project/Data
+cd ~/Dropbox/Data_MEG_Project/
 
 if isempty(patientNumber)
     patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'}; 

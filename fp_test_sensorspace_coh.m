@@ -1,7 +1,7 @@
 function fp_test_sensorspace_coh(patientNumber)
 
-cd ~/Dropbox/MEG_Project/Data
-DIROUT =  '~/Dropbox/MEG_Project/Data/';
+cd ~/Dropbox/Data_MEG_Project/
+DIROUT =  '~/Dropbox/Data_MEG_Project/';
 
 if ~exist('patientNumber','var')
     patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'}; %'12' has too few sensors

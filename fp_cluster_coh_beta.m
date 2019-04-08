@@ -1,6 +1,6 @@
 function fp_cluster_coh_beta(patientNumber)
 
-cd ~/Dropbox/MEG_Project/Data
+cd ~/Dropbox/Data_MEG_Project/
 
 if isempty(patientNumber)
     patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'}; 

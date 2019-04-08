@@ -1,8 +1,8 @@
 function p = fp_cluster_singlesub(patientNumber, frq_band, minnbchan,abs_imag)
 
-cd ~/Dropbox/MEG_Project/Data
+cd ~/Dropbox/Data_MEG_Project/
 
-DIROUT = '~/Dropbox/MEG_Project/Data/';
+DIROUT = '~/Dropbox/Data_MEG_Project/';
 if ~exist(DIROUT); mkdir(DIROUT); end
 
 if isempty(patientNumber)
@@ -54,11 +54,11 @@ for id = 1:numel(patientID)
         error('Method unknown!')
     end 
     
-    threshold = prctile(reshape(abs_coh,1,[]),95);
     %mean across lfp channels (already flipped) and across frequencies
     avg_coh = squeeze(median(median(abs_coh(:,frq_id,:,:),4),2));
+    threshold(id) = prctile(reshape(avg_coh,1,[]),95);
     
-    onoff = avg_coh>threshold;
+    onoff = avg_coh>threshold(id);
     big_clusters = zeros(nit,ns);
     
     for iit = 1: nit
@@ -93,7 +93,7 @@ for id = 1:numel(patientID)
 end
 
 outname = sprintf('%sp_singlesub_%s',DIROUT,abs_imag);
-save(outname,'p','-v7.3')
+save(outname,'p','threshold','-v7.3')
     
 
 

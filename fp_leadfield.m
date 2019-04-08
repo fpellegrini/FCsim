@@ -5,8 +5,8 @@ function leadfield = fp_leadfield(patientNumber, changeFilePaths, calculateBF, f
 %refChannel (string with channel name), plotOn (0 or 1),inode (node
 %number), idir (1 2 or 3)
 
-cd ~/Dropbox/MEG_Project/Data
-DIROUT = '~/Dropbox/MEG_Project/Data/figures/topo_leadfields/';
+cd ~/Dropbox/Data_MEG_Project/
+DIROUT = '~/Dropbox/Data_MEG_Project/figures/topo_leadfields/';
 if ~exist(DIROUT); mkdir(DIROUT); end
 
 if strcmp(patientNumber,'all')
