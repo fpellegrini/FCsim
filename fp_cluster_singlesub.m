@@ -54,6 +54,7 @@ for id = 1:numel(patientID)
         error('Method unknown!')
     end 
     
+    threshold(id) = prctile(reshape(abs_coh,1,[]),95);
     %mean across lfp channels (already flipped) and across frequencies
     avg_coh = squeeze(median(median(abs_coh(:,frq_id,:,:),4),2));
     threshold(id) = prctile(reshape(avg_coh,1,[]),95);
