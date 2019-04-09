@@ -5,6 +5,9 @@ cd ~/Dropbox/Data_MEG_Project/
 DIROUT = '~/Dropbox/Data_MEG_Project/';
 if ~exist(DIROUT); mkdir(DIROUT); end
 
+DIRFIG = sprintf('~/Dropbox/Data_MEG_Project/figures/cluster_singlesub/%s/',abs_imag);
+if ~exist(DIRFIG); mkdir(DIRFIG); end
+
 if isempty(patientNumber)
     patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
 else
@@ -16,10 +19,10 @@ if isempty(frq_band)
 end
 if isempty(minnbchan)
     minnbchan = 2;
-end 
+end
 if isempty(abs_imag)
     abs_imag = 'abs';
-end 
+end
 
 fs = 300;
 fres = 75;
@@ -52,12 +55,11 @@ for id = 1:numel(patientID)
         abs_coh = abs(imag(flip_coh));
     else
         error('Method unknown!')
-    end 
+    end
     
-    threshold(id) = prctile(reshape(abs_coh,1,[]),95);
     %mean across lfp channels (already flipped) and across frequencies
     avg_coh = squeeze(median(median(abs_coh(:,frq_id,:,:),4),2));
-    threshold(id) = prctile(reshape(avg_coh,1,[]),95);
+    threshold(id) = prctile(reshape(avg_coh,1,[]),99);
     
     onoff = avg_coh>threshold(id);
     big_clusters = zeros(nit,ns);
@@ -65,20 +67,33 @@ for id = 1:numel(patientID)
     for iit = 1: nit
         
         clear cluster total x big_clu_id
-        [cluster, total] = findcluster(squeeze(onoff(iit,:))',...
-            conn,conn, minnbchan);
+        [clu, total] = findcluster(squeeze(onoff(iit,:))',...
+            conn, conn, minnbchan);
         
         if total>0
-            x = hist(cluster,0:total);
-            big_clu_id = find(max(x));
-            big_clusters(iit,:) = cluster == big_clu_id;
+            clear x
+            x = hist(clu,0:total);
+            big_clu_id = find(x(2:end)==max(x(2:end)));
+            big_clu_id=big_clu_id(1); %in case there are two clusters with the same size, take the first one
+            big_clusters(iit,:) = clu == big_clu_id;
             
-%                                 mask = onoff(iit,:)';
-%                                 c = sources.grid.pos;
-%                                 scatter3(c(:,1),c(:,2),c(:,3),5,[0.85 0.85 0.85])
-%                                 hold on
-%                                 scatter3(c(mask==1,1),c(mask==1,2),c(mask==1,3),20,[0.8 0.1,0.5],'filled')
-%                                 colormap jet
+            if iit == 1
+                %plot biggest cluster 
+                figure
+                c=sym_pos;
+                clear mask
+    %             mask= onoff(iit,:);
+                mask = big_clusters(iit,:);
+                scatter3(c(:,1),c(:,2),c(:,3),5,[0.85 0.85 0.85])
+                hold on
+                scatter3(c(mask==1,1),c(mask==1,2),c(mask==1,3),20,[0.8 0.1,0.5],'filled')
+                colormap jet
+                
+                outname = sprintf('%s%s.png',DIRFIG,patientID{id});
+                print(outname,'-dpng');
+                close all
+            end
+            
         end
         
     end
@@ -87,14 +102,18 @@ for id = 1:numel(patientID)
     a(big_clusters==1)=avg_coh(big_clusters==1);
     clustercoh = sum(a,2);
     
-    shufCoh = clustercoh(2:end);
-    trueCoh = clustercoh(1);
-    p(id) = sum(shufCoh>trueCoh)/numel(shufCoh);
-        
+    if sum(clustercoh)> 0
+        shufCoh = clustercoh(2:end);
+        trueCoh = clustercoh(1);
+        p(id) = sum(shufCoh>trueCoh)/numel(shufCoh);
+    else %when no cluster was found it any iteration 
+        p(id)= nan;
+    end
+    
 end
 
 outname = sprintf('%sp_singlesub_%s',DIROUT,abs_imag);
 save(outname,'p','threshold','-v7.3')
-    
+
 
 
