@@ -56,10 +56,7 @@ for id = 1:numel(patientID)
     %mean across lfp channels (already flipped) and across frequencies
     avg_coh = squeeze(median(abs_coh(:,:,:,:),4));
     avg_coh = permute(avg_coh,[3 2 1]);
-%     for i = 1:46
-%         avg_coh(:,i,:) = zscore(avg_coh(:,i,:));
-%     end
-    threshold(id) = prctile(reshape(avg_coh,1,[]),99);
+    threshold(id) = prctile(reshape(avg_coh,1,[]),95);
     
     onoff = avg_coh>threshold(id);
     big_clusters = zeros(nit,ns,nfreq);
@@ -77,8 +74,7 @@ for id = 1:numel(patientID)
             big_clu_id=big_clu_id(1); %in case there are two clusters with the same size, take the first one
             big_clusters(iit,:,:) = clu == big_clu_id;
             
-         
-            
+                    
         end
         
     end
