@@ -12,22 +12,23 @@ if ~exist('shuffle','var')
 end
 
 for id = 1:numel(patientID)
-    load(sprintf('BF_Patient%s.mat',patientID{id}));
+%     load(sprintf('BF_Patient%s.mat',patientID{id}));
     load(sprintf('Filter_Patient%s.mat',patientID{id}));%Filter and whole CS
+    D = spm_eeg_load(sprintf('redPLFP%s_off', patientID{id}));
     
-    ns = size(A,2);
-    X = data.D(:,:,:);
-    D_ft = ftraw(data.D);
+    X = D(:,:,:);
+    D_ft = ftraw(D);
     n_trials = length(D_ft.trial);
     
-    fs = data.D.fsample;
+    fs = D.fsample;
     fres = 75;
     frqs = sfreqs(fres, fs);
     frqs(frqs>90) = [];
     nfreq = numel(frqs);
+    ns = size(A,2);
     
     id_meg_chan = 1:125;
-    id_meg_chan(data.D.badchannels)=[];
+    id_meg_chan(D.badchannels)=[];
     nmeg = numel(id_meg_chan);
     id_lfp_chan = 126:131;
     nlfp = numel(id_lfp_chan);
