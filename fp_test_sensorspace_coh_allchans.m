@@ -1,7 +1,9 @@
-function fp_test_sensorspace_coh(patientNumber)
+function fp_test_sensorspace_coh_allchans(patientNumber,DIROUT)
 
-cd ~/Dropbox/Data_MEG_Project/
-DIROUT =  '~/Dropbox/Data_MEG_Project/';
+if ~exist('DIROUT','var')
+    DIROUT =  '~/Dropbox/Data_MEG_Project/';
+end
+if ~exist(DIROUT); mkdir(DIROUT); end
 
 if ~exist('patientNumber','var')
     patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'}; %'12' has too few sensors
@@ -17,7 +19,7 @@ N_lfp = numel(LFP_INDS);
 nlags = 20;
 cond = 0;
 nboot = 1;
-N_it = 100;
+N_it = 1000;
 
 for id = 1:numel(patientID)
     
@@ -53,21 +55,23 @@ for id = 1:numel(patientID)
         conn = data2spwctrgc(data, fres, nlags, cond, nboot, [], {'CS'});
         COH = cs2coh(conn.CS);
         
-        r_max_abs(iit) = max(mean(mean(abs(COH(frq_inds, 1:end-N_lfp, 1:3)),1),3));
-        r_max_im(iit) = max(mean(mean(abs(imag(COH(frq_inds,1:end-N_lfp, 1:3))),1),3));
-        
-        l_max_abs(iit) = max(mean(mean(abs(COH(frq_inds, 1:end-N_lfp, 4:6)),1),3));
-        l_max_im(iit) = max(mean(mean(abs(imag(COH(frq_inds, 1:end-N_lfp, 4:6))),1),3));
+        r_max_abs(iit,:) = mean(mean(abs(COH(frq_inds,1:N_meg, 1:3)),1),3);
+        r_max_im(iit,:) = mean(mean(abs(imag(COH(frq_inds,1:N_meg, 1:3))),1),3);
+
+        l_max_abs(iit,:) = mean(mean(abs(COH(frq_inds, 1:N_meg, 4:6)),1),3);
+        l_max_im(iit,:) = mean(mean(abs(imag(COH(frq_inds, 1:N_meg, 4:6))),1),3);
        
         clear data conn COH 
     end
     
-    p_r_abs = sum(r_max_abs(2:end)>r_max_abs(1))/numel(r_max_abs);
-    p_l_abs = sum(l_max_abs(2:end)>l_max_abs(1))/numel(l_max_abs);
-    p_r_im = sum(r_max_im(2:end)>r_max_im(1))/numel(r_max_im);
-    p_l_im = sum(l_max_im(2:end)>l_max_im(1))/numel(l_max_im);
+    for ichan = 1:N_meg
+        p_r_abs(ichan) = sum(r_max_abs(2:end,ichan)>r_max_abs(1,ichan))/numel(r_max_abs(:,ichan));
+        p_l_abs(ichan) = sum(l_max_abs(2:end,ichan)>l_max_abs(1,ichan))/numel(l_max_abs(:,ichan));
+        p_r_im(ichan) = sum(r_max_im(2:end,ichan)>r_max_im(1,ichan))/numel(r_max_im(:,ichan));
+        p_l_im(ichan) = sum(l_max_im(2:end,ichan)>l_max_im(1,ichan))/numel(l_max_im(:,ichan));
+    end
     
-    outname = sprintf('%sperm_sensor_Patient%s',DIROUT,patientID{id});
+    outname = sprintf('%sperm_sensor_allchans_Patient%s',DIROUT,patientID{id});
     save(outname,'p_r_abs','p_l_abs','p_r_im','p_l_im','-v7.3')
     clear r_max_abs r_max_im l_max_abs l_max_im p_r_abs p_l_abs p_r_im p_l_im 
     

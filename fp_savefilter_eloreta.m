@@ -1,0 +1,54 @@
+function fp_savefilter_eloreta(patientNumber)
+%pipeline to get from time-series data to coherence on source level
+
+cd ~/Dropbox/Data_MEG_Project/
+
+DIROUT = '~/Dropbox/Data_MEG_Project/';
+if ~exist(DIROUT); mkdir(DIROUT); end
+
+if ~exist('patientNumber','var')
+    patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'}; 
+else
+    patientID{1} = patientNumber;
+end
+
+for id = 1:numel(patientID)
+    load('Filter_Patient04.mat')
+    clear A
+    
+    load(sprintf('BF_Patient%s.mat',patientID{id}));
+    
+    L1 = inverse.MEG.L;
+    ns = numel(L1);
+    for is=1:ns
+        L(:,is,:)= L1{is};
+    end     
+   
+    fs = data.D.fsample;
+    fres = 75;
+    frqs = sfreqs(fres, fs);
+    frqs(frqs>90) = [];
+    nfreq = numel(frqs);
+   
+    id_meg_chan = 1:125;
+    id_meg_chan(data.D.badchannels)=[];
+    nmeg = numel(id_meg_chan);
+    id_lfp_chan = 126:131;
+    nlfp = numel(id_lfp_chan);
+        
+    %fiter
+    A=zeros(nmeg,ns);
+    
+    for ifrq = 1:nfreq
+        currentCS = squeeze(CS(1:end-nlfp,1:end-nlfp,ifrq));
+        A(:,:,ifrq) = fp_filter_eloreta(currentCS, L);
+        clear currentCS
+    end 
+    
+    
+    outname = sprintf('%sFilter_Patient%s_e',DIROUT, patientID{id});
+    save(outname,'A','CS','-v7.3')
+    clearvars -except DIROUT patientID id
+    
+end
+

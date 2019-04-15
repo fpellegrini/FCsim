@@ -10,21 +10,25 @@ else
     patientID{1} = patientNumber;
 end
 
-meg_inds = 1:125;
-lfp_inds = 126:131;
-N_meg = length(meg_inds);
+MEG_INDS = 1:125;
+LFP_INDS = 126:131;
+N_lfp = numel(LFP_INDS);
+
 
 nlags = 20;
 cond = 0;
 nboot = 1;
 
-for id = 1:numel(patientID)
+for id = [1:6 8:numel(patientID)] %patient 12: too few good channels for a plot
     
     fileName = sprintf('redPLFP%s_off', patientID{id});
     D = spm_eeg_load(fileName);
     D_ft = ftraw(D);
     N_trials = length(D_ft.trial);
     [~, N_samples] = size(D_ft.trial{1});
+    meg_inds = MEG_INDS;
+    meg_inds(D.badchannels) = [];
+    N_meg = length(meg_inds);
 
     fs = D.fsample;
     fres = fs;
@@ -32,14 +36,14 @@ for id = 1:numel(patientID)
     
     data = [D_ft.trial{:}];
         
-    data = reshape(data([meg_inds lfp_inds], :), N_meg+numel(lfp_inds), N_samples, N_trials);
+    data = reshape(data([meg_inds LFP_INDS], :), N_meg+N_lfp, N_samples, N_trials);
 
     conn = data2spwctrgc(data, fres, nlags, cond, nboot, [], {'CS'});        
     COH = cs2coh(conn.CS);
-    absCOH = abs(COH(:, meg_inds, lfp_inds));
-    imCOH = abs(imag(COH(:, meg_inds, lfp_inds)));
+    absCOH = abs(COH(:, 1:N_meg, end-N_lfp+1:end));
+    imCOH = abs(imag(COH(:, 1:numel(meg_inds), end-N_lfp+1:end)));
     
-    loc = mk_sensors_plane(D_ft.grad.chanpos(:, [2 1 3]));
+    loc = mk_sensors_plane(D_ft.grad.chanpos(meg_inds, [2 1 3]));
     frq_inds = find(frqs > 13 & frqs < 30);
 
     

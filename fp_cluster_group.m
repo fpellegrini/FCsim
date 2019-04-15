@@ -78,7 +78,7 @@ for iit = 1: nit
         x = hist(clu(:),0:total);
         big_clu_id = find(x(2:end)==max(x(2:end)));
         big_clusters(iit,:,:) = clu == big_clu_id;
-        
+        keyboard
 %         figure
 %         c=commonvox_pos;
 %         clear mask
@@ -95,9 +95,13 @@ a = zeros(size(avg_coh));
 a(big_clusters==1)=avg_coh(big_clusters==1);
 clustercoh = sum(sum(a,2),3);
 
-shufCoh = clustercoh(2:end);
-trueCoh = clustercoh(1);
-p = sum(shufCoh>trueCoh)/numel(shufCoh);
+if sum(clustercoh)> 0
+    shufCoh = clustercoh(2:end);
+    trueCoh = clustercoh(1);
+    p = sum(shufCoh>trueCoh)/numel(shufCoh);
+else %when no cluster was found it any iteration 
+    p=nan;
+end
 
 outname = sprintf('%sp_group_%s',DIROUT,abs_imag);
 save(outname,'p','-v7.3')

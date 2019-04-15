@@ -1,8 +1,6 @@
 function [COH_all] = fp_timesensor2sourcecoh(patientNumber, shuffle)
 %pipeline to get from time-series data to coherence on source level
 
-cd ~/Dropbox/Data_MEG_Project/
-
 if isempty(patientNumber)
     patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'}; 
 else
@@ -15,6 +13,9 @@ end
 
 for id = 1:numel(patientID)
     load(sprintf('BF_Patient%s.mat',patientID{id}));
+    load(sprintf('Filter_Patient%s.mat',patientID{id}));%Filter and whole CS
+    
+    ns = size(A,2);
     X = data.D(:,:,:);
     D_ft = ftraw(data.D);
     n_trials = length(D_ft.trial);
@@ -33,18 +34,11 @@ for id = 1:numel(patientID)
     id_meg_trials = 1:n_trials;
     
     if shuffle == 1
+        rng(id)
         id_lfp_trials = randperm(n_trials);
     else
         id_lfp_trials = id_meg_trials;
     end 
-    
-   
-    %Now load/ calculate power, cross spectrum and filters. In P, CS, and A, bad
-    %channels are already sorted out.
-
-    %load filter and whole CS
-    load(sprintf('Filter_Patient%s.mat',patientID{id}));
-    ns = size(A,2);
     
     %throw away all frequencies above 90 Hz (in filters already done) 
     CS(:,:,nfreq+1:end)=[];

@@ -1,8 +1,8 @@
-function fp_surrogate_coh(patientNumber, nit)
+function fp_surrogate_coh(patientNumber, nit, DIROUT)
 
-cd ~/Dropbox/Data_MEG_Project/
-
-DIROUT = '~/Dropbox/Data_MEG_Project/';
+if ~exist('DIROUT','var')
+    DIROUT =  '~/Dropbox/Data_MEG_Project/';
+end
 if ~exist(DIROUT); mkdir(DIROUT); end
 
 if isempty(patientNumber)
@@ -12,7 +12,7 @@ else
 end
 
 if ~exist('nit','var')
-    nit = 50;
+    nit = 1000;
 end
 
 for id = 1:numel(patientID)

@@ -9,4 +9,4 @@ end
 V=spm_vol(sprintf('%s.nii',fileName));
 Y=spm_read_vols(V);
 Y1 = permute(Y,dimOrder);
-imshow3D(Y1)
+imshow3D(Y)
