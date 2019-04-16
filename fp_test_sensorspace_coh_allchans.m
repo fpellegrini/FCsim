@@ -1,7 +1,5 @@
 function fp_test_sensorspace_coh_allchans(patientNumber,DIROUT, DIRLOG)
 
-fp_addpath
-
 if ~exist('DIROUT','var')
     DIROUT =  '~/Dropbox/Data_MEG_Project/';
 end
@@ -56,7 +54,7 @@ for id = 1:numel(patientID)
         for iit = 1: N_it
             iit
             clear id_lfp_trials
-            if iit ==1
+            if iit==1
                 id_lfp_trials = 1: N_trials;
             else
                 id_lfp_trials = randperm(N_trials);
@@ -67,11 +65,11 @@ for id = 1:numel(patientID)
             conn = data2spwctrgc(data, fres, nlags, cond, nboot, [], {'CS'});
             COH = cs2coh(conn.CS);
 
-            r_max_abs(iit,:) = mean(mean(abs(COH(frq_inds,1:N_meg, 1:3)),1),3);
-            r_max_im(iit,:) = mean(mean(abs(imag(COH(frq_inds,1:N_meg, 1:3))),1),3);
+            r_max_abs(iit,:) = mean(mean(abs(COH(frq_inds,1:N_meg, end-5:end-3)),1),3);
+            r_max_im(iit,:) = mean(mean(abs(imag(COH(frq_inds,1:N_meg,end-5:end-3))),1),3);
 
-            l_max_abs(iit,:) = mean(mean(abs(COH(frq_inds, 1:N_meg, 4:6)),1),3);
-            l_max_im(iit,:) = mean(mean(abs(imag(COH(frq_inds, 1:N_meg, 4:6))),1),3);
+            l_max_abs(iit,:) = mean(mean(abs(COH(frq_inds, 1:N_meg, end-2:end)),1),3);
+            l_max_im(iit,:) = mean(mean(abs(imag(COH(frq_inds, 1:N_meg, end-2:end))),1),3);
 
             clear data conn COH 
         end
@@ -83,7 +81,7 @@ for id = 1:numel(patientID)
             p_l_im(ichan) = sum(l_max_im(2:end,ichan)>l_max_im(1,ichan))/numel(l_max_im(:,ichan));
         end
 
-        outname = sprintf('%sperm_sensor_allchans_Patient%s',DIROUT,patientID{id});
+        outname = sprintf('%sperm_sensor_allchans_beta_Patient%s',DIROUT,patientID{id});
         save(outname,'p_r_abs','p_l_abs','p_r_im','p_l_im','-v7.3')
         clear r_max_abs r_max_im l_max_abs l_max_im p_r_abs p_l_abs p_r_im p_l_im 
         

@@ -53,11 +53,11 @@ for id = 1:numel(patientID)
         conn = data2spwctrgc(data, fres, nlags, cond, nboot, [], {'CS'});
         COH = cs2coh(conn.CS);
         
-        r_max_abs(iit) = max(mean(mean(abs(COH(frq_inds, 1:end-N_lfp, 1:3)),1),3));
-        r_max_im(iit) = max(mean(mean(abs(imag(COH(frq_inds,1:end-N_lfp, 1:3))),1),3));
+        r_max_abs(iit) = max(mean(mean(abs(COH(frq_inds, 1:end-N_lfp, end-5:end-3)),1),3));
+        r_max_im(iit) = max(mean(mean(abs(imag(COH(frq_inds,1:end-N_lfp, end-5:end-3))),1),3));
         
-        l_max_abs(iit) = max(mean(mean(abs(COH(frq_inds, 1:end-N_lfp, 4:6)),1),3));
-        l_max_im(iit) = max(mean(mean(abs(imag(COH(frq_inds, 1:end-N_lfp, 4:6))),1),3));
+        l_max_abs(iit) = max(mean(mean(abs(COH(frq_inds, 1:end-N_lfp, end-2:end)),1),3));
+        l_max_im(iit) = max(mean(mean(abs(imag(COH(frq_inds, 1:end-N_lfp, end-2:end))),1),3));
        
         clear data conn COH 
     end
