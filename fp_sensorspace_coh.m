@@ -19,7 +19,7 @@ nlags = 20;
 cond = 0;
 nboot = 1;
 
-for id = [1:6 8:numel(patientID)] %patient 12: too few good channels for a plot
+for id = [9:numel(patientID)] %patient 12: too few good channels for a plot
     
     fileName = sprintf('redPLFP%s_off', patientID{id});
     D = spm_eeg_load(fileName);
@@ -58,9 +58,11 @@ for id = [1:6 8:numel(patientID)] %patient 12: too few good channels for a plot
 %     outname = sprintf('%ssix_lfps_Patient%s.png',DIROUT,patientID{id});
 %     print(outname,'-dpng');
 %     close all
+    load(sprintf('perm_sensor_allchans_beta_Patient%s.mat',patientID{id}))
 
     %right lfp channels   
     r_COH = mean(absCOH(frq_inds,:,1:3),3); %15 x 125
+    r_COH(:,p_r_abs>0.05)= nan;
     clear outname
     outname = sprintf('%scoh_abs_Patient%s_right.png',DIROUT,patientID{id});
     
@@ -68,6 +70,7 @@ for id = [1:6 8:numel(patientID)] %patient 12: too few good channels for a plot
     
     %left lfp channels 
     l_COH = mean(absCOH(frq_inds,:,4:6),3); %15 x 125
+    l_COH(:,p_l_abs>0.05)= nan;
     clear outname
     outname = sprintf('%scoh_abs_Patient%s_left.png',DIROUT,patientID{id});
     
@@ -76,6 +79,7 @@ for id = [1:6 8:numel(patientID)] %patient 12: too few good channels for a plot
     %plot imaginary parts 
     %right
     rim_COH = mean(imCOH(frq_inds,:,1:3),3); %15 x 125
+    rim_COH(:,p_r_im>0.05)= nan;
     clear outname
     outname = sprintf('%scoh_imag_Patient%s_right.png',DIROUT,patientID{id});
         
@@ -83,6 +87,7 @@ for id = [1:6 8:numel(patientID)] %patient 12: too few good channels for a plot
     
     %left
     lim_COH = mean(imCOH(frq_inds,:,4:6),3); %15 x 125
+    lim_COH(:,p_l_im>0.05)= nan;
     clear outname
     outname = sprintf('%scoh_imag_Patient%s_left.png',DIROUT,patientID{id});
         
@@ -103,7 +108,7 @@ function fp_plot_sensorspace_coh(coh,frqs, frq_inds, loc,c_scale, outname)
     clear temp
     
     figure
-    figone(30,30)
+    figone(30,34)
     pars.scale = c_scale;
     %plot right channels
     %mean across freqs between 15 and 22
