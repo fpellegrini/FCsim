@@ -73,10 +73,10 @@ for id = 5 %1:numel(patientID)
         P = sparse(A);
         [ci sizes] = components(P);
         
-        clear cluster total x big_clu_id
-        [clu, total] = findcluster(squeeze(onoff(iit,:))',...
-            conn, conn, minnbchan);
-        
+%         clear cluster total x big_clu_id
+%         [clu, total] = findcluster(squeeze(onoff(iit,:))',...
+%             conn, conn, minnbchan);
+%         
         if total>0
             clear x
             x = hist(clu,0:total);
