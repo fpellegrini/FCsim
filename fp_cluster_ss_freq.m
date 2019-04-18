@@ -1,4 +1,6 @@
-function p = fp_cluster_singlesub_withfreq(patientNumber, minnbchan,abs_imag)
+function p = fp_cluster_ss_freq(patientNumber, minnbchan,abs_imag)
+%singlesub, finds clusters with the findclusters fun across space and
+%frequencies
 
 cd ~/Dropbox/Data_MEG_Project/
 

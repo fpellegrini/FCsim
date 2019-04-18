@@ -1,4 +1,6 @@
-function [p, true_clu] = fp_cluster_group_withfreq(minnbchan,abs_imag)
+function [p, true_clu] = fp_cluster_g_freq(minnbchan,abs_imag)
+%group statistics, finds clusters across space and frequencies with the
+%findclusters fun 
 
 cd ~/Dropbox/Data_MEG_Project/
 

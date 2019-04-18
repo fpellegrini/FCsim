@@ -1,4 +1,5 @@
-function [p true_clu] = fp_cluster_group(minnbchan,fband, abs_imag)
+function [p, true_clu] = fp_cluster_g(minnbchan,fband, abs_imag)
+%group statistics, cluster analysis with findclusters fun
 
 cd ~/Dropbox/Data_MEG_Project/
 

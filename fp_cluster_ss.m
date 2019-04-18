@@ -1,4 +1,5 @@
-function p = fp_cluster_singlesub(patientNumber, fband, minnbchan,abs_imag)
+function p = fp_cluster_ss(patientNumber, fband, minnbchan,abs_imag)
+%singlesubjects, finds clusters with the findclusters fun
 
 cd ~/Dropbox/Data_MEG_Project/
 
