@@ -1,15 +1,12 @@
-function [p, true_clu] = fp_cluster_g_freq(minnbchan,abs_imag)
-%group statistics, finds clusters across space and frequencies with the
-%findclusters fun 
+function [p, true_clu] = fp_cluster_g_c_freq(abs_imag)
+%Group statistics, finds clusters with components fun.
+%Clustering across space and frequencies.
 
 DIROUT = '~/Dropbox/Data_MEG_Project/';
 if ~exist(DIROUT); mkdir(DIROUT); end
 
 patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
 
-if isempty(minnbchan)
-    minnbchan = 2;
-end
 if isempty(abs_imag)
     abs_imag = 'abs';
 end
@@ -17,7 +14,7 @@ end
 [commonvox_pos, voxID] = fp_find_commonvox;
 
 nsubs = numel(patientID);
-nit = 1000;
+nit = 51;
 nfreq = 46;
 ns = size(commonvox_pos,1);
 
@@ -29,23 +26,30 @@ for id = 1:nsubs
     clear coh
     load(sprintf('Coherences_Patient%s.mat',patientID{id}));
     
-    clear conn mni_pos noEq
-    mni_pos = fp_getMNIpos(patientID{id});
-    conn = fp_find_neighbours(patientID{id}); %think about how to do that
+    %get neighbouring nodes and node positions
+    clear conn mni_pos match_conn conn_s kron_conn sym_pos flip_id match_pos noEq
+    conn = fp_find_neighbours(patientID{id});
     match_conn = conn(voxID{id},voxID{id});
+    freq_conn = zeros(nfreq,nfreq);
+    for ifreq = 1:nfreq-1
+        freq_conn(ifreq,ifreq+1)=1;
+        freq_conn(ifreq+1,ifreq)=1;
+    end
+    conn_s = sparse(match_conn); %nvox x nvox
+    freq_conn_s = sparse(freq_conn);%nfrerq x nfreq
+    kron_conn = kron(conn_s,freq_conn_s); %say nvox*nfreq = nkron
     
     %get flip id and symmetric head
+    mni_pos = fp_getMNIpos(patientID{id});
     [sym_pos, noEq] = fp_symmetric_vol(mni_pos);
     match_pos = sym_pos(voxID{id},:);
     [~,flip_id] = fp_flip_vol(match_pos);
     
-    %flip coherence
     coh(:,:,noEq,:) = [];
     match_coh = coh(:,:,voxID{id},:);
     flip_coh = match_coh;
-    flip_coh(:,:,:,4:6) = match_coh(:,:,flip_id,4:6);
+    flip_coh(:,:,:,4:6) = coh(:,:,flip_id,4:6);
     
-    %absolute value
     if strcmp(abs_imag,'abs')
         abs_coh= abs(flip_coh);
     elseif strcmp(abs_imag,'imag')
@@ -54,39 +58,51 @@ for id = 1:nsubs
         error('Method unknown!')
     end
     
-    %sum across lfp channels
+    %mean across lfp channels
     COH(id,:,:,:) = squeeze(mean(abs_coh,4));
-    
 end
 
 clear avg_coh threshold onoff big_clusters
-avg_coh = squeeze(sum(COH,1));
-threshold = prctile(reshape(avg_coh,1,[]),99);
-onoff = avg_coh>threshold;
+avg_coh = squeeze(sum(COH,1)); %sum across subjects
+threshold(id) = prctile(reshape(avg_coh,1,[]),99);
+onoff = avg_coh>threshold(id);
 big_clusters = zeros(nit-1,nfreq,ns);
 
-
-%find the clusters 
 for iit = 1: nit
     
-    clear clu total x big_clu_id
-    [clu, total] = findcluster(squeeze(onoff(iit,:,:))',...
-        match_conn,  minnbchan);
+    clear onoff_temp u ind A
+    onoff_temp = squeeze(onoff(1,:,:)); %nfreq x ns
+    u = onoff_temp(:); %should be the same indexing like in kron_conn now; nkron x 1
+    
+    ind = find(u==1); %remember indeces of super-threshold coherences
+    A = kron_conn;
+    A(u==0,:)=[]; %pass the neighbourhood structure only for the super-threshold voxels
+    A(:,u==0)=[];
+    
+    %components assigns every voxel to a cluster, even if this means that every voxel is its own cluster
+    clear ci x clu
+    [ci, x] = components(A); %x is the histogram of the clusters
+    clu = zeros(size(kron_conn,1),1);%refill with sub-threshold voxels
+    clu(ind)= ci; %nkron x 1
+    clu = reshape(clu,[nfreq ns]); %nfreq x ns
+    
     if iit==1 %save true cluster for later
-        true_clu = clu';
-        true_total = total;
-    elseif total>0
-        clear x
-        x = hist(clu(:),0:total);
-        big_clu_id = find(x(2:end)==max(x(2:end)));
+        clear true_clu true_total true_sizes
+        true_clu = clu;
+        true_total = numel(x);
+        true_sizes = x;
+        
+    elseif numel(x)>0
+        big_clu_id = find(x==max(x));
         big_clu_id=big_clu_id(1); %in case there are two clusters with the same size, take the first one
-        big_clusters(iit-1,:,:) = (clu == big_clu_id)';
+        big_clusters(iit-1,:,:) = (clu == big_clu_id);
     end
     
 end
 
 %compare not only cluster size but also magnitude of coherence within
 %the relevant cluster
+clear b a shufCoh
 b = avg_coh(2:end,:,:); %only shuffled clusters
 a = zeros(size(b)); %only shuffled clusters
 a(big_clusters==1) = b(big_clusters==1);
@@ -111,5 +127,8 @@ else %when only in shuffled conditions clusters were found
 end
 
 
-outname = sprintf('%sp_group_withfreq_%s',DIROUT,abs_imag);
-save(outname,'p','true_clu','-v7.3')
+outname = sprintf('%sp_group_c_allfreqs_%s',DIROUT,abs_imag);
+save(outname,'p','threshold','true_clu','true_sizes','-v7.3')
+
+
+
