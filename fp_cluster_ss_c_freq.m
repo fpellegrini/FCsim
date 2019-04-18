@@ -1,6 +1,5 @@
-function p = singlesub_components_withfreq(patientNumber,abs_imag)
-%doesnt work yet 
-cd ~/Dropbox/Data_MEG_Project/
+function [p, TRUE_CLU] = fp_cluster_ss_c_freq(patientNumber,abs_imag)
+%singlesub components with clustering across space and frequencies 
 
 DIROUT = '~/Dropbox/Data_MEG_Project/';
 if ~exist(DIROUT); mkdir(DIROUT); end
@@ -20,7 +19,7 @@ for id = 1 %1:numel(patientID)
     %load coherences
     clear coh
     load(sprintf('Coherences_Patient%s_chunk1.mat',patientID{id}));
-    nfreq = size(coh,2);
+    [nit, nfreq, ns, nlfp] = size(coh);
     
     %get neighbouring nodes and node positions
     clear conn mni_pos noEq
@@ -62,7 +61,8 @@ for id = 1 %1:numel(patientID)
     
     for iit = 1: nit
         
-        onoff_temp = squeeze(onoff(1,:,:));
+        clear onoff_temp u ind A 
+        onoff_temp = squeeze(onoff(1,:,:)); %nfreq x ns
         u = onoff_temp(:); %should be the same indexing like in kron_conn now; nkron x 1
         
         ind = find(u==1); %remember indeces of super-threshold coherences
@@ -71,27 +71,29 @@ for id = 1 %1:numel(patientID)
         A(:,u==0)=[];
         
         %components assigns every voxel to a cluster, even if this means that every voxel is its own cluster
+        clear ci x clu
         [ci, x] = components(A); %x is the histogram of the clusters 
         clu = zeros(size(kron_conn,1),1);%refill with sub-threshold voxels
         clu(ind)= ci; %nkron x 1 
+        clu = reshape(clu,[nfreq ns]); %nfreq x ns
          
         if iit==1 %save true cluster for later
+            clear true_clu true_total true_sizes
             true_clu = clu;
             true_total = numel(x);
-            true_siz = x;
+            true_sizes = x;
             
         elseif numel(x)>0
             big_clu_id = find(x==max(x));
             big_clu_id=big_clu_id(1); %in case there are two clusters with the same size, take the first one
-            big_clusters(iit-1,:,:) = (clu == big_clu_id)';
+            big_clusters(iit-1,:,:) = (clu == big_clu_id);
         end
         
     end
     
-    %%modify from here 
-    
     %compare not only cluster size but also magnitude of coherence within
     %the relevant cluster 
+    clear b a shufCoh
     b = avg_coh(2:end,:,:); %only shuffled clusters 
     a = zeros(size(b)); %only shuffled clusters
     a(big_clusters==1) = b(big_clusters==1);
@@ -106,6 +108,7 @@ for id = 1 %1:numel(patientID)
             p{id}(iclus) = sum(shufCoh>trueCoh)/numel(shufCoh);
         end
         TRUE_CLU{id} = true_clu;
+        TRUE_sizes{id} = true_sizes;
         
     elseif sum(shufCoh)== 0  %when no cluster was found it any iteration
         p{id}= nan;
@@ -119,7 +122,7 @@ for id = 1 %1:numel(patientID)
 end
 
 outname = sprintf('%sp_singlesub_c_allfreqs_%s',DIROUT,abs_imag);
-save(outname,'p','threshold','TRUE_CLU','-v7.3')
+save(outname,'p','threshold','TRUE_CLU','TRUE_sizes','-v7.3')
 
 
 

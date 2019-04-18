@@ -19,7 +19,7 @@ nlags = 20;
 cond = 0;
 nboot = 1;
 
-for id = [9:numel(patientID)] %patient 12: too few good channels for a plot
+for id = [1:6 8:numel(patientID)] %patient 12: too few good channels for a plot
     
     fileName = sprintf('redPLFP%s_off', patientID{id});
     D = spm_eeg_load(fileName);
@@ -41,7 +41,7 @@ for id = [9:numel(patientID)] %patient 12: too few good channels for a plot
     conn = data2spwctrgc(data, fres, nlags, cond, nboot, [], {'CS'});        
     COH = cs2coh(conn.CS);
     absCOH = abs(COH(:, 1:N_meg, end-N_lfp+1:end));
-    imCOH = abs(imag(COH(:, 1:numel(meg_inds), end-N_lfp+1:end)));
+    imCOH = abs(imag(COH(:, 1:N_meg, end-N_lfp+1:end)));
     
     loc = mk_sensors_plane(D_ft.grad.chanpos(meg_inds, [2 1 3]));
     frq_inds = find(frqs > 13 & frqs < 30);
@@ -66,7 +66,9 @@ for id = [9:numel(patientID)] %patient 12: too few good channels for a plot
     clear outname
     outname = sprintf('%scoh_abs_Patient%s_right.png',DIROUT,patientID{id});
     
-    fp_plot_sensorspace_coh(r_COH,frqs, frq_inds, loc, [0 0.15] ,outname)
+    if any(any(~isnan(r_COH)))
+        fp_plot_sensorspace_coh(r_COH,frqs, frq_inds, loc, [0 0.15] ,outname)
+    end
     
     %left lfp channels 
     l_COH = mean(absCOH(frq_inds,:,4:6),3); %15 x 125
@@ -74,7 +76,9 @@ for id = [9:numel(patientID)] %patient 12: too few good channels for a plot
     clear outname
     outname = sprintf('%scoh_abs_Patient%s_left.png',DIROUT,patientID{id});
     
-    fp_plot_sensorspace_coh(l_COH,frqs,frq_inds, loc, [0 0.15],outname)
+    if any(any(~isnan(l_COH)))
+        fp_plot_sensorspace_coh(l_COH,frqs,frq_inds, loc, [0 0.15],outname)
+    end
     
     %plot imaginary parts 
     %right
@@ -83,15 +87,19 @@ for id = [9:numel(patientID)] %patient 12: too few good channels for a plot
     clear outname
     outname = sprintf('%scoh_imag_Patient%s_right.png',DIROUT,patientID{id});
         
-    fp_plot_sensorspace_coh(rim_COH,frqs, frq_inds, loc, [0 0.15],outname)
+    if any(any(~isnan(rim_COH)))
+        fp_plot_sensorspace_coh(rim_COH,frqs, frq_inds, loc, [0 0.15],outname)
+    end
     
     %left
     lim_COH = mean(imCOH(frq_inds,:,4:6),3); %15 x 125
     lim_COH(:,p_l_im>0.05)= nan;
     clear outname
     outname = sprintf('%scoh_imag_Patient%s_left.png',DIROUT,patientID{id});
-        
-    fp_plot_sensorspace_coh(lim_COH,frqs, frq_inds, loc,[0 0.15],outname)
+       
+    if any(any(~isnan(lim_COH)))
+        fp_plot_sensorspace_coh(lim_COH,frqs, frq_inds, loc,[0 0.15],outname)
+    end
     
     clear fileName D D_ft data conn COH absCOH imCOH loc l_COH r_COH lim_COH rim_COH
     
