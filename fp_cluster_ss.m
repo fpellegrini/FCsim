@@ -1,13 +1,11 @@
-function p = fp_cluster_ss(patientNumber, fband, minnbchan,abs_imag)
+function p = fp_cluster_ss(patientNumber, fband, minnbchan,abs_imag, DIROUT)
 %singlesubjects, finds clusters with the findclusters fun
 
-cd ~/Dropbox/Data_MEG_Project/
-
-DIROUT = '~/Dropbox/Data_MEG_Project/';
-if ~exist(DIROUT); mkdir(DIROUT); end
-
-DIRFIG = sprintf('~/Dropbox/Data_MEG_Project/figures/cluster_singlesub/%s/',abs_imag);
-if ~exist(DIRFIG); mkdir(DIRFIG); end
+if nargin>4
+    if ~exist(DIROUT); mkdir(DIROUT); end
+else
+    warning('Results will not be saved')
+end
 
 if isempty(patientNumber)
     patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
@@ -34,98 +32,99 @@ elseif strcmp(fband,'gamma_high')
 else 
     warning('Choosing beta frequency band!')
     frq_band = [13 30];
+    fband = 'beta';
 end
 
+nchunk = 10;
 fs = 300;
 fres = 75;
 frqs = sfreqs(fres, fs);
 frqs(frqs>90) = [];
 frq_id = find(frqs> frq_band(1) & frqs< frq_band(2));
 
-for id = 1:numel(patientID)
-    
-    %load coherences
-    load(sprintf('Coherences_Patient%s.mat',patientID{id}));
+for id = 1 %s:numel(patientID)  
     
     %get neighbouring nodes and node positions
-    clear conn mni_pos noEq
+    clear conn mni_pos noEq threshold
     conn = fp_find_neighbours(patientID{id});
     mni_pos = fp_getMNIpos(patientID{id});
     
     %get flip id and symmetric head
     [sym_pos, noEq] = fp_symmetric_vol(mni_pos);
-    [~,flip_id] = fp_flip_vol(sym_pos);
+    [~,flip_id] = fp_flip_vol(sym_pos);    
     
-    coh(:,:,noEq,:) = [];
-    [nit, nfreq, ns, nlfp] = size(coh);
-    flip_coh = coh;
-    flip_coh(:,:,:,4:6) = coh(:,:,flip_id,4:6);
+    threshold = fp_get_thresholds_ss(patientID{id},fband, abs_imag);
+    shufCoh = [];
     
-    if strcmp(abs_imag,'abs')
-        abs_coh= abs(flip_coh);
-    elseif strcmp(abs_imag,'imag')
-        abs_coh = abs(imag(flip_coh));
-    else
-        error('Method unknown!')
-    end
-    
-    %mean across lfp channels (already flipped) and across frequencies
-    avg_coh = squeeze(median(median(abs_coh(:,frq_id,:,:),4),2));
-    threshold(id) = prctile(reshape(avg_coh,1,[]),99);
-    
-    onoff = avg_coh>threshold(id);
-    big_clusters = zeros(nit-1,ns);
-    
-    for iit = 1: nit
+    for ichunk = 1:nchunk
+        %load coherences
+        clear coh flip_coh abs_coh avg_coh
+        load(sprintf('Coherences_Patient%s_chunk%d.mat',patientID{id},ichunk));
         
-        clear clu total x big_clu_id
-        [clu, total] = findcluster(squeeze(onoff(iit,:))',...
-            conn, conn, minnbchan);
+        coh(:,:,noEq,:) = [];
+        [nit, ~, ns,~] = size(coh);
         
-        if iit==1 %save true cluster for later
+        flip_coh = coh;
+        flip_coh(:,:,:,4:6) = coh(:,:,flip_id,4:6);
+    
+        if strcmp(abs_imag,'abs')
+            abs_coh= abs(flip_coh);
+        elseif strcmp(abs_imag,'imag')
+            abs_coh = abs(imag(flip_coh));
+        else
+            error('Method unknown!')
+        end
+    
+        %mean across lfp channels (already flipped) and across frequencies
+        avg_coh = squeeze(median(median(abs_coh(:,frq_id,:,:),4),2));
+        onoff = avg_coh>threshold;
+               
+        %true cluster 
+        if ichunk==1
+            clear clu total x big_clu_id
+            [clu, total] = findcluster(squeeze(onoff(1,:))',...
+                 conn, conn, minnbchan);
             true_clu = clu;
             true_total = total;
-        elseif total>0
-            clear x
-            x = hist(clu,0:total);
-            big_clu_id = find(x(2:end)==max(x(2:end)));
-            big_clu_id=big_clu_id(1); %in case there are two clusters with the same size, take the first one
-            big_clusters(iit-1,:) = clu == big_clu_id;
+            true_avg_coh = avg_coh(1,:,:);
             
-            %             if iit == 1
-            %                 %plot biggest cluster
-            %                 figure
-            %                 c=sym_pos;
-            %                 clear mask
-            %     %             mask= onoff(iit,:);
-            %                 mask = big_clusters(iit,:);
-            %                 scatter3(c(:,1),c(:,2),c(:,3),5,[0.85 0.85 0.85])
-            %                 hold on
-            %                 scatter3(c(mask==1,1),c(mask==1,2),c(mask==1,3),20,[0.8 0.1,0.5],'filled')
-            %                 colormap jet
-            %
-            %                 outname = sprintf('%s%s.png',DIRFIG,patientID{id});
-            %                 print(outname,'-dpng');
-            %                 close all
-            %             end
-            
-            
+            onoff(1,:) =[]; %remove true coherence dimension 
+            nit = nit-1;
         end
-        
-    end
     
-    %compare not only cluster size but also magnitude of coherence within
-    %the relevant cluster 
-    b = avg_coh(2:end,:); %only shuffled clusters 
-    a = zeros(size(b)); %only shuffled clusters
-    a(big_clusters==1) = b(big_clusters==1);
-    shufCoh = sum(a,2);
+        
+        %shuffled clusters
+        clear big_clusters
+        big_clusters = zeros(nit,ns);
+        for iit = 1: nit
+
+            clear clu total x big_clu_id
+            [clu, total] = findcluster(squeeze(onoff(iit,:))',...
+                conn, conn, minnbchan);
+            
+            if total>0
+                clear x
+                x = hist(clu,0:total);
+                big_clu_id = find(x(2:end)==max(x(2:end)));
+                big_clu_id=big_clu_id(1); %in case there are two clusters with the same size, take the first one
+                big_clusters(iit,:) = clu == big_clu_id;
+            end           
+        end
+    
+        %compare not only cluster size but also magnitude of coherence within
+        %the relevant cluster 
+        clear b a 
+        b = avg_coh(2:end,:); %only shuffled clusters 
+        a = zeros(size(b)); %only shuffled clusters
+        a(big_clusters==1) = b(big_clusters==1);
+        shufCoh = cat(1,shufCoh,sum(a,2)); %cat across chunks          
+    end 
     
     
     if true_total>0 %when at least one true cluster exists  
         for iclus = 1:true_total
             clear trueCoh
-            trueCoh = sum(avg_coh(1,true_clu==iclus));
+            trueCoh = sum(true_avg_coh(true_clu==iclus));
             p{id}(iclus) = sum(shufCoh>trueCoh)/numel(shufCoh);
         end
         TRUE_CLU{id} = true_clu;
@@ -141,8 +140,10 @@ for id = 1:numel(patientID)
         
 end
 
-outname = sprintf('%sp_singlesub_%s',DIROUT,abs_imag);
-save(outname,'p','threshold','TRUE_CLU','-v7.3')
+if numel(patientID)==11 && exist('DIROUT')
+    outname = sprintf('%sp_singlesub_%s',DIROUT,abs_imag);
+    save(outname,'p','TRUE_CLU','-v7.3')
+end
 
 
 
