@@ -22,9 +22,9 @@ cube1 = cube.*100000;
 cube2 = round(smooth3(cube1,'box',[11 11 11]));
 
 
-V= wjn_read_nii('./mri/rPLFP04.nii');
+V= wjn_read_nii('./mri/rPLFP08.nii');
 
-V.fname = 'patient04.nii';
+V.fname = 'patient04p.nii';
 
 V.img = cube2;
 spm_write_vol(V,cube2);
