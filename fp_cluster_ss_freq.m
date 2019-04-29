@@ -122,7 +122,7 @@ for id = 1:numel(patientID)
 end
 
 if numel(patientID)==11 && exist('DIROUT')
-    outname = sprintf('%sp_ss_allfreq_%s',DIROUT,abs_imag);
+    outname = sprintf('%sp_cluster_ss_freq_%s',DIROUT,abs_imag);
     save(outname,'p','TRUE_CLU','-v7.3')
 end
 
