@@ -35,7 +35,6 @@ for id = 1:numel(patientID)
     id_meg_trials = 1:n_trials;
     
     if shuffle == 1
-        rng(id)
         id_lfp_trials = randperm(n_trials);
     else
         id_lfp_trials = id_meg_trials;
