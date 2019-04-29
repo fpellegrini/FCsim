@@ -1,18 +1,15 @@
-function threshold = fp_get_thresholds_ss(patientNumber, fband, abs_imag, DIROUT)
-%get threshold (from all chunks) for single subjects 
+function threshold = fp_get_thresholds_group(fband, abs_imag, DIROUT)
+%get threshold (from all chunks) for all subjects 
 
-if nargin>3
+if nargin>2
     if ~exist(DIROUT); mkdir(DIROUT); end
 end
 
-if isempty(patientNumber)
-    patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
-else
-    patientID{1} = patientNumber;
-end
 if isempty(abs_imag)
     abs_imag = 'abs';
 end
+
+patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
 
 if strcmp(fband,'theta')
     frq_band = [4 8];
@@ -36,6 +33,8 @@ frqs = sfreqs(fres, fs);
 frqs(frqs>90) = [];
 frq_id = find(frqs> frq_band(1) & frqs< frq_band(2));
 
+coh_vals = [];
+
 for id = 1:numel(patientID)  
     
     %get neighbouring nodes and node positions
@@ -49,7 +48,6 @@ for id = 1:numel(patientID)
     %get flip id and symmetric head
     [~, noEq] = fp_symmetric_vol(mni_pos);
     
-    coh_vals = [];
     for ichunk = 1:nchunk
         %load coherences
         clear coh flip_coh abs_coh avg_coh
@@ -71,12 +69,13 @@ for id = 1:numel(patientID)
         avg_coh = squeeze(median(median(abs_coh(:,frq_id,:,:),4),2));
         coh_vals = cat(2,coh_vals, reshape(avg_coh,1,[]));
     end
-    clear threshold 
-    threshold = prctile(coh_vals,99);
-    
-    outname = sprintf('%sthreshold_Patient%s_%s_%s',DIROUT,patientID{id},fband, abs_imag);
-    save(outname,'threshold','-v7.3')
 end
+
+clear threshold 
+threshold = prctile(coh_vals,99);
+
+outname = sprintf('%sthreshold_group_%s_%s',DIROUT,fband, abs_imag);
+save(outname,'threshold','-v7.3')
     
     
     

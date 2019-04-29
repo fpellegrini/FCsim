@@ -2,6 +2,8 @@ function [p, true_clu] = fp_cluster_g_freq(minnbchan,abs_imag)
 %group statistics, finds clusters across space and frequencies with the
 %findclusters fun 
 
+cd ~/Dropbox/Data_MEG_Project/
+
 DIROUT = '~/Dropbox/Data_MEG_Project/';
 if ~exist(DIROUT); mkdir(DIROUT); end
 
@@ -17,7 +19,7 @@ end
 [commonvox_pos, voxID] = fp_find_commonvox;
 
 nsubs = numel(patientID);
-nit = 1000;
+nit = 51;
 nfreq = 46;
 ns = size(commonvox_pos,1);
 
@@ -26,10 +28,7 @@ COH = nan(nsubs,nit,nfreq,ns);
 for id = 1:nsubs
     
     %load coherences
-    clear coh
     load(sprintf('Coherences_Patient%s.mat',patientID{id}));
-    
-    clear conn mni_pos noEq
     mni_pos = fp_getMNIpos(patientID{id});
     conn = fp_find_neighbours(patientID{id}); %think about how to do that
     match_conn = conn(voxID{id},voxID{id});
@@ -59,12 +58,12 @@ for id = 1:nsubs
     
 end
 
-clear avg_coh threshold onoff big_clusters
 avg_coh = squeeze(sum(COH,1));
 threshold = prctile(reshape(avg_coh,1,[]),99);
 onoff = avg_coh>threshold;
-big_clusters = zeros(nit-1,nfreq,ns);
 
+big_clusters = zeros(nit-1,nfreq,ns);
+% big_clusters = zeros(nit,ns);
 
 %find the clusters 
 for iit = 1: nit

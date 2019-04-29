@@ -1,7 +1,7 @@
-function threshold = fp_get_thresholds_ss(patientNumber, fband, abs_imag, DIROUT)
-%get threshold (from all chunks) for single subjects 
+function threshold = fp_get_thresholds_ss_freq(patientNumber, abs_imag, DIROUT)
+%get threshold (from all chunks) for single subjects for all freqs
 
-if nargin>3
+if nargin>2
     if ~exist(DIROUT); mkdir(DIROUT); end
 end
 
@@ -14,27 +14,7 @@ if isempty(abs_imag)
     abs_imag = 'abs';
 end
 
-if strcmp(fband,'theta')
-    frq_band = [4 8];
-elseif strcmp(fband,'alpha')
-    frq_band = [7 13];
-elseif strcmp(fband,'beta')
-    frq_band = [13 30];
-elseif strcmp(fband,'gamma_low')
-    frq_band = [30 46];
-elseif strcmp(fband,'gamma_high')
-    frq_band = [60 90];
-else 
-    warning('Choosing beta frequency band!')
-    frq_band = [13 30];
-end
-
 nchunk = 10;
-fs = 300;
-fres = 75;
-frqs = sfreqs(fres, fs);
-frqs(frqs>90) = [];
-frq_id = find(frqs> frq_band(1) & frqs< frq_band(2));
 
 for id = 1:numel(patientID)  
     
@@ -68,13 +48,13 @@ for id = 1:numel(patientID)
         end
     
         %mean across lfp channels (already flipped) and across frequencies
-        avg_coh = squeeze(median(median(abs_coh(:,frq_id,:,:),4),2));
+        avg_coh = squeeze(median(abs_coh,4));
         coh_vals = cat(2,coh_vals, reshape(avg_coh,1,[]));
     end
     clear threshold 
     threshold = prctile(coh_vals,99);
     
-    outname = sprintf('%sthreshold_Patient%s_%s_%s',DIROUT,patientID{id},fband, abs_imag);
+    outname = sprintf('%sthreshold_Patient%s_allfreq_%s',DIROUT,patientID{id}, abs_imag);
     save(outname,'threshold','-v7.3')
 end
     

@@ -1,5 +1,6 @@
 function p = fp_cluster_ss(patientNumber, fband, minnbchan,abs_imag, DIROUT)
 %singlesubjects, finds clusters with the findclusters fun
+fp_addpath 
 
 if nargin>4
     if ~exist(DIROUT); mkdir(DIROUT); end
@@ -42,7 +43,7 @@ frqs = sfreqs(fres, fs);
 frqs(frqs>90) = [];
 frq_id = find(frqs> frq_band(1) & frqs< frq_band(2));
 
-for id = 1 %s:numel(patientID)  
+for id = 1:numel(patientID)  
     
     %get neighbouring nodes and node positions
     clear conn mni_pos noEq threshold
@@ -53,7 +54,7 @@ for id = 1 %s:numel(patientID)
     [sym_pos, noEq] = fp_symmetric_vol(mni_pos);
     [~,flip_id] = fp_flip_vol(sym_pos);    
     
-    threshold = fp_get_thresholds_ss(patientID{id},fband, abs_imag);
+    load(sprintf('%sthreshold_Patient%s_%s_%s.mat',DIROUT,patientID{id},fband, abs_imag));
     shufCoh = [];
     
     for ichunk = 1:nchunk
@@ -77,6 +78,7 @@ for id = 1 %s:numel(patientID)
     
         %mean across lfp channels (already flipped) and across frequencies
         avg_coh = squeeze(median(median(abs_coh(:,frq_id,:,:),4),2));
+        
         onoff = avg_coh>threshold;
                
         %true cluster 
@@ -86,7 +88,7 @@ for id = 1 %s:numel(patientID)
                  conn, conn, minnbchan);
             true_clu = clu;
             true_total = total;
-            true_avg_coh = avg_coh(1,:,:);
+            true_avg_coh = avg_coh(1,:);
             
             onoff(1,:) =[]; %remove true coherence dimension 
             nit = nit-1;
@@ -96,6 +98,7 @@ for id = 1 %s:numel(patientID)
         %shuffled clusters
         clear big_clusters
         big_clusters = zeros(nit,ns);
+        avg_coh = avg_coh(end-nit+1:end,:); %select shuffled clusters only
         for iit = 1: nit
 
             clear clu total x big_clu_id
@@ -113,10 +116,9 @@ for id = 1 %s:numel(patientID)
     
         %compare not only cluster size but also magnitude of coherence within
         %the relevant cluster 
-        clear b a 
-        b = avg_coh(2:end,:); %only shuffled clusters 
-        a = zeros(size(b)); %only shuffled clusters
-        a(big_clusters==1) = b(big_clusters==1);
+        clear a 
+        a = zeros(size(avg_coh)); %only shuffled clusters
+        a(big_clusters==1) = avg_coh(big_clusters==1);
         shufCoh = cat(1,shufCoh,sum(a,2)); %cat across chunks          
     end 
     
