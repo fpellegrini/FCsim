@@ -1,5 +1,7 @@
 function fp_test_sensorspace_coh_allchans(patientNumber,DIROUT, DIRLOG)
 
+fp_addpath
+
 if ~exist('DIROUT','var')
     DIROUT =  '~/Dropbox/Data_MEG_Project/';
 end
@@ -57,6 +59,7 @@ for id = 1:numel(patientID)
             if iit==1
                 id_lfp_trials = 1: N_trials;
             else
+                rng('shuffle')
                 id_lfp_trials = randperm(N_trials);
             end
 

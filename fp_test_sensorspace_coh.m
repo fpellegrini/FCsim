@@ -45,6 +45,7 @@ for id = 1:numel(patientID)
         if iit ==1
             id_lfp_trials = 1: N_trials;
         else
+            rng('shuffle')
             id_lfp_trials = randperm(N_trials);
         end
                

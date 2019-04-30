@@ -35,6 +35,7 @@ for id = 1:numel(patientID)
     id_meg_trials = 1:n_trials;
     
     if shuffle == 1
+        rng('shuffle')
         id_lfp_trials = randperm(n_trials);
     else
         id_lfp_trials = id_meg_trials;
@@ -55,11 +56,9 @@ for id = 1:numel(patientID)
     end
     
     %project cross spectrum to voxel space
-    tic
     for ifq = 1:nfreq
         CSv(ifq,:,:) = A(:,:,ifq)' * cCS(:,:,ifq);
     end
-    toc
     
     %get voxel power
     pv = fp_project_power(CS,A);
