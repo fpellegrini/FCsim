@@ -68,25 +68,25 @@ for id = 1:numel(patientID)
             conn = data2spwctrgc(data, fres, nlags, cond, nboot, [], {'CS'});
             COH = cs2coh(conn.CS);
 
-            r_max_abs(iit,:) = mean(mean(abs(COH(frq_inds,1:N_meg, end-5:end-3)),1),3);
-            r_max_im(iit,:) = mean(mean(abs(imag(COH(frq_inds,1:N_meg,end-5:end-3))),1),3);
+            r_abs(iit,:) = mean(mean(abs(COH(frq_inds,1:N_meg, end-5:end-3)),1),3);
+            r_im(iit,:) = mean(mean(abs(imag(COH(frq_inds,1:N_meg,end-5:end-3))),1),3);
 
-            l_max_abs(iit,:) = mean(mean(abs(COH(frq_inds, 1:N_meg, end-2:end)),1),3);
-            l_max_im(iit,:) = mean(mean(abs(imag(COH(frq_inds, 1:N_meg, end-2:end))),1),3);
+            l_abs(iit,:) = mean(mean(abs(COH(frq_inds, 1:N_meg, end-2:end)),1),3);
+            l_im(iit,:) = mean(mean(abs(imag(COH(frq_inds, 1:N_meg, end-2:end))),1),3);
 
             clear data conn COH 
         end
 
         for ichan = 1:N_meg
-            p_r_abs(ichan) = sum(r_max_abs(2:end,ichan)>r_max_abs(1,ichan))/numel(r_max_abs(:,ichan));
-            p_l_abs(ichan) = sum(l_max_abs(2:end,ichan)>l_max_abs(1,ichan))/numel(l_max_abs(:,ichan));
-            p_r_im(ichan) = sum(r_max_im(2:end,ichan)>r_max_im(1,ichan))/numel(r_max_im(:,ichan));
-            p_l_im(ichan) = sum(l_max_im(2:end,ichan)>l_max_im(1,ichan))/numel(l_max_im(:,ichan));
+            p_r_abs(ichan) = sum(r_abs(2:end,ichan)>r_abs(1,ichan))/numel(r_abs(:,ichan));
+            p_l_abs(ichan) = sum(l_abs(2:end,ichan)>l_abs(1,ichan))/numel(l_abs(:,ichan));
+            p_r_im(ichan) = sum(r_im(2:end,ichan)>r_im(1,ichan))/numel(r_im(:,ichan));
+            p_l_im(ichan) = sum(l_im(2:end,ichan)>l_im(1,ichan))/numel(l_im(:,ichan));
         end
 
         outname = sprintf('%sperm_sensor_allchans_beta_Patient%s',DIROUT,patientID{id});
         save(outname,'p_r_abs','p_l_abs','p_r_im','p_l_im','-v7.3')
-        clear r_max_abs r_max_im l_max_abs l_max_im p_r_abs p_l_abs p_r_im p_l_im 
+        clear r_abs r_im l_abs l_im p_r_abs p_l_abs p_r_im p_l_im 
         
         eval(sprintf('!mv %s%s_work %s%s_done',DIRLOG,logname,DIRLOG,logname))
     end 
