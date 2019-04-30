@@ -47,15 +47,19 @@ for id = 1:numel(patientID)
     if shuffle ==1
         %when trials are shuffled, the CS between meg and lfp must be
         %re-calculated
+        tic
         cCS = fp_tsdata_to_cpsd(X,0,fres,id_meg_chan, id_lfp_chan, id_meg_trials, id_lfp_trials);
+        toc
     else 
         cCS = CS(1:(end-nlfp),end-nlfp+1:end,:);
     end
     
     %project cross spectrum to voxel space
+    tic
     for ifq = 1:nfreq
         CSv(ifq,:,:) = A(:,:,ifq)' * cCS(:,:,ifq);
     end
+    toc
     
     %get voxel power
     pv = fp_project_power(CS,A);
