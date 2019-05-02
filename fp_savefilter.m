@@ -14,19 +14,20 @@ end
 
 for id = 1:numel(patientID)
     load(sprintf('BF_Patient%s.mat',patientID{id}));
+    D=spm_eeg_load(sprintf('redPLFP%s_off',patientID{id}));
     
-    X = data.D(:,:,:);
-    D_ft = ftraw(data.D);
+    X = D(:,:,:);
+    D_ft = ftraw(D);
     n_trials = length(D_ft.trial);
     
-    fs = data.D.fsample;
+    fs = D.fsample;
     fres = 75;
     frqs = sfreqs(fres, fs);
     frqs(frqs>90) = [];
     nfreq = numel(frqs);
     
     id_meg_chan = 1:125;
-    id_meg_chan(data.D.badchannels)=[];
+    id_meg_chan(D.badchannels)=[];
     nmeg = numel(id_meg_chan);
     id_lfp_chan = 126:131;
     nlfp = numel(id_lfp_chan);
@@ -40,7 +41,7 @@ for id = 1:numel(patientID)
 
     %cross spectrum
 
-    CS = fp_tsdata_to_cpsd(X,1,fres,id_meg_chan, id_lfp_chan, id_meg_trials, id_lfp_trials);
+    CS3 = fp_tsdata_to_cpsd(X,fres,[id_meg_chan,id_lfp_chan], [id_meg_chan,id_lfp_chan], id_meg_trials, id_lfp_trials);
     
     %leadfield
     L1 = inverse.MEG.L;
