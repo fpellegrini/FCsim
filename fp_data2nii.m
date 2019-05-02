@@ -18,8 +18,8 @@ for i =1:numel(x)
     cube(x(i),y(i),z(i)) = data(i);
 end 
 
-cube1 = cube.*100000;
-cube2 = round(smooth3(cube1,'box',[11 11 11]));
+cube1 = cube.*(11^3);
+cube2 = round(smooth3(cube1,'box',[10 10 10]));
 
 V= wjn_read_nii('./mri/rPLFP04.nii');
 

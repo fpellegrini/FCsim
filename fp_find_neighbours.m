@@ -16,10 +16,10 @@ for inode =1:size(neighb,1)
     
     neighb(inode,find(o==gridsiz))=1;
     clear o
+    
     neighb(inode,inode) = 1; %voxel is also neighbour to itself
     
 end
-
 % 
 % %check visually wether only outer gridpoints have fewer than 6 neighbours
 % outerpoints = find(sum(neighb,1)<6); 

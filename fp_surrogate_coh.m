@@ -16,8 +16,8 @@ else
     patientID{1} = patientNumber;
 end
 
-nit = 100;
-nchunks = 10;
+nit = 20;
+nchunks = 50;
 
 
 for id = 1:numel(patientID)
@@ -47,9 +47,9 @@ for id = 1:numel(patientID)
             
             
             outname = sprintf('%sCoherences_Patient%s_chunk%d',DIROUT, patientID{id},ichunk);
-            save(outname,'coh','-v7.3')
-            
+            save(outname,'coh','-v7.3')            
             clear coh
+            
             eval(sprintf('!mv %s%s_work %s%s_done',DIRLOG,logname,DIRLOG,logname))
         end
     end

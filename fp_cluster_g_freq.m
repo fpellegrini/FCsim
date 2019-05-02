@@ -21,7 +21,7 @@ end
 
 [commonvox_pos, voxID] = fp_find_commonvox;
 
-nchunk = 10;
+nchunk = 50;
 
 for id = 1:numel(patientID)
     

@@ -36,7 +36,7 @@ else
     fband = 'beta';
 end
 
-nchunk = 10;
+nchunk = 50;
 fs = 300;
 fres = 75;
 frqs = sfreqs(fres, fs);

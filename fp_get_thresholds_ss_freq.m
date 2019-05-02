@@ -1,6 +1,8 @@
 function threshold = fp_get_thresholds_ss_freq(patientNumber, abs_imag, DIROUT)
 %get threshold (from all chunks) for single subjects for all freqs
 
+fp_addpath
+
 if nargin>2
     if ~exist(DIROUT); mkdir(DIROUT); end
 end
@@ -14,7 +16,7 @@ if isempty(abs_imag)
     abs_imag = 'abs';
 end
 
-nchunk = 10;
+nchunk = 50;
 
 for id = 1:numel(patientID)  
     

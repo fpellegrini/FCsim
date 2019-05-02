@@ -42,7 +42,7 @@ frq_id = find(frqs> frq_band(1) & frqs< frq_band(2));
 
 [commonvox_pos, voxID] = fp_find_commonvox;
 
-nchunk = 10;
+nchunk = 50;
 
 for id = 1:numel(patientID)
     

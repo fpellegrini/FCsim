@@ -1,6 +1,7 @@
 function threshold = fp_get_thresholds_ss(patientNumber, fband, abs_imag, DIROUT)
 %get threshold (from all chunks) for single subjects 
 
+fp_addpath
 if nargin>3
     if ~exist(DIROUT); mkdir(DIROUT); end
 end
@@ -29,7 +30,7 @@ else
     frq_band = [13 30];
 end
 
-nchunk = 10;
+nchunk = 50;
 fs = 300;
 fres = 75;
 frqs = sfreqs(fres, fs);
