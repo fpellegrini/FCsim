@@ -1,4 +1,4 @@
-function fp_test_sensorspace_coh_allchans_group(patientNumber,DIROUT)
+function fp_test_sensorspace_coh_allchans_group(patientNumber,fband, DIROUT)
 
 fp_addpath
 
@@ -10,6 +10,22 @@ if isempty(patientNumber)
     patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'}; %'12' has too few sensors
 else
     patientID{1} = patientNumber;
+end
+
+if strcmp(fband,'theta')
+    frq_band = [4 8];
+elseif strcmp(fband,'alpha')
+    frq_band = [7 13];
+elseif strcmp(fband,'beta')
+    frq_band = [13 30];
+elseif strcmp(fband,'gamma_low')
+    frq_band = [30 60];
+elseif strcmp(fband,'gamma_high')
+    frq_band = [60 90];
+else 
+    warning('Choosing beta frequency band!')
+    frq_band = [13 30];
+    fband = 'beta';
 end
 
 MEG_INDS = 1:125;
@@ -45,7 +61,7 @@ for id = 1:numel(patientID)
     fs = D.fsample;
     fres = 75;
     frqs = sfreqs(fres, fs);
-    frq_inds = find(frqs > 13 & frqs < 30);
+    frq_inds = find(frqs > frq_band(1) & frqs < frq_band(2));
     
     data1 = [D_ft.trial{:}];
     
@@ -87,7 +103,7 @@ for ichan = 1:N_meg
     p_l_im(ichan) = sum(l_im(2:end,ichan)>l_im(1,ichan))/numel(l_im(:,ichan));
 end
 
-outname = sprintf('%sperm_sensor_beta_group',DIROUT);
+outname = sprintf('%sperm_sensor_%s_group',DIROUT,fband);
 save(outname,'p_r_abs','p_l_abs','p_r_im','p_l_im','-v7.3')
 
 

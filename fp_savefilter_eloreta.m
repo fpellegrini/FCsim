@@ -41,7 +41,7 @@ for id = 1:numel(patientID)
         id_lfp_chan = 126:131;
         nlfp = numel(id_lfp_chan);
         
-        %fiter
+        %filter
         A=zeros(nmeg,ns);
         
         for ifrq = 1:nfreq
@@ -53,7 +53,7 @@ for id = 1:numel(patientID)
         
         outname = sprintf('%sFilter_Patient%s_e',DIROUT, patientID{id});
         save(outname,'A','CS','-v7.3')
-        clearvars -except DIROUT patientID id
+        clearvars -except DIROUT patientID id DIRLOG logname
         
         eval(sprintf('!mv %s%s_work %s%s_done',DIRLOG,logname,DIRLOG,logname))
     end

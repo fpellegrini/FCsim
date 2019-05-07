@@ -148,5 +148,5 @@ else %when only in shuffled conditions clusters were found
 end
 
 
-outname = sprintf('%sp_cluster_g_%s',DIROUT,abs_imag);
+outname = sprintf('%sp_cluster_g_%s_%s',DIROUT,fband,abs_imag);
 save(outname,'p','true_clu','-v7.3')

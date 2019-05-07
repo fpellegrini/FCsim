@@ -68,7 +68,7 @@ avg_coh = squeeze(sum(COH,1));
 threshold = prctile(reshape(avg_coh,1,[]),99);
 
 %cat the chunks
-avg_coh = squeeze(reshape(avg_coh,[size(COH,1),size(COH,2)*size(COH,3),size(COH,4), size(COH,5)]));
+avg_coh = squeeze(reshape(avg_coh,[size(COH,2)*size(COH,3),size(COH,4), size(COH,5)]));
 onoff = avg_coh>threshold;
 
 %true cluster
