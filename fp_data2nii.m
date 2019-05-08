@@ -1,36 +1,44 @@
-function fp_data2nii(data,pos,outname)
+function fp_data2nii(data,id, nit, outname)
+%data should have be of size 1 x nvox 
+%id is index of patient in patientID variable, if data is group data id =
+%nan.
+%nit is number of iterations (default: 500)
+%outname example: 'test.nii'
 
-% patientNumber = '10';
+if isempty(nit)
+    nit=500;
+end
 
-% load(sprintf('Coherences_Patient%s.mat',patientNumber));
-% vals = squeeze(abs(coh(1,13,:,1)));
-% [c, voxID] = fp_find_commonvox;
-% data = vals(voxID{1});
-% pos = c;
+[pos, voxID] = fp_find_commonvox;
+if ~isnan(id)
+    data = data(voxID{id}); %start data
+end
+cube = nan([91 109 91]); %destimation cube
 
+%mask for all data points outside the brain
 mask= wjn_read_nii('/Users/franziskapellegrini/Dropbox/Master/Masterarbeit/MasterThesis/wjn_toolbox/spm12/toolbox/FieldMap/brainmask.nii');
 mask = mask.img;
-
-cube = nan([91 109 91]);
 cube(mask==0) = 0;
 
-[x y z outtype] = mni2orFROMxyz(pos(:,1), pos(:,2), pos(:,3),[],'mni');
+%from mni to world coordinates
+[x, y, z, ~] = mni2orFROMxyz(pos(:,1), pos(:,2), pos(:,3),[],'mni');
 x = round(x);
 y=round(y);
 z=round(z);
 
+%fill data into cube
 for i =1:numel(x)    
     cube(x(i),y(i),z(i)) = data(i);
 end 
-Vq = inpaintn(cube,500);
-Vq = Vq.*(10^3);
-% Vq = inpaintn(cube);
 
+%interpolation of missing values
+Vq = cube.*(10^3);
+Vq = inpaintn(Vq,nit);
 
+%read in some template 
 V= wjn_read_nii('./mri/rPLFP04.nii');
-
-% V.fname = 'patient04.nii';
 V.fname = outname;
-
 V.img = Vq;
+
+%write nifti 
 spm_write_vol(V,Vq);
