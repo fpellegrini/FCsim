@@ -41,7 +41,7 @@ for id = 1:numel(patientID)
 
     %cross spectrum
 
-    CS3 = fp_tsdata_to_cpsd(X,fres,[id_meg_chan,id_lfp_chan], [id_meg_chan,id_lfp_chan], id_meg_trials, id_lfp_trials);
+    CS = fp_tsdata_to_cpsd(X,fres,[id_meg_chan,id_lfp_chan], [id_meg_chan,id_lfp_chan], id_meg_trials, id_lfp_trials);
     
     %leadfield
     L1 = inverse.MEG.L;

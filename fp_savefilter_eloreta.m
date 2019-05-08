@@ -18,7 +18,7 @@ for id = 1:numel(patientID)
     if ~exist(sprintf('%s%s_work',DIRLOG,logname)) & ~exist(sprintf('%s%s_done',DIRLOG,logname))
         eval(sprintf('!touch %s%s_work',DIRLOG,logname))
         
-        load('Filter_Patient04.mat')
+        load(sprintf('Filter_Patient%s.mat',patientID{id}))
         clear A
         
         load(sprintf('BF_Patient%s.mat',patientID{id}));
