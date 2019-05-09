@@ -1,3 +1,4 @@
+
 function fp_test_sensorspace_coh_allchans_group(patientNumber,fband, DIROUT)
 
 fp_addpath

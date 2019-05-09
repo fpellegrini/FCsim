@@ -24,6 +24,10 @@ if nargin < 3 || isempty(method)
    method = 'MT';    % default is multi-taper
 end
 
+if ~isequal(ind_1,unique(ind_1)) || ~isequal(ind_2, unique(ind_2))
+    error('ind_1 and ind_2 must be unique')
+end
+
 if strcmpi(method,'MT')    
       
     nchunks = floor(((n_times-noverlap)/(window-noverlap))); % FFT chunks per channel
