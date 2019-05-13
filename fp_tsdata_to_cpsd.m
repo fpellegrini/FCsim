@@ -79,11 +79,25 @@ elseif strcmpi(method,'WELCH')
         %trial shuffling
         x_original = X(:,:,id_trials_1(r));
         x_perm = X(:,:,id_trials_2(r));
+        
+        clear XX
+        s = fp_cpsd_welch(x_original,x_perm,ind_1,ind_2,fres+1,window,noverlap);
+        
 
-        XX = fp_cpsd_welch(x_original,x_perm,ind_1,ind_2,fres+1,window,noverlap);
-        S = S + XX; 
+        if ~isempty(ind_pow)
+            clear pow
+            pow = pwelch(x_original(:,ind_pow),window,noverlap,nfft);
+            for ii = 1:numel(ind_pow)
+                clear a b 
+                a = find(ind_1 == ind_pow(ii));
+                b = find(ind_2 == ind_pow(ii));
+                s(a,b,:) = pow(:,ii);
+            end
+        end
+        
+        S = S + s; 
     end
-    S = S/n_trials; % average across trials; formerly: S = pi*S/N; 
+    S = S/n_trials; 
     
 else
     error('unknown method ''%s''',method);
