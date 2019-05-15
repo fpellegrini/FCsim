@@ -4,8 +4,9 @@ ns = size(L,2);
 
 for is = 1: ns 
     %remove radial orientation 
-    [u v s] = svd(squeeze(L(:,1,:)),'econ');
-    L2(:,is,:) = u(:,1:2)*s(1:2,1:2)*v(1:2,1:2);
+    clear u v s
+    [u v s] = svd(squeeze(L(:,is,:)),'econ');
+    L2(:,is,:) = u(:,1:2)*s(1:2,1:2);
 end 
 
 filter = squeeze(mkfilt_eloreta_v2(L2));
