@@ -39,13 +39,9 @@ for id = 1:nsubs
         %load coherences
         clear coh flip_coh abs_coh avg_coh
         load(sprintf('Coherences_Patient%s_chunk%d.mat',patientID{id},ichunk));
-        nfreq = size(coh,2);
         
-        freq_conn = zeros(nfreq,nfreq);
-        for ifreq = 1:nfreq-1
-            freq_conn(ifreq,ifreq+1)=1;
-            freq_conn(ifreq+1,ifreq)=1;
-        end
+        nfreq = size(coh,2);
+        freq_conn = fp_get_freq_conn(nfreq);
         conn_s = sparse(match_conn); %nvox x nvox
         freq_conn_s = sparse(freq_conn);%nfrerq x nfreq
         kron_conn = kron(conn_s,freq_conn_s); %say nvox*nfreq = nkron
@@ -69,7 +65,7 @@ for id = 1:nsubs
 end
 
 avg_coh = squeeze(sum(COH,1));
-threshold = prctile(reshape(avg_coh,1,[]),99);
+threshold = prctile(reshape(avg_coh,1,[]),99.9);
 
 %cat the chunks
 avg_coh = squeeze(reshape(avg_coh,[size(COH,2)*size(COH,3),size(COH,4), size(COH,5)]));

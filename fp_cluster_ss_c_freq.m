@@ -47,11 +47,7 @@ for id = 1:numel(patientID)
         flip_coh(:,:,:,4:6) = coh(:,:,flip_id,4:6);
         
         %freq conn and kron conn
-        freq_conn = zeros(nfreq,nfreq);
-        for ifreq = 1:nfreq-1
-            freq_conn(ifreq,ifreq+1)=1;
-            freq_conn(ifreq+1,ifreq)=1;
-        end
+        freq_conn = fp_get_freq_conn(nfreq);
         freq_conn_s = sparse(freq_conn);%nfreq x nfreq
         kron_conn = kron(conn_s,freq_conn_s); %say nvox*nfreq = nkron
         
