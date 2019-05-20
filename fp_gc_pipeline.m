@@ -15,6 +15,18 @@ for id = 1:numel(patientID)
     
     load(sprintf('Filter_Patient%s.mat',patientID{id}));%Filter and whole CS
     clear A 
+    
+    %include for shuffling and manual cs calc 
+%     id_meg_trials = 1:n_trials;
+%     
+%     if shuffle == 1
+%         rng('shuffle')
+%         id_lfp_trials = randperm(n_trials);
+%     else
+%         id_lfp_trials = id_meg_trials;
+%     end 
+    
+    
     load(sprintf('BF_Patient%s.mat',patientID{id}));
     D = spm_eeg_load(sprintf('redPLFP%s_off', patientID{id}));
     
@@ -53,27 +65,21 @@ for id = 1:numel(patientID)
             A(:,:,is,ifrq) = (pinv(Lloc'*CSinv*Lloc)*Lloc'*CSinv)'; %create filter
         end
     end
+   
+    cCS = CS(1:(end-nlfp),end-nlfp+1:end,:);
     
-    for itrial = 1: n_trials
-        for idir = 1:3 
-            Xv = 
-    
-%     cCS = CS(1:(end-nlfp),end-nlfp+1:end,:);
-
-    
-%     %project cross spectrum to voxel space
-%     for ifq = 1:nfreq
-%         for idir = 1:3
-%          CSv(idir,:,:,ifq) = squeeze(A(:,idir,:,ifq))' * cCS(:,:,ifq);
-%         end
-%     end
+    %project cross spectrum to voxel space
+    for ifq = 1:nfreq
+        for idir = 1:3
+            CSv(idir,:,:,ifq) = squeeze(A(:,idir,:,ifq))' * cCS(:,:,ifq);
+        end
+    end
     
    
-    id_meg_trials = 1:n_trials;
     
-    if shuffle == 1
-        rng('shuffle')
-        id_lfp_trials = randperm(n_trials);
-    else
-        id_lfp_trials = id_meg_trials;
-    end 
+    
+    
+end 
+    
+    
+    
