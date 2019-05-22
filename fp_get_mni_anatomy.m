@@ -1,7 +1,6 @@
 function [label,code,id]=fp_get_mni_anatomy(coord)
-
+% keyboard
 cd ~/Dropbox/Master/Masterarbeit/MasterThesis/wjn_toolbox/spm12/toolbox/aal
-
 load('ROI_MNI_V5_List.mat')
 t1=wjn_read_nii('ROI_MNI_V5.nii');
 
