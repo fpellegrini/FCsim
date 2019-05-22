@@ -57,10 +57,13 @@ for id = 1:numel(patientID)
             Lloc=squeeze(L(:,is,:));
             A(:,:,is,ifrq) = (pinv(Lloc'*CSinv*Lloc)*Lloc'*CSinv)'; %create filter
         end
-    end    
+    end   
+    
+    %calculate coherence 
     
     for iit = 1:nit
         
+        %cross spectrum
         clear CS
         id_trials_1 = 1:n_trials;
         rng('shuffle')
@@ -68,7 +71,7 @@ for id = 1:numel(patientID)
         CS = fp_tsdata_to_cpsd(X,fres,'MT',id_meg_chan, id_meg_chan, id_trials_1, id_trials_2);
         CS = CS(1:(end-nlfp),1:(end-nlfp),:);
  
-        %project cross spectrum to voxel space
+        %project cross spectrum to voxel space and get power and coherence 
         for ifq = 1:nfreq
             for idim = 1:3
                 
@@ -83,103 +86,46 @@ for id = 1:numel(patientID)
             end
         end
         
-        %here zscore? 
+        %%%%%%here zscore? 
         
         %aggregate voxels of one region 
         
+        clear mni_pos label code roi_id u_roi_id
+        mni_pos = fp_getMNIpos(patientID{id});
+        for ii = 1: ns
+            [label{ii},code{ii},roi_id(ii)]=fp_get_mni_anatomy(mni_pos(ii,:));
+        end 
+        u_roi_id = sort(unique(roi_id));
+        nroi = numel(u_roi_id);
         
-        
+        for iroi = 2:nroi
+            for ifq = 1:nfreq                
+                ccoh = coh(:,roi_id == u_roi_id(iroi),roi_id == u_roi_id(iroi),ifq);
+                rcoh(iit,:,iroi,iroi,ifq) = abs(imag(svd(ccoh))); % nit x npcs x nroi x nroi x nfq
+                clear ccoh
+                
+            end
+        end
         
     end
+    
+    clear rcoh_max
+    rcoh_max = max(rcoh,2); %nroi x nroi x nfq
+    COH = COH + rcoh_max;
+    clear rcoh
 end
 
+%%%%here roi neighbouring 
+freq_conn = zeros(nfreq,nfreq);
+for ifreq = 1:nfreq-1
+    freq_conn(ifreq,ifreq+1)=1;
+    freq_conn(ifreq+1,ifreq)=1;
+end
+freq_conn_s = sparse(freq_conn);%nfrerq x nfreq
+kron_conn = kron(conn_s,freq_conn_s); %say nvox*nfreq = nkron
+kron_conn = kron(conn_s,kron_conn);
 
-%     load(sprintf('Filter_Patient%s.mat',patientID{id}));%Filter and whole CS
-%     clear CS
-%     D = spm_eeg_load(sprintf('redPLFP%s_off', patientID{id}));
-%
-%     X = D(:,:,:);
-%     D_ft = ftraw(D);
-%     n_trials = length(D_ft.trial);
-%
-%     fs = D.fsample;
-%     fres = 75;
-%     frqs = sfreqs(fres, fs);
-%     frqs(frqs>90) = [];
-%     nfreq = numel(frqs);
-%
-%     id_meg_chan = 1:125;
-%     id_meg_chan(D.badchannels)=[];
-%     id_trials_1 = 1:n_trials;
-%
-%     %get symmetric head
-%     mni_pos = fp_getMNIpos(patientID{id});
-%     [~, noEq] = fp_symmetric_vol(mni_pos);
-%     %keep only voxels that exist in all subjects
-%     A(:,noEq,:) = [];
-%     A_common = A(:,voxID{id},:);
-%
-%     for iit = 1:nit
-%         tic
-%         if iit ==1
-%             shuffle = 0;
-%             id_trials_2 = id_trials_1;
-%         else
-%             shuffle =1;
-%             rng('shuffle')
-%             id_trials_2 = randperm(n_trials);
-%         end
-%
-%         CS = fp_tsdata_to_cpsd(X,fres,'MT',id_meg_chan, id_meg_chan, id_trials_1, id_trials_2);
-%
-%         %project cross spectrum to voxel space
-%         for ifq = 1:nfreq
-%             CSv(ifq,:,:) = A_common(:,:,ifq)' * CS(:,:,ifq) * A_common(:,:,ifq);
-%         end
-%
-%         %get voxel power
-%         for ifq=1:nfreq
-%             pv(:,ifq) = diag(squeeze(CSv(ifq,:,:)));
-%         end
-%
-%         %coherence
-%         coh = CSv;
-%         for ifreq = 1:nfreq
-%             coh(ifreq, :, :) = squeeze(CSv(ifreq, :, :)) ...
-%                 ./ sqrt(pv(:,ifreq)*pv(:,ifreq)');
-%         end
-%
-%         if shuffle == 0
-% %             outname = sprintf('%true_megmeg_coh_Patient%s',DIROUT, patientID{id});
-% %             save(outname,'coh','-v7.3')
-%             true_coh = true_coh+coh;
-%         else
-%             coh1(iit-1,:,:,:) = abs(imag(coh)); %nit x nfreq x nvox x nvox
-%         end
-%         clearvars -except patientID id nit coh1 true_coh A_common X n_trials nfreq fres n_trials id_meg_chan id_trials_1 voxID noEq
-%         toc
-%     end
-%
-%     COH = COH + coh1;
-%
-%     clearvars -except patientID id nit COH voxID nfreq true_coh
-% end
-%
-% conn = fp_find_neighbours(patientID{id});
-% match_conn = conn(voxID{id},voxID{id}); %is for all patients the same
-% conn_s = sparse(match_conn); %nvox x nvox
-% ns = size(match_conn,1);
-%
-% freq_conn = zeros(nfreq,nfreq);
-% for ifreq = 1:nfreq-1
-%     freq_conn(ifreq,ifreq+1)=1;
-%     freq_conn(ifreq+1,ifreq)=1;
-% end
-% freq_conn_s = sparse(freq_conn);%nfrerq x nfreq
-% kron_conn = kron(conn_s,freq_conn_s); %say nvox*nfreq = nkron
-% kron_conn = kron(conn_s,kron_conn);
-%
-% threshold = prctile(reshape(COH,1,[]),99);
+threshold = prctile(reshape(COH,1,[]),99,9);
 %
 % %true cluster
 %
@@ -205,39 +151,40 @@ end
 % true_total = numel(x);
 % true_sizes = x;
 %
-%
-% %shuffled clusters
-%
-% onoff = COH>threshold;
-% big_clusters = zeros(nit-1,nfreq,ns,ns);
-%
-% %find the clusters
-% for iit = 1: nit-1
-%
-%     clear onoff_temp u ind NB
-%     onoff_temp = squeeze(onoff(iit,:,:)); %nfreq x ns
-%     u = onoff_temp(:); %should be the same indexing like in kron_conn now; nkron x 1
-%
-%     ind = find(u==1); %remember indeces of super-threshold coherences
-%     NB = kron_conn;
-%     NB(u==0,:)=[]; %pass the neighbourhood structure only for the super-threshold voxels
-%     NB(:,u==0)=[];
-%
-%     %components assigns every voxel to a cluster, even if this means that every voxel is its own cluster
-%     clear ci x clu
-%     [ci, x] = components(NB); %x is the histogram of the clusters
-%     clu = zeros(size(kron_conn,1),1);%refill with sub-threshold voxels
-%     clu(ind)= ci; %nkron x 1
-%     clu = reshape(clu,[nfreq ns ns]); %nfreq x ns
-%
-%     if numel(x)>0
-%         big_clu_id = find(x==max(x));
-%         big_clu_id=big_clu_id(1); %in case there are two clusters with the same size, take the first one
-%         big_clusters(iit,:,:,:) = (clu == big_clu_id);
-%     end
-%
-% end
-%
+
+
+%shuffled clusters
+
+onoff = COH>threshold;
+big_clusters = zeros(nit-1,nfreq,ns,ns);
+
+%find the clusters
+for iit = 1: nit-1
+
+    clear onoff_temp u ind NB
+    onoff_temp = squeeze(onoff(iit,:,:)); %nfreq x ns
+    u = onoff_temp(:); %should be the same indexing like in kron_conn now; nkron x 1
+
+    ind = find(u==1); %remember indeces of super-threshold coherences
+    NB = kron_conn;
+    NB(u==0,:)=[]; %pass the neighbourhood structure only for the super-threshold voxels
+    NB(:,u==0)=[];
+
+    %components assigns every voxel to a cluster, even if this means that every voxel is its own cluster
+    clear ci x clu
+    [ci, x] = components(NB); %x is the histogram of the clusters
+    clu = zeros(size(kron_conn,1),1);%refill with sub-threshold voxels
+    clu(ind)= ci; %nkron x 1
+    clu = reshape(clu,[nfreq ns ns]); %nfreq x ns
+
+    if numel(x)>0
+        big_clu_id = find(x==max(x));
+        big_clu_id=big_clu_id(1); %in case there are two clusters with the same size, take the first one
+        big_clusters(iit,:,:,:) = (clu == big_clu_id);
+    end
+
+end
+
 % %compare not only cluster size but also magnitude of coherence within
 % %the relevant cluster
 %
