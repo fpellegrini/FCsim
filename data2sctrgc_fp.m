@@ -74,6 +74,32 @@ else
   ninds = length(inds);  
 end
 
+%transfer indeces and data 
+tic
+%get indices
+ia=[];
+ib =[];
+for ii = 1:ninds
+    ia = [ia inds{ii}{1}];%first index 
+    ib = [ib inds{ii}{2}];%second index
+end
+
+% u_inds: (data) index of all occurring channels (sorted)
+% t_ia and t_ib: transferred indeces: where indices occur in u_inds
+[u_inds] = union(ia, ib);  
+t_ia = [];
+t_ib = [];
+for ii = 1:ninds 
+    t_ia = [t_ia find(u_inds==ia(ii))];
+    t_ib = [t_ib find(u_inds== ib(ii))];
+    t_inds{ii}{1} = t_ia(ii);
+    t_inds{ii}{2} = t_ib(ii);
+end 
+%only keep channels of interest
+data = data(u_inds,:,:);
+nchan = size(data,1);
+% inds= t_inds;
+toc
 
 if  nlags < 0
   if cond 
@@ -178,7 +204,7 @@ else %bootstrap/ permutation
           % data to autocovariance
           % G = tsdata_to_autocov(data(:, :, bootinds), nlags);
           CS = tsdata_to_cpsd(data(:, :, boot_inds), fres, 'MT', ndat); 
-
+          
       else           
           % shuffle trials 
           id_trials1 = 1:nepo;
