@@ -32,23 +32,29 @@ for iclus = 1:numel(p)
 end
 
 %% group bands 
+afs = {'theta','alpha','beta','gamma_low','gamma_high'};
+abs_imag = {'abs','imag'};
 
-clear all
-load('p_cluster_g_alpha_imag.mat')
+for iafs = [1 3:numel(afs)]
+    for iabs = 1:2
+        clearvars -except iafs afs iabs abs_imag
+        load(sprintf('p_cluster_g_%s_%s.mat',afs{iafs},abs_imag{iabs}))
 
-for iclus = 1:numel(p)
-    if p(iclus) < 0.01
-        clear a b c
-        a = true_clu;
-        a(a~=iclus) = 0;
-        
-        %spatial localization
-        b = sum(a,1);
-        outname = sprintf('cluster_g_alpha_imag_%d.nii',iclus);
-        fp_data2nii(b,nan,[],outname)
-        
-    end
-    
+        for iclus = 1:numel(p)
+            if p(iclus) < 0.01
+                clear a b c
+                a = true_clu;
+                a(a~=iclus) = 0;
+
+                %spatial localization
+                b = sum(a,1);
+                outname = sprintf('cluster_g_%s_%s_%d.nii',afs{iafs},abs_imag{iabs},iclus);
+                fp_data2nii(b,nan,[],outname)
+
+            end
+
+        end
+    end 
 end
 
 
