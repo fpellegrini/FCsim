@@ -59,7 +59,7 @@ for id = 1:numel(patientID)
         end
     end   
     
-    %calculate coherence 
+    %calculate coherence for permutations
     
     for iit = 1:nit
         
@@ -69,7 +69,6 @@ for id = 1:numel(patientID)
         rng('shuffle')
         id_trials_2 = randperm(n_trials);
         CS = fp_tsdata_to_cpsd(X,fres,'MT',id_meg_chan, id_meg_chan, id_trials_1, id_trials_2);
-        CS = CS(1:(end-nlfp),1:(end-nlfp),:);
  
         %project cross spectrum to voxel space and get power and coherence 
         for ifq = 1:nfreq
