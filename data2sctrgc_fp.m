@@ -98,7 +98,9 @@ end
 %only keep channels of interest
 data = data(u_inds,:,:);
 nchan = size(data,1);
-% inds= t_inds;
+clear inds
+inds= t_inds;
+ninds = length(inds);
 toc
 
 if  nlags < 0
