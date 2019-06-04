@@ -16,7 +16,6 @@ for id = 1:numel(patientID)
     
     load(sprintf('Filter_Patient%s.mat',patientID{id}));% 1D-A and true CS
     clear A
-    CS = CS(1:(end-nlfp),1:(end-nlfp),:); %throw away lfp channels
     
     D = spm_eeg_load(sprintf('redPLFP%s_off', patientID{id}));    
     X = D(:,:,:);
@@ -34,6 +33,8 @@ for id = 1:numel(patientID)
     frqs = sfreqs(fres, fs);
     frqs(frqs>90) = [];
     nfreq = numel(frqs);
+    
+    CS = CS(1:(end-nlfp),1:(end-nlfp),:); %throw away lfp channels
     
     %construct filters
     
