@@ -69,9 +69,7 @@ if nargin < 7 || isempty(inds)
       inds{ninds+2} = {ij, ii};  
       ninds = ninds + 2;
     end
-  end
-else
-  ninds = length(inds);  
+  end 
 end
 
 %transfer indeces and data 
@@ -79,21 +77,35 @@ tic
 %get indices
 ia=[];
 ib =[];
+ca = [];
+cb=[];
 for ii = 1:ninds
     ia = [ia inds{ii}{1}];%first index 
+    ca = [ca numel(inds{ii}{1})]; %count how many indices are at this position 
     ib = [ib inds{ii}{2}];%second index
+    cb = [cb numel(inds{ii}{2})];
 end
 
 % u_inds: (data) index of all occurring channels (sorted)
 % t_ia and t_ib: transferred indeces: where indices occur in u_inds
 [u_inds] = union(ia, ib);  
-t_ia = [];
-t_ib = [];
+
+oa = 1; 
+ob = 1; 
 for ii = 1:ninds 
-    t_ia = [t_ia find(u_inds==ia(ii))];
-    t_ib = [t_ib find(u_inds== ib(ii))];
-    t_inds{ii}{1} = t_ia(ii);
-    t_inds{ii}{2} = t_ib(ii);
+    t_ia = [];
+    t_ib = [];  
+    for jj = 1:ca(ii)
+        t_ia = [t_ia find(u_inds==ia(oa))];
+        oa = oa+1; 
+    end
+    for jj = 1:cb(ii)   
+        t_ib = [t_ib find(u_inds== ib(ob))];
+        ob = ob+1; 
+    end
+    
+    t_inds{ii}{1} = t_ia;
+    t_inds{ii}{2} = t_ib;
 end 
 %only keep channels of interest
 data = data(u_inds,:,:);
