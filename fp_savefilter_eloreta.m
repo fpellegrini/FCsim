@@ -28,6 +28,7 @@ for id = 1:numel(patientID)
         for is=1:ns
             L(:,is,:)= L1{is};
         end
+        L=L.*(10^(-log10(range(L(:))))); %scale leadfield to avoid numerical issues
         
         fs = data.D.fsample;
         fres = 75;

@@ -17,6 +17,7 @@ for id = 1:numel(patientID)
     D = spm_eeg_load(sprintf('redPLFP%s_off', patientID{id}));
     
     X = D(:,:,:);
+    X=X./10^(log10(range(X(:)))-2); %scale the data 
     D_ft = ftraw(D);
     n_trials = length(D_ft.trial);
     
@@ -49,7 +50,7 @@ for id = 1:numel(patientID)
         %when trials are shuffled, the CS between meg and lfp must be
         %re-calculated
         tic
-        cCS = fp_tsdata_to_cpsd(X,fres,'MT',id_meg_chan, id_lfp_chan, id_meg_trials, id_lfp_trials);
+        cCS = fp_tsdata_to_cpsd(X,fres,'WELCH',id_meg_chan, id_lfp_chan, id_meg_trials, id_lfp_trials);
         toc
     else 
         cCS = CS(1:(end-nlfp),end-nlfp+1:end,:);
@@ -61,7 +62,7 @@ for id = 1:numel(patientID)
     end
     
     %get voxel power
-    pv = fp_project_power(CS,A);
+    pv = fp_project_power(CS(1:nmeg,1:nmeg),A);
    
     %coherence
     coh = CSv;
