@@ -19,6 +19,8 @@ for id = 1:numel(patientID)
     
     D = spm_eeg_load(sprintf('redPLFP%s_off', patientID{id}));    
     X = D(:,:,:);
+    X = X./10^(log10(range(X(:)))-2);
+    
     D_ft = ftraw(D);
     n_trials = length(D_ft.trial);
     
@@ -45,6 +47,7 @@ for id = 1:numel(patientID)
     for is=1:ns
         L(:,is,:)= L1{is};
     end
+    L = L.* (10^(-log10(range(L(:)))));
         
     A = nan(nmeg,3,ns,nfreq);
     for ifrq = 1:nfreq      
