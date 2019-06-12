@@ -72,21 +72,19 @@ for id = 1:numel(patientID)
         CS = fp_tsdata_to_cpsd(X,fres,'MT',id_meg_chan, id_meg_chan, id_trials_1, id_trials_2);
  
         %project cross spectrum to voxel space and get power and coherence 
+        A_ = reshape(A, nmeg, 3*ns, nfreq);
         for ifq = 1:nfreq
-            for idim = 1:3
                 
-                CSv = squeeze(A(:,idim,:,ifq))' * ...
-                    CS(:,:,ifq) * squeeze(A(:,idim,:,ifq)); %3dim x nvox x nvox x nfreq
+            clear CSv pv
+            CSv = squeeze(A_(:,:,ifq))' * ...
+                CS(:,:,ifq) * squeeze(A_(:,:,ifq)); %3dim x nvox x nvox x nfreq
+
+            pv = diag(squeeze(CSv));
+
+            CSn(idim, :, :,ifq) = squeeze(CSv) ./ sqrt(pv * pv');
+            clear CSv pv
                 
-                pv = diag(squeeze(CSv));
-                
-                coh(idim, :, :,ifq) = squeeze(CSv) ./ sqrt(pv * pv');
-                clear CSv pv
-                
-            end
-        end
-        
-        %%%%%%here zscore? 
+        end       
         
         %aggregate voxels of one region 
         
@@ -99,10 +97,13 @@ for id = 1:numel(patientID)
         nroi = numel(u_roi_id);
         
         for iroi = 2:nroi
-            for ifq = 1:nfreq                
-                ccoh = coh(:,roi_id == u_roi_id(iroi),roi_id == u_roi_id(iroi),ifq);
-                rcoh(iit,:,iroi,iroi,ifq) = abs(imag(svd(ccoh))); % nit x npcs x nroi x nroi x nfq
-                clear ccoh
+            for ifq = 1:nfreq   
+                
+                    ccs = squeeze(CSn(:,roi_id == u_roi_id(iroi),roi_id == u_roi_id(iroi),ifq));
+                    [v, d, w] = eig(real(ccs));
+                    v5 = v(:,1:5)'; %5 * nregionvoxels 
+                    a = 
+                    rcoh(iit,:,iroi,iroi,ifq) = abs(imag());
                 
             end
         end

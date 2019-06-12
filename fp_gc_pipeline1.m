@@ -1,4 +1,4 @@
-function fp_gc_pipeline
+function fp_gc_pipeline1
 
 if isempty(patientNumber)
     patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
@@ -76,21 +76,20 @@ for id = 1:numel(patientID)
         id_trials_1 = 1:n_trials;
         rng('shuffle')
         id_trials_2 = randperm(n_trials);
-        CS = fp_tsdata_to_cpsd(X,fres,'MT',[id_meg_chan id_lfp_chan], [id_meg_chan id_lfp_chan], id_trials_1, id_trials_2);
+        CS = fp_tsdata_to_cpsd(X,fres,'MT',id_meg_chan, id_lfp_chan, id_trials_1, id_trials_2);
         
         %project cross spectrum to voxel space
-        cCS = CS(1:(end-nlfp),end-nlfp+1:end,:); %nmeg x nlfp x nfreq
-        CSv = zeros(3,ns+nlfp,ns+nlfp,nfreq);
-        for ifq = 1:nfreq %%%%%better solution?
-            for idir = 1:3
-                CSv(idir,1:ns,end-nlfp+1:end,ifq) = squeeze(A(idir,:,:,ifq))' * cCS(:,:,ifq);
-                CSv(idir,end-nlfp+1:end,1:ns,ifq)= squeeze(CSv(idir,1:ns,end-nlfp+1:end,ifq))';
-                CSv(idir, 1:ns,1:ns,ifq) = squeeze(A(idir,:,:,ifq))' * CS(1:nmeg,1:nmeg,ifq) * squeeze(A(idir,:,:,ifq));
-                CSv(idir,end-nlfp+1:end,end-nlfp+1:end,ifq) = CS(end-nlfp+1:end,end-nlfp+1:end,ifq);
-            end
+        CSv = zeros(3,ns,nlfp,nfreq);
+        for ifq = 1:nfreq 
+%             for idir = 1:3
+%                 CSv(idir,:,:,ifq) = squeeze(A(idir,:,:,ifq))' * CS(:,:,ifq);
+%             end
+            CSv(:,:,ifq) = squeeze(permute(A(:,:,:,ifq), []))' * CS(:,:,ifq);
         end
         
-        G = cpsd_to_autocov(squeeze(CSv(1,:,:,:)), nlags); %%%how to deal here with 3D? Takes long. Possible to select inds first?
+        for idim = 1:3
+            G(idim,:,:,:) = cpsd_to_autocov_fp(squeeze(CSv(idim,:,:,:)), nlags); 
+        end 
         
         inds = {}; ninds = 0;
         for ii = 1:ns % over nvox
