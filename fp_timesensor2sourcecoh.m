@@ -62,7 +62,7 @@ for id = 1:numel(patientID)
     end
     
     %get voxel power
-    pv = fp_project_power(CS(1:nmeg,1:nmeg),A);
+    pv = fp_project_power(CS(1:nmeg,1:nmeg,:),A);
    
     %coherence
     coh = CSv;
