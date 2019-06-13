@@ -17,7 +17,7 @@ for id = 1:numel(patientID)
     load(sprintf('Filter_Patient%s.mat',patientID{id}));% 1D-A and true CS
     clear A
     
-    D = spm_eeg_load(sprintf('redPLFP%s_off', patientID{id}));    
+    D = spm_eeg_load(sprintf('redPLFP%s_off', patientID{id}));
     X = D(:,:,:);
     X = X./10^(log10(range(X(:)))-2);
     
@@ -43,14 +43,14 @@ for id = 1:numel(patientID)
     %leadfield
     load(sprintf('BF_Patient%s.mat',patientID{id}));
     L1 = inverse.MEG.L;
-    ns = numel(L1);    
+    ns = numel(L1);
     for is=1:ns
         L(:,is,:)= L1{is};
     end
     L = L.* (10^(-log10(range(L(:)))));
-        
+    
     A = nan(nmeg,3,ns,nfreq);
-    for ifrq = 1:nfreq      
+    for ifrq = 1:nfreq
         clear currentCS lambda CSinv
         currentCS = squeeze(CS(:,:,ifrq)); %nmeg x nmeg x nfq
         lambda = mean(diag(real(currentCS)))/100;
@@ -61,7 +61,7 @@ for id = 1:numel(patientID)
             Lloc=squeeze(L(:,is,:));
             A(:,:,is,ifrq) = (pinv(Lloc'*CSinv*Lloc)*Lloc'*CSinv)'; %create filter
         end
-    end   
+    end
     
     %calculate coherence for permutations
     
@@ -73,61 +73,65 @@ for id = 1:numel(patientID)
         rng('shuffle')
         id_trials_2 = randperm(n_trials);
         CS = fp_tsdata_to_cpsd(X,fres,'MT',id_meg_chan, id_meg_chan, id_trials_1, id_trials_2);
- 
-        %project cross spectrum to voxel space and get power and coherence 
-        A_ = reshape(A, nmeg, 3*ns, nfreq);
-        for ifq = 1:nfreq
-                
-            clear CSv pv
-            CSv = squeeze(A_(:,:,ifq))' * ...
-                CS(:,:,ifq) * squeeze(A_(:,:,ifq)); %3dim x nvox x nvox x nfreq
-
-            pv = diag(squeeze(CSv));
-
-            CSn(idim, :, :,ifq) = squeeze(CSv) ./ sqrt(pv * pv');
-            clear CSv pv
-                
-        end       
         
-        %aggregate voxels of one region 
         
         clear mni_pos label code roi_id u_roi_id
         mni_pos = fp_getMNIpos(patientID{id});
         for ii = 1: ns
             [label{ii},code{ii},roi_id(ii)]=fp_get_mni_anatomy(mni_pos(ii,:));
-        end 
+        end
         u_roi_id = sort(unique(roi_id));
-        nroi = numel(u_roi_id);
+        nroi = numel(u_roi_id)-1;
         
+        csroi = nan(nroi,nfreq,5,5);
+        %project cross spectrum to voxel space and get power and coherence
         for iroi = 2:nroi
-            for ifq = 1:nfreq   
+            for ifq = 1:nfreq
+                clear Aroi A_ CSv pv CSn v v5 cseig proi
+                Aroi = squeeze(A(:,:,roi_id == u_roi_id(iroi),ifq));
+                A_ = reshape(Aroi, [nmeg, 3*size(Aroi,3)]);
                 
-                    ccs = squeeze(CSn(:,roi_id == u_roi_id(iroi),roi_id == u_roi_id(iroi),ifq));
-                    [v, d, w] = eig(real(ccs));
-                    v5 = v(:,1:5)'; %5 * nregionvoxels 
-                    a = 
-                    rcoh(iit,:,iroi,iroi,ifq) = abs(imag());
+                CSv = A_' * CS(:,:,ifq) * A_; %3*nvoxofroi x 3*nvoxofroi
+                
+                pv = real(diag(CSv)); %3*nvox x 1
+                
+                CSn = CSv ./ sqrt(pv * pv');
+                
+                [v, ~, ~] = eig(real(CSn));
+                
+                if size(v,1)>5
+                    v5 = v(:,1:5)'; %5 * nregionvoxels
+                else
+                    v5 = v;
+                end
+                
+                cseig = v5 * CSv * v5';
+                proi = real(diag(cseig));
+                
+                csroi(iroi-1,ifq,1:size(v5,1),1:size(v5,1)) = cseig ./ sqrt(proi * proi');
                 
             end
         end
         
+        
+        %%%%hier muss ich irgendwie auf region x region coherence kommen. 
+        %%%% + cca , also dann coherence nit x nroi x nroi x nfreq (jeweils
+        %%%%schon ueber ids aufsummieren!) 
+        
+
+        COH(iit,:,:,:) = COH(iit,:,:,:) + coh;
+        
     end
-    
-    clear rcoh_max
-    rcoh_max = max(rcoh,2); %nroi x nroi x nfq
-    COH = COH + rcoh_max;
-    clear rcoh
 end
 
-%%%%here roi neighbouring 
-freq_conn = zeros(nfreq,nfreq);
-for ifreq = 1:nfreq-1
-    freq_conn(ifreq,ifreq+1)=1;
-    freq_conn(ifreq+1,ifreq)=1;
-end
+
+%neighbourhood 
+load('roi_conn.mat')
+roiconn_s = sparse(roi_conn);
+freq_conn = fp_get_freq_conn(nfreq);
 freq_conn_s = sparse(freq_conn);%nfrerq x nfreq
-kron_conn = kron(conn_s,freq_conn_s); %say nvox*nfreq = nkron
-kron_conn = kron(conn_s,kron_conn);
+kron_conn = kron(roiconn_s,freq_conn_s); %nroi*nfreq = nkron
+kron_conn = kron(roiconn_s,kron_conn);
 
 threshold = prctile(reshape(COH,1,[]),99,9);
 %
@@ -164,29 +168,29 @@ big_clusters = zeros(nit-1,nfreq,ns,ns);
 
 %find the clusters
 for iit = 1: nit-1
-
+    
     clear onoff_temp u ind NB
     onoff_temp = squeeze(onoff(iit,:,:)); %nfreq x ns
     u = onoff_temp(:); %should be the same indexing like in kron_conn now; nkron x 1
-
+    
     ind = find(u==1); %remember indeces of super-threshold coherences
     NB = kron_conn;
     NB(u==0,:)=[]; %pass the neighbourhood structure only for the super-threshold voxels
     NB(:,u==0)=[];
-
+    
     %components assigns every voxel to a cluster, even if this means that every voxel is its own cluster
     clear ci x clu
     [ci, x] = components(NB); %x is the histogram of the clusters
     clu = zeros(size(kron_conn,1),1);%refill with sub-threshold voxels
     clu(ind)= ci; %nkron x 1
     clu = reshape(clu,[nfreq ns ns]); %nfreq x ns
-
+    
     if numel(x)>0
         big_clu_id = find(x==max(x));
         big_clu_id=big_clu_id(1); %in case there are two clusters with the same size, take the first one
         big_clusters(iit,:,:,:) = (clu == big_clu_id);
     end
-
+    
 end
 
 % %compare not only cluster size but also magnitude of coherence within
