@@ -1,4 +1,4 @@
-function fp_gc_pipeline1
+function fp_gc_pipeline1(patientNumber)
 
 if isempty(patientNumber)
     patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
@@ -17,6 +17,7 @@ for id = 1:numel(patientID)
     %load data
     D = spm_eeg_load(sprintf('redPLFP%s_off', patientID{id}));
     X = D(:,:,:);
+    X = X./10^(log10(range(X(:)))-2);
     D_ft = ftraw(D);
     n_trials = length(D_ft.trial);
     
@@ -46,6 +47,7 @@ for id = 1:numel(patientID)
     for is=1:ns_org
         L(:,is,:)= L1{is};
     end
+    L = L.* (10^(-log10(range(L(:)))));
     
     %delete voxels that are not common in all subs
     mni_pos = fp_getMNIpos(patientID{id});
@@ -54,7 +56,7 @@ for id = 1:numel(patientID)
     L = L(:,voxID{id},:);
     ns = numel(voxID{id});
     
-    A = nan(3,nmeg,ns,nfreq);
+    A = nan(nmeg,3,ns,nfreq);
     for ifrq = 1:nfreq
         clear currentCS lambda CSinv
         currentCS = squeeze(CS(1:end-nlfp,1:end-nlfp,ifrq));
@@ -64,9 +66,13 @@ for id = 1:numel(patientID)
         for is=1:ns %iterate across nodes
             clear Lloc
             Lloc=squeeze(L(:,is,:));
-            A(:,:,is,ifrq) = (pinv(Lloc'*CSinv*Lloc)*Lloc'*CSinv); %create filter
+            A(:,:,is,ifrq) = (pinv(Lloc'*CSinv*Lloc)*Lloc'*CSinv)'; %create filter
         end
     end
+    
+    A_ = reshape(A, [nmeg, 3*ns, nfreq]);
+    clear A
+    
     
     % loop over permutations
     for iit = 1:nit
@@ -76,20 +82,31 @@ for id = 1:numel(patientID)
         id_trials_1 = 1:n_trials;
         rng('shuffle')
         id_trials_2 = randperm(n_trials);
-        CS = fp_tsdata_to_cpsd(X,fres,'MT',id_meg_chan, id_lfp_chan, id_trials_1, id_trials_2);
+        CS = fp_tsdata_to_cpsd(X,fres,'MT',[id_meg_chan id_lfp_chan], [id_meg_chan id_lfp_chan], id_trials_1, id_trials_2);
         
         %project cross spectrum to voxel space
-        CSv = zeros(3,ns,nlfp,nfreq);
+        cCS = CS(1:(end-nlfp),end-nlfp+1:end,:); %nmeg x nlfp x nfreq
+        CSv = zeros(3*ns+nlfp,3*ns+nlfp,nfreq);
         for ifq = 1:nfreq 
-%             for idir = 1:3
-%                 CSv(idir,:,:,ifq) = squeeze(A(idir,:,:,ifq))' * CS(:,:,ifq);
-%             end
-            CSv(:,:,ifq) = squeeze(permute(A(:,:,:,ifq), []))' * CS(:,:,ifq);
+            
+            csv = zeros(ns*3+nlfp,ns*3+nlfp);
+            csv(1:ns*3,end-nlfp+1:end) = squeeze(A_(:,:,ifq))' * cCS(:,:,ifq);
+            csv(end-nlfp+1:end,1:ns*3)= csv(1:ns*3,end-nlfp+1:end)';
+            csv(1:ns*3,1:ns*3) = squeeze(A_(:,:,ifq))' * CS(1:nmeg,1:nmeg,ifq) * squeeze(A_(:,:,ifq));
+            csv(end-nlfp+1:end,end-nlfp+1:end) = CS(end-nlfp+1:end,end-nlfp+1:end,ifq);
+            %replace power with real values
+            clear n 
+            n = size(csv,1);
+            csv(1:(n+1):end) = real(diag(csv));
+            CSv(:,:,ifq) = csv;
+            clear csv
+
         end
+        clear cCS CS CSinv currentCS 
         
-        for idim = 1:3
-            G(idim,:,:,:) = cpsd_to_autocov_fp(squeeze(CSv(idim,:,:,:)), nlags); 
-        end 
+        tic
+        G = cpsd_to_autocov(csv, nlags); 
+        toc
         
         inds = {}; ninds = 0;
         for ii = 1:ns % over nvox

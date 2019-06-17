@@ -1,4 +1,4 @@
-function fp_gc_pipeline
+function fp_gc_pipeline(patientNumber)
 
 if isempty(patientNumber)
     patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
@@ -17,6 +17,7 @@ for id = 1:numel(patientID)
     %load data
     D = spm_eeg_load(sprintf('redPLFP%s_off', patientID{id}));
     X = D(:,:,:);
+    X = X./10^(log10(range(X(:)))-2);
     D_ft = ftraw(D);
     n_trials = length(D_ft.trial);
     
@@ -46,6 +47,7 @@ for id = 1:numel(patientID)
     for is=1:ns_org
         L(:,is,:)= L1{is};
     end
+    L = L.* (10^(-log10(range(L(:)))));
     
     %delete voxels that are not common in all subs
     mni_pos = fp_getMNIpos(patientID{id});
@@ -83,10 +85,17 @@ for id = 1:numel(patientID)
         CSv = zeros(3,ns+nlfp,ns+nlfp,nfreq);
         for ifq = 1:nfreq %%%%%better solution?
             for idir = 1:3
-                CSv(idir,1:ns,end-nlfp+1:end,ifq) = squeeze(A(idir,:,:,ifq))' * cCS(:,:,ifq);
-                CSv(idir,end-nlfp+1:end,1:ns,ifq)= squeeze(CSv(idir,1:ns,end-nlfp+1:end,ifq))';
-                CSv(idir, 1:ns,1:ns,ifq) = squeeze(A(idir,:,:,ifq))' * CS(1:nmeg,1:nmeg,ifq) * squeeze(A(idir,:,:,ifq));
-                CSv(idir,end-nlfp+1:end,end-nlfp+1:end,ifq) = CS(end-nlfp+1:end,end-nlfp+1:end,ifq);
+                csv = zeros(ns+nlfp,ns+nlfp);
+                csv(1:ns,end-nlfp+1:end) = squeeze(A(idir,:,:,ifq))' * cCS(:,:,ifq);
+                csv(end-nlfp+1:end,1:ns)= csv(1:ns,end-nlfp+1:end)';
+                csv(1:ns,1:ns) = squeeze(A(idir,:,:,ifq))' * CS(1:nmeg,1:nmeg,ifq) * squeeze(A(idir,:,:,ifq));
+                csv(end-nlfp+1:end,end-nlfp+1:end) = CS(end-nlfp+1:end,end-nlfp+1:end,ifq);
+                %replace power with real values
+                clear n 
+                n = size(csv,1);
+                csv(1:(n+1):end) = real(diag(csv));
+                CSv(idir,:,:,ifq) = csv;
+                clear csv
             end
         end
         
