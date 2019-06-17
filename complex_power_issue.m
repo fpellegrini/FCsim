@@ -1,19 +1,49 @@
 
 %% short version
-load('Filter_Patient18.mat') %load filter and true CS for subject 18
-[nmeg, ns, nfreq] = size(A);
-CS = CS(1:nmeg,1:nmeg,:);
+patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
+[~, voxID] = fp_find_commonvox;
+pow = nan(numel(patientID),numel(voxID{1}),46);
 
-pow = nan(ns,nfreq);
-
-for ifreq = 2:nfreq
-
-    cfilter = A(:,:,ifreq)';
+for id = 1:numel(patientID)
+    clearvars -except id patientID pow voxID
     
-    for is = 1:ns
-        pow(is,ifreq) = cfilter(is,:) * CS(:,:,ifreq) * cfilter(is,:)';
-    end
+    load(sprintf('Filter_Patient%s.mat',patientID{id})) 
+  
+    
+    mni_pos = fp_getMNIpos(patientID{id});
+    [~, noEq] = fp_symmetric_vol(mni_pos);
+    A(:,noEq,:) = [];
+    filter = A(:,voxID{id},:);
+    
+    [nmeg, ns, nfreq] = size(filter); 
+    CS = CS(1:nmeg,1:nmeg,:);  
+
+    for ifreq = 1: nfreq    
+
+        cfilter = filter(:,:,ifreq)';
+
+        for is = 1:ns    
+            pow(id,is,ifreq) = real(cfilter(is,:) * CS(:,:,ifreq) * cfilter(is,:)');        
+        end    
+    end 
 end
+
+a = squeeze(mean(pow,1));
+
+ %spatial localization
+b = mean(a(:,2:10),2);
+c = mean(a(:,11:17),2);
+d = mean(a(:,2:17),2);
+
+outname = 'pow1.nii';
+fp_data2nii(b,nan,[],outname)
+
+outname = 'pow2.nii';
+fp_data2nii(c,nan,[],outname)
+
+outname = 'pow3.nii';
+fp_data2nii(d,nan,[],outname)
+
 
 %% version from scratch, with 3D filters
 

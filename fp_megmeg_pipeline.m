@@ -1,6 +1,6 @@
-function fp_megmeg_pipeline
+function fp_megmeg_pipeline(patientNumber)
 
-fp_addpath
+% fp_addpath
 
 if isempty(patientNumber)
     patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
@@ -134,31 +134,6 @@ kron_conn = kron(roiconn_s,freq_conn_s); %nroi*nfreq = nkron
 kron_conn = kron(roiconn_s,kron_conn);
 
 threshold = prctile(reshape(COH,1,[]),99,9);
-%
-% %true cluster
-%
-% clear u ind NB
-% onoff_true = true_coh > threshold; %nfreq x ns
-% u = onoff_true(:); %should be the same indexing like in kron_conn now; nkron x 1
-%
-% ind = find(u==1); %remember indeces of super-threshold coherences
-% NB = kron_conn;
-% NB(u==0,:)=[]; %pass the neighbourhood structure only for the super-threshold voxels
-% NB(:,u==0)=[];
-%
-% %components assigns every voxel to a cluster, even if this means that every voxel is its own cluster
-% clear ci x clu
-% [ci, x] = components(NB); %x is the histogram of the clusters
-% clu = zeros(size(kron_conn,1),1);%refill with sub-threshold voxels
-% clu(ind)= ci; %nkron x 1
-% clu = reshape(clu,[nfreq ns ns]); %nfreq x ns x ns
-%
-% %save true cluster for later
-% clear true_clu true_total true_sizes
-% true_clu = clu;
-% true_total = numel(x);
-% true_sizes = x;
-%
 
 
 %shuffled clusters
