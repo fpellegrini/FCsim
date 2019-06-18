@@ -242,6 +242,7 @@ for id = 1:numel(patientID)
     clear GC TRGC
 end
 
+
 %diff meg-lfp to lfp-meg trgc
 o=1;
 for iind = 1:2:ninds-1
@@ -255,7 +256,7 @@ DIFFGC_true = permute(DIFFGC_true,[3 1 2]);
 
 clearvars -except DIFFGC DIFFGC_true nfreq voxID
 
-%% neighbourhood
+%% clusters
 
 freq_conn = fp_get_freq_conn(nfreq);
 freq_conn_s = sparse(freq_conn);
@@ -265,7 +266,7 @@ conn_s = sparse(match_conn);
 kron_conn = kron(conn_s,freq_conn_s);
 
 
-%% true clusters
+%true clusters
 
 onoff_pos = DIFFGC_true>0;
 onoff_neg = DIFFCG_true<0;
@@ -333,7 +334,7 @@ clear onoff_pos onoff_neg
 
 
 
-%% shuffled clusters
+%shuffled clusters
 
 onoff_pos = DIFFGC>0;
 onoff_neg = DIFFCG<0;
@@ -446,8 +447,8 @@ else %when only in shuffled conditions clusters were found
 end
 
 
-outname = sprintf('%sp_gc',DIROUT);
-save(outname,'p_pos','p_neg','true_clu_pos','true_clu_neg','true_sizes_pos','true_sizes_neg','-v7.3')
+outname = sprintf('%sp_cluster_g_c_freq_%s',DIROUT,abs_imag);
+save(outname,'p','threshold','true_clu','true_sizes','-v7.3')
 
 
 
