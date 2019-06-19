@@ -31,7 +31,7 @@ for k = 1:nchunks
         o = ind_1(ii); 
         for jj = 1:n2
             oo = ind_2(jj);      
-            S(:,ii,jj) = S(:,ii,:) + mean(P1(:,:,o) .* conj(P2(:,:,oo)),2);  
+            S(:,ii,jj) = S(:,ii,jj) + mean(P1(:,:,o) .* conj(P2(:,:,oo)),2);  
         end
     end
     
