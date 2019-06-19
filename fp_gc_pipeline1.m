@@ -13,7 +13,7 @@ nit=2;
 
 %%
 
-for id = 3 %numel(patientID)
+for id = 1:3 %numel(patientID)
     fprintf('Working on subject %d. \n',id)
     %load data
     clear X X1 
@@ -282,7 +282,7 @@ kron_conn = kron(conn_s,freq_conn_s);
 %% true clusters
 
 onoff_pos = DIFFGC_true>0;
-onoff_neg = DIFFCG_true<0;
+onoff_neg = DIFFGC_true<0;
 
 %positive 
 
@@ -314,7 +314,7 @@ true_total_pos = numel(x);
 true_sizes_pos = x;
 
 
-%negative
+%% negative
 
 clear u ind A
 u = onoff_neg(:); %should be the same indexing like in kron_conn now; nkron x 1
