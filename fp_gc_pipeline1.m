@@ -1,19 +1,22 @@
 function fp_gc_pipeline1(patientNumber)
 
-if isempty(patientNumber)
+% if isempty(patientNumber)
     patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
-else
-    patientID{1} = patientNumber;
-end
+% else
+%     patientID{1} = patientNumber;
+% end
 
 [~, voxID] = fp_find_commonvox;
-nlags = 20;
+nlags = 4;
 ndim = 2;
-GC_all=[];
-TRGC_all=[];
-for id = 1:numel(patientID)
-    
+nit=2;
+
+%%
+
+for id = 3 %numel(patientID)
+    fprintf('Working on subject %d. \n',id)
     %load data
+    clear X X1 
     D = spm_eeg_load(sprintf('redPLFP%s_off', patientID{id}));
     X1 = D(:,:,:);
     %rescale data channel-wise
@@ -25,11 +28,11 @@ for id = 1:numel(patientID)
         X(ii,:,:)=(X1(ii,:,:)./u);
     end
     
-    clear a
     D_ft = ftraw(D);
     n_trials = length(D_ft.trial);
     
     %channel IDs
+    clear id_meg_chan id_lfp_chan
     id_meg_chan = 1:125;
     id_meg_chan(D.badchannels)=[];
     nmeg = numel(id_meg_chan);
@@ -40,13 +43,13 @@ for id = 1:numel(patientID)
     fs = D.fsample;
     fres = 75;
     frqs = sfreqs(fres, fs);
-    maxfreq = 90;
+    maxfreq = 10;
     frqs(frqs>maxfreq) = [];
     nfreq = numel(frqs);
     z = exp(-i*pi*frqs)';
     
-    %construct filters
-    
+    %construct filters  
+    clear L1 L L2
     load(sprintf('BF_Patient%s.mat',patientID{id}));
     L1 = inverse.MEG.L;
     ns_org = numel(L1);
@@ -55,14 +58,15 @@ for id = 1:numel(patientID)
         L2(:,is,:)= L1{is};
         
         %remove radial orientation
-        clear u v s
-        [u v s] = svd(squeeze(L2(:,is,:)),'econ');
+        clear u s
+        [u, ~, s] = svd(squeeze(L2(:,is,:)),'econ');
         L(:,is,:) = u(:,1:2)*s(1:2,1:2);
         
     end
     %     L = L.* (10^(-log10(range(L(:)))+5.5));
     
     %delete voxels that are not common in all subs
+    clear mni_pos noEq 
     mni_pos = fp_getMNIpos(patientID{id});
     [~, noEq] = fp_symmetric_vol(mni_pos);
     L(:,noEq,:) = [];
@@ -70,6 +74,7 @@ for id = 1:numel(patientID)
     ns = numel(voxID{id});
     
     %true CS
+    clear id_trials_1 id_trials_2 CS A_
     id_trials_1 = 1:n_trials;
     id_trials_2 = 1:n_trials;
     CS = fp_tsdata_to_cpsd(X,fres,'MT',[id_meg_chan id_lfp_chan], [id_meg_chan id_lfp_chan], id_trials_1, id_trials_2);
@@ -91,16 +96,17 @@ for id = 1:numel(patientID)
     A_ = reshape(A, [nmeg, ndim*ns, nfreq]);
     clear A
     
-    
+    clear inds
     inds = {}; ninds = 0;
     for ii = 1:ndim:ns*ndim % over nvox
         inds{ninds+1} = {[ii, ii+1], [ns*ndim+1:ns*ndim+nlfp]};
         inds{ninds+2} = {[ns*ndim+1:ns*ndim+nlfp], [ii, ii+1]};
         ninds = ninds + 2;
     end
-    %%  true GC
+    %  true GC
     
     %project cross spectrum to voxel space
+    clear CSv
     cCS = CS(1:(end-nlfp),end-nlfp+1:end,:); %nmeg x nlfp x nfreq
     CSv = zeros(ndim*ns+nlfp,ndim*ns+nlfp,nfreq);
     for ifq = 1:nfreq
@@ -117,16 +123,15 @@ for id = 1:numel(patientID)
         csv(1:(n+1):end) = real(diag(csv));
         CSv(:,:,ifq) = csv; %.*10^4; %re-scale to avoid numerical errors
         clear csv
-        
     end
-    clear cCS CS CSinv currentCS
+    clear cCS CS CSinv currentCS G
     G = cpsd_to_autocov(CSv, nlags);
     
     % loop over sender/receiver combinations to compute time-reversed GC
     for iind = 1:ninds
         if ~isequal(inds{iind}{1}, inds{iind}{2})
             %       disp(['bootstrap run ' num2str(iboot) '/' num2str(nboot) ', testing connection ' num2str(iind) '/' num2str(ninds) ': [' num2str(inds{iind}{1}) '] -> [' num2str(inds{iind}{2}) ']'])
-            
+            clear subset subsetvars subinds A1 SIG eA eC eK eV AR SIGR eAR eCR eKR eVR GCR
             subset = [inds{iind}{1} inds{iind}{2}];
             nsubsetvars = length(subset);
             subinds = {1:length(inds{iind}{1}), length(inds{iind}{1}) + (1:length(inds{iind}{2}))};
@@ -135,13 +140,13 @@ for id = 1:numel(patientID)
             [A1, SIG] = autocov_to_var3(G(subset, subset, :));
             
             % forward VAR model to state space VARMA models
-            [eA, eC, eK, eV, eVy] = varma2iss(reshape(A1, nsubsetvars, []), [], SIG, eye(nsubsetvars));
+            [eA, eC, eK, eV, ~] = varma2iss(reshape(A1, nsubsetvars, []), [], SIG, eye(nsubsetvars));
             
             % backward autocovariance to full backward VAR model
             [AR, SIGR] = autocov_to_var3(permute(G(subset, subset, :), [2 1 3]));
             
             % backward VAR to VARMA
-            [eAR, eCR, eKR, eVR, eVyR] = varma2iss(reshape(AR, nsubsetvars, []), [], SIGR, eye(nsubsetvars));
+            [eAR, eCR, eKR, eVR, ~] = varma2iss(reshape(AR, nsubsetvars, []), [], SIGR, eye(nsubsetvars));
             
             % GC and TRGC computation
             GC(:, iind) = iss_SGC(eA, eC, eK, eV, z, subinds{2}, subinds{1});
@@ -153,23 +158,31 @@ for id = 1:numel(patientID)
         end
     end
     
-    GC_all_true = GC_all_true + GC;
-    TRGC_all_true = TRGC_all_true + TRGC;
+    if ~exist('GC_all_true','var')
+        GC_all_true=GC;
+        TRGC_all_true=TRGC;
+    else
+        GC_all_true = GC_all_true + GC;
+        TRGC_all_true = TRGC_all_true + TRGC;
+    end
     clear GC TRGC
     
     
-    %%   shuffled GC
+    %   shuffled GC
     % loop over permutations
     for iit = 1:nit
         
+        fprintf('Working on iteration %d.\n',iit)
+        
         %cross spectrum
-        clear CS
+        clear CS id_trials_1 id_trials_2
         id_trials_1 = 1:n_trials;
         rng('shuffle')
         id_trials_2 = randperm(n_trials);
         CS = fp_tsdata_to_cpsd(X,fres,'MT',[id_meg_chan id_lfp_chan], [id_meg_chan id_lfp_chan], id_trials_1, id_trials_2);
         
         %project cross spectrum to voxel space
+        clear CSv
         cCS = CS(1:(end-nlfp),end-nlfp+1:end,:); %nmeg x nlfp x nfreq
         CSv = zeros(ndim*ns+nlfp,ndim*ns+nlfp,nfreq);
         for ifq = 1:nfreq
@@ -188,11 +201,9 @@ for id = 1:numel(patientID)
             clear csv
             
         end
-        clear cCS CS CSinv currentCS
+        clear cCS CS CSinv currentCS G inds
         
-        tic
         G = cpsd_to_autocov(CSv, nlags);
-        toc
         
         inds = {}; ninds = 0;
         for ii = 1:ndim:ns*ndim % over nvox
@@ -204,26 +215,25 @@ for id = 1:numel(patientID)
         % (time-reversed) GC just between sender and receiver sets
         
         % loop over sender/receiver combinations to compute time-reversed GC
-        tic
         for iind = 1:ninds
             if ~isequal(inds{iind}{1}, inds{iind}{2})
                 %       disp(['bootstrap run ' num2str(iboot) '/' num2str(nboot) ', testing connection ' num2str(iind) '/' num2str(ninds) ': [' num2str(inds{iind}{1}) '] -> [' num2str(inds{iind}{2}) ']'])
-                
+                clear subset subsetvars subinds A1 SIG eA eC eK eV AR SIGR eAR eCR eKR eVR GCR
                 subset = [inds{iind}{1} inds{iind}{2}];
                 nsubsetvars = length(subset);
                 subinds = {1:length(inds{iind}{1}), length(inds{iind}{1}) + (1:length(inds{iind}{2}))};
                 
                 % autocovariance to full forward VAR model
-                [A1, SIG] = autocov_to_var3(G(subset, subset, :));
+                [A1, SIG] = autocov_to_var3(G(subset, subset, :)); 
                 
                 % forward VAR model to state space VARMA models
-                [eA, eC, eK, eV, eVy] = varma2iss(reshape(A1, nsubsetvars, []), [], SIG, eye(nsubsetvars));
+                [eA, eC, eK, eV, ~] = varma2iss(reshape(A1, nsubsetvars, []), [], SIG, eye(nsubsetvars));
                 
                 % backward autocovariance to full backward VAR model
                 [AR, SIGR] = autocov_to_var3(permute(G(subset, subset, :), [2 1 3]));
                 
                 % backward VAR to VARMA
-                [eAR, eCR, eKR, eVR, eVyR] = varma2iss(reshape(AR, nsubsetvars, []), [], SIGR, eye(nsubsetvars));
+                [eAR, eCR, eKR, eVR, ~] = varma2iss(reshape(AR, nsubsetvars, []), [], SIGR, eye(nsubsetvars));
                 
                 % GC and TRGC computation
                 GC(:, iind, iit) = iss_SGC(eA, eC, eK, eV, z, subinds{2}, subinds{1});
@@ -234,14 +244,18 @@ for id = 1:numel(patientID)
                 TRGC(:, iind, iit) = 0;
             end
         end
-        toc
     end
     
-    GC_all = GC_all + GC;
-    TRGC_all = TRGC_all + TRGC;
+    if ~exist('GC_all','var')
+        GC_all=GC;
+        TRGC_all=TRGC;
+    else
+        GC_all = GC_all + GC;
+        TRGC_all = TRGC_all + TRGC;
+    end
     clear GC TRGC
 end
-
+%%
 %diff meg-lfp to lfp-meg trgc
 o=1;
 for iind = 1:2:ninds-1
@@ -253,7 +267,7 @@ end
 DIFFGC = permute(DIFFGC,[3 1 2]);
 DIFFGC_true = permute(DIFFGC_true,[3 1 2]);
 
-clearvars -except DIFFGC DIFFGC_true nfreq voxID
+clearvars -except DIFFGC DIFFGC_true nfreq voxID ns
 
 %% neighbourhood
 
@@ -346,7 +360,7 @@ for iit = 1: size(onoff_pos,1)
     
     %find the positive clusters
     
-    clear onoff_temp u ind A
+    clear onoff_temp u ind A big_clu_id
     onoff_temp = squeeze(onoff_pos(iit,:,:));
     u = onoff_temp(:); %should be the same indexing like in kron_conn now; nkron x 1
     
@@ -371,7 +385,7 @@ for iit = 1: size(onoff_pos,1)
     
     %find the negative clusters
     
-    clear onoff_temp u ind A
+    clear onoff_temp u ind A big_clu_id
     onoff_temp = squeeze(onoff_neg(iit,:,:));
     u = onoff_temp(:); %should be the same indexing like in kron_conn now; nkron x 1
     
@@ -445,7 +459,7 @@ else %when only in shuffled conditions clusters were found
     p_neg = sum(shufGC>trueGC)/numel(shufGC);
 end
 
-
+%%
 outname = sprintf('%sp_gc',DIROUT);
 save(outname,'p_pos','p_neg','true_clu_pos','true_clu_neg','true_sizes_pos','true_sizes_neg','-v7.3')
 
