@@ -81,51 +81,85 @@ for id = 1:numel(patientID)
             [label{ii},code{ii},roi_id(ii)]=fp_get_mni_anatomy(mni_pos(ii,:));
         end
         u_roi_id = sort(unique(roi_id));
-        nroi = numel(u_roi_id)-1;
+        nroi = numel(u_roi_id);
         
         csroi = nan(nroi,nfreq,5,5);
         %project cross spectrum to voxel space and get power and coherence
-        for iroi = 2:nroi
-            for ifq = 1:nfreq
-                clear Aroi A_ CSv pv CSn v v5 cseig proi
-                Aroi = squeeze(A(:,:,roi_id == u_roi_id(iroi),ifq));
-                A_ = reshape(Aroi, [nmeg, 3*size(Aroi,3)]);
+        
                 
-                CSv = A_' * CS(:,:,ifq) * A_; %3*nvoxofroi x 3*nvoxofroi
+        clear v5
+        for ifq = 1:nfreq
+            
+            clear Aroi A_ CSv pv CSn
+            Aroi = squeeze(A(:,:,roi_id~=0,ifq));
+            A_ = reshape(Aroi, [nmeg, 3*size(Aroi,3)]);
+            CSv = A_' * CS(:,:,ifq) * A_;
+            pv = real(diag(CSv)); %3*nvox x 1
+            CSn = CSv ./ sqrt(pv * pv');
+            
+            %region pca 
+            is = 1;
+            for iroi = 2:nroi
+                clear v cCS cns
                 
-                pv = real(diag(CSv)); %3*nvox x 1
-                
-                CSn = CSv ./ sqrt(pv * pv');
-                
-                [v, ~, ~] = eig(real(CSn));
+                cns = sum(roi_id == u_roi_id(iroi))*3;
+                cCS = CSn(is:is+cns-1,is:is+cns-1);
+                [v, ~, ~] = eig(real(cCS));
                 
                 if size(v,1)>5
-                    v5 = v(:,1:5)'; %5 * nregionvoxels
+                    v5(is:is+size(v,1)-1,:,ifq) = v(:,1:5); %5 * nregionvoxels
                 else
-                    v5 = v;
+                    v5(is:is+size(v,1)-1,1:size(v,2),ifq) = v;
                 end
                 
-                cseig = v5 * CSv * v5';
-                proi = real(diag(cseig));
-                
-                csroi(iroi-1,ifq,1:size(v5,1),1:size(v5,1)) = cseig ./ sqrt(proi * proi');
-                
+                is = is+cns;
             end
+            
+            %apply the filters to the cs 
+            kr=1;
+            for kroi = 2:nroi
+                
+                vk = v5(kr: kr+ sum(roi_id == u_roi_id(kroi))-1,:,ifq);
+                jr=1;
+                for jroi = 2: nroi
+                    clear cCS
+                    cCS = CSn(roi_id == u_roi_id(kroi),roi_id == u_roi_id(jroi));
+                    vj = v5(jr: jr+ sum(roi_id == u_roi_id(jroi))-1,:,ifq);
+                    cseig(kroi,jroi,:,:) = vk' * cCS * vj;
+                    
+                    jr=jr+sum(roi_id == u_roi_id(jroi));
+                end
+                
+                kr=kr+sum(roi_id == u_roi_id(kroi));
+            end
+            
+            %divide by power 
+            for ifc=1:5
+                for jfc =1:5
+                    clear proi 
+                    proi = squeeze(real(diag(cseig(:,:,ifc,jfc))));
+                    csroi(:,:,ifc,jfc,ifq)= cseig(:,:,ifc,jfc)./sqrt(proi' * proi);
+                end
+            end
+            
+            
         end
         
         
-        %%%%hier muss ich irgendwie auf region x region coherence kommen. 
-        %%%% + cca , also dann coherence nit x nroi x nroi x nfreq (jeweils
-        %%%%schon ueber ids aufsummieren!) 
         
-
+    
+        
+        %%%% + cca , also dann coherence nit x nroi x nroi x nfreq (jeweils
+        %%%%schon ueber ids aufsummieren!)
+        
+        
         COH(iit,:,:,:) = COH(iit,:,:,:) + coh;
         
     end
 end
 
 
-%neighbourhood 
+%neighbourhood
 load('roi_conn.mat')
 roiconn_s = sparse(roi_conn);
 freq_conn = fp_get_freq_conn(nfreq);
