@@ -29,7 +29,7 @@ for k = 1:nchunks
     
     for ii = 1:n1
         o = ind_1(ii);        
-        S(:,ii,:) = S(:,ii,:) + mean(P1(:,:,o) .* conj(P2(:,:,ind_2)),2);        
+        S(:,ii,:) = S(:,ii,:) + mean(repmat(P1(:,:,o), 1, 1, length(ind_2)) .* conj(P2(:,:,ind_2)),2);        
     end
     
     if ~isempty(ind_pow)

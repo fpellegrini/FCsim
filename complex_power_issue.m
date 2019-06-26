@@ -1,14 +1,16 @@
 
 %% short version
+
+clear all
 patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
 [~, voxID] = fp_find_commonvox;
 pow = nan(numel(patientID),numel(voxID{1}),46);
+pow_noise = nan(numel(patientID),numel(voxID{1}),46);
 
-for id = 1:numel(patientID)
-    clearvars -except id patientID pow voxID
+for id = 3
+    clearvars -except id patientID pow voxID pow_noise
     
-    load(sprintf('Filter_Patient%s.mat',patientID{id})) 
-  
+    load(sprintf('Filter2_Patient%s.mat',patientID{id}))  
     
     mni_pos = fp_getMNIpos(patientID{id});
     [~, noEq] = fp_symmetric_vol(mni_pos);
@@ -23,10 +25,14 @@ for id = 1:numel(patientID)
         cfilter = filter(:,:,ifreq)';
 
         for is = 1:ns    
-            pow(id,is,ifreq) = real(cfilter(is,:) * CS(:,:,ifreq) * cfilter(is,:)');        
+            pow(id,is,ifreq) = real(cfilter(is,:) * CS(:,:,ifreq) * cfilter(is,:)'); 
+            pow_noise(id,is,ifreq) = real(cfilter(is,:) * eye(size(CS(:,:,ifreq))) * cfilter(is,:)'); 
         end    
     end 
 end
+
+pow = pow./pow_noise;
+pow = pow(id,:,:);
 
 a = squeeze(mean(pow,1));
 
@@ -38,11 +44,11 @@ d = mean(a(:,2:17),2);
 outname = 'pow1.nii';
 fp_data2nii(b,nan,[],outname)
 
-outname = 'pow2.nii';
-fp_data2nii(c,nan,[],outname)
-
-outname = 'pow3.nii';
-fp_data2nii(d,nan,[],outname)
+% outname = 'pow2_e.nii';
+% fp_data2nii(c,nan,[],outname)
+% 
+% outname = 'pow3_e.nii';
+% fp_data2nii(d,nan,[],outname)
 
 
 %% version from scratch, with 3D filters

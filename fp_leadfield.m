@@ -6,8 +6,8 @@ function leadfield = fp_leadfield(patientNumber, changeFilePaths, calculateBF, f
 %number), idir (1 2 or 3)
 
 cd ~/Dropbox/Data_MEG_Project/
-DIROUT = '~/Dropbox/Data_MEG_Project/figures/topo_leadfields/';
-if ~exist(DIROUT); mkdir(DIROUT); end
+% DIROUT = '~/Dropbox/Data_MEG_Project/figures/topo_leadfields/';
+% if ~exist(DIROUT); mkdir(DIROUT); end
 
 if strcmp(patientNumber,'all')
     %change filenames
@@ -37,7 +37,7 @@ if nargin< 8
     idir = 1;
 end
 
-for id = 1:numel(patientID)
+for id = 1%:numel(patientID)
     
     fileName = sprintf('redPLFP%s_off', patientID{id});
     
@@ -57,12 +57,12 @@ for id = 1:numel(patientID)
 
         load('BF.mat')
 %         save(sprintf('%s/BF_Patient%s',pwd,patientID{id}),'sources')
-        save(sprintf('%s/BF_Patient%s',pwd,patientID{id}),'sources', ...
+        save(sprintf('%s/BF_Patient%s_1',pwd,patientID{id}),'sources', ...
             'inverse','data','features','output','write','-v7.3')
         !rm ./BF.mat
         
     else
-        load(sprintf('%s/BF_Patient%s',pwd,patientID{id}))
+        load(sprintf('%s/BF_Patient%s1',pwd,patientID{id}))
     end
     
     clear leadfield

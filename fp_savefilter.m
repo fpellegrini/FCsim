@@ -46,7 +46,7 @@ for id = 1:numel(patientID)
         
         %cross spectrum
         
-        CS = fp_tsdata_to_cpsd(X,fres,'WELCH',[id_meg_chan,id_lfp_chan], [id_meg_chan,id_lfp_chan], id_meg_trials, id_lfp_trials);
+        CS = fp_tsdata_to_cpsd(X,fres,'MT',[id_meg_chan,id_lfp_chan], [id_meg_chan,id_lfp_chan], id_meg_trials, id_lfp_trials);
         
         %leadfield
         L1 = inverse.MEG.L;
@@ -67,7 +67,7 @@ for id = 1:numel(patientID)
         
         CS(:,:,nfreq+1:end)=[];
         
-        outname = sprintf('%sFilter_Patient%s',DIROUT, patientID{id});
+        outname = sprintf('%sFilter2_Patient%s',DIROUT, patientID{id});
         save(outname,'A','CS','-v7.3')
         clearvars -except DIROUT DIRLOG logname patientID id
         

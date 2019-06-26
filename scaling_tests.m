@@ -1,11 +1,14 @@
 clear all
 
+sf = 0; 
+sf1=0;
+sf2 = 0;
+id=5;
+
 patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
-id=10;
+
 [~, voxID] = fp_find_commonvox;
 nlags = 4;
-load(sprintf('Filter_Patient%s.mat',patientID{id}));%load true CS for constructing filters
-clear A
 
 %load data
 D = spm_eeg_load(sprintf('redPLFP%s_off', patientID{id}));
@@ -31,6 +34,13 @@ maxfreq = fres+1;
 freqs = freqs(1:maxfreq);
 z = exp(-i*pi*freqs);
 
+%true CS
+clear id_trials_1 id_trials_2 CS A_
+id_trials_1 = 1:n_trials;
+id_trials_2 = 1:n_trials;
+CS = fp_tsdata_to_cpsd(X,fres,'MT',[id_meg_chan id_lfp_chan], [id_meg_chan id_lfp_chan], id_trials_1, id_trials_2);
+    
+
 %construct filters
 
 load(sprintf('BF_Patient%s.mat',patientID{id}));
@@ -39,7 +49,9 @@ ns_org = numel(L1);
 for is=1:ns_org
     L(:,is,:)= L1{is};
 end 
-L = L.* (10^(-log10(range(L(:)))+5.5));
+if sf1 ==1 
+    L = L.* (10^(-log10(range(L(:)))+5));
+end
 
 %delete voxels that are not common in all subs
 mni_pos = fp_getMNIpos(patientID{id});
@@ -64,7 +76,22 @@ end
 
 A_ = reshape(A, [nmeg, 3*ns, nfreq]);
 clear A
-iit=1;
+
+if sf ==1 
+    clear CS
+    X1 = X;
+    for ii = 1:size(X,1)
+        clear o u
+        o = squeeze(X(ii,:,:));
+        u = 10^(log10(range(o(:))));
+        X1(ii,:,:)=(X(ii,:,:)./u);
+    end
+    clear X 
+    X=X1;
+    
+    CS = fp_tsdata_to_cpsd(X,fres,'MT',[id_meg_chan id_lfp_chan], [id_meg_chan id_lfp_chan], id_trials_1, id_trials_2);
+    
+end   
 
 cCS = CS(1:(end-nlfp),end-nlfp+1:end,:); %nmeg x nlfp x nfreq
 CSv = zeros(3*ns+nlfp,3*ns+nlfp,nfreq);
@@ -76,7 +103,9 @@ csv(end-nlfp+1:end,1:ns*3)= csv(1:ns*3,end-nlfp+1:end)';
 csv(1:ns*3,1:ns*3) = squeeze(A_(:,:,ifq))' * CS(1:nmeg,1:nmeg,ifq) * squeeze(A_(:,:,ifq));
 csv(end-nlfp+1:end,end-nlfp+1:end) = CS(end-nlfp+1:end,end-nlfp+1:end,ifq);
 
-csv=csv.*10^8;
+if sf2 ==1
+    csv=csv.*10^3;
+end
 
 a=diag(csv);
 %
@@ -87,7 +116,39 @@ a=diag(csv);
 %     CSv(:,:,ifq) = csv;
 %     clear csv
 
+figure
+plot(squeeze(X(5,:,5)))
+hold on 
+plot(squeeze(X(126,:,5)))
+legend('meg channel', 'lfp channel')
 
-
-imagesc(real(csv(1:3,[1:3 end-3:end])))
+figure
+imagesc(real(csv([3:5 end-2:end],[3:5 end-2:end])))
+xlabel('3 meg chan + 3 lfp chan')
+ylabel('3 meg chan + 3 lfp chan')
 colorbar
+
+%%
+
+patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
+
+for id = 1: numel(patientID)
+    
+    load(sprintf('BF_Patient%s.mat',patientID{id}));
+    L1 = sources.L.MEG;
+    ns_org = numel(L1);
+    for is=1:ns_org
+        L(:,is,:)= L1{is};
+    end
+    l = std(L(:));
+    lr = range(L(:));
+    clear L1 L
+    
+    
+    D = spm_eeg_load(sprintf('redPLFP%s_off', patientID{id}));
+    X = D(:,:,:);
+    
+    x(id)=std(X(:));
+    clear X
+    
+end
