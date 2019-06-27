@@ -16,14 +16,15 @@ ns = size(conn,1);
 for ii = 1: ns
     [~,~,roi_id(ii)]=fp_get_mni_anatomy(sym_pos(ii,:));
 end 
-load('ROI_MNI_V5_List.mat')
 
 u_roi_id = sort(unique(roi_id));
-nroi = 120;
+load('ROI_MNI_V5_List.mat')
+
+nroi =length(ROI);
 roi_conn = zeros(nroi,nroi);
 
 u=[];
-for o = 1:120 
+for o = 1:nroi 
     u = [u ROI(o).ID];
 end
 
@@ -32,7 +33,7 @@ n2 = find(~ismember(u_roi_id,u)); %wegnehmen
 
 u_roi_id(n2) = [];
 t = 1;
-for iroi =1:120 
+for iroi =1:nroi 
     if any(ismember(iroi,n1))
         roivox{iroi} = nan;
     else
@@ -56,6 +57,9 @@ for iroi = 1:nroi
         end
     end
 end
+
+roi_conn(n1,:)=[];
+roi_conn(:,n1)=[];
 
 outname = sprintf('%sroi_conn',DIROUT);
 save(outname,'roi_conn','-v7.3')
