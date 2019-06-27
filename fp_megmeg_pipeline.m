@@ -9,8 +9,8 @@ else
 end
 
 nit= 1000;
-COH = [];
-true_coh=[];
+npcs = 3;
+COH = zeros(nit,117,117,46);
 
 for id = 1:numel(patientID)
     
@@ -68,7 +68,7 @@ for id = 1:numel(patientID)
     for iit = 1:nit
         
         %cross spectrum
-        clear CS
+        clear CS coh
         id_trials_1 = 1:n_trials;
         rng('shuffle')
         id_trials_2 = randperm(n_trials);
@@ -83,79 +83,83 @@ for id = 1:numel(patientID)
         u_roi_id = sort(unique(roi_id));
         nroi = numel(u_roi_id);
         
-        csroi = nan(nroi,nfreq,5,5);
+        csroi = nan(nroi-1,nroi-1,npcs,npcs,nfreq);
         %project cross spectrum to voxel space and get power and coherence
         
-                
-        clear v5
+        tic
         for ifq = 1:nfreq
             
-            clear Aroi A_ CSv pv CSn
+            clear Aroi A_ CSv pv CSn v5 cseig
             Aroi = squeeze(A(:,:,roi_id~=0,ifq));
             A_ = reshape(Aroi, [nmeg, 3*size(Aroi,3)]);
             CSv = A_' * CS(:,:,ifq) * A_;
             pv = real(diag(CSv)); %3*nvox x 1
             CSn = CSv ./ sqrt(pv * pv');
             
-            %region pca 
+            %region pca
             is = 1;
             for iroi = 2:nroi
-                clear v cCS cns
+                clear v cCS cns iid
                 
-                cns = sum(roi_id == u_roi_id(iroi))*3;
-                cCS = CSn(is:is+cns-1,is:is+cns-1);
+                iid = is: is+ (sum(roi_id == u_roi_id(iroi)))*3-1;
+                cCS = CSn(iid,iid);
                 [v, ~, ~] = eig(real(cCS));
                 
-                if size(v,1)>5
-                    v5(is:is+size(v,1)-1,:,ifq) = v(:,1:5); %5 * nregionvoxels
+                if size(v,1)>npcs
+                    v5{iroi} = v(:,1:npcs); %npcs * nregionvoxels
                 else
-                    v5(is:is+size(v,1)-1,1:size(v,2),ifq) = v;
+                    v5{iroi} = v;
                 end
                 
-                is = is+cns;
+                is = is+length(iid);
             end
             
-            %apply the filters to the cs 
+            %apply the filters to the cs
             kr=1;
             for kroi = 2:nroi
+                clear kid
                 
-                vk = v5(kr: kr+ sum(roi_id == u_roi_id(kroi))-1,:,ifq);
+                kid = kr: kr+ (sum(roi_id == u_roi_id(kroi)))*3-1;
                 jr=1;
-                for jroi = 2: nroi
-                    clear cCS
-                    cCS = CSn(roi_id == u_roi_id(kroi),roi_id == u_roi_id(jroi));
-                    vj = v5(jr: jr+ sum(roi_id == u_roi_id(jroi))-1,:,ifq);
-                    cseig(kroi,jroi,:,:) = vk' * cCS * vj;
+                for jroi =2: nroi
+                    clear cCS jid
+                    jid = jr:jr+ (sum(roi_id == u_roi_id(jroi)))*3-1;
+                    cCS = CSn(kid,jid);
                     
-                    jr=jr+sum(roi_id == u_roi_id(jroi));
+                    cseig(kroi-1,jroi-1,:,:) = v5{kroi}' * cCS * v5{jroi};
+                    
+                    jr=jr+length(jid);
                 end
                 
-                kr=kr+sum(roi_id == u_roi_id(kroi));
+                kr=kr+length(kid);
             end
             
-            %divide by power 
-            for ifc=1:5
-                for jfc =1:5
-                    clear proi 
+            %divide by power
+            for ifc=1:npcs
+                for jfc =1:npcs
+                    clear proi
                     proi = squeeze(real(diag(cseig(:,:,ifc,jfc))));
                     csroi(:,:,ifc,jfc,ifq)= cseig(:,:,ifc,jfc)./sqrt(proi' * proi);
                 end
             end
-            
+            %         csroi(:,:,:,:,ifq)= cseig;
             
         end
+        toc %ca 35 sec
         
+        for ii=1:nroi-1
+            for jj= 1: nroi-1
+                for ifq = 1: nfreq
+                    coh(ii,jj,ifq) =  sum(sum(triu(squeeze(abs(imag(csroi(ii,jj,:,:,ifq)))))));
+                end
+            end
+        end
         
-        
-    
-        
-        %%%% + cca , also dann coherence nit x nroi x nroi x nfreq (jeweils
-        %%%%schon ueber ids aufsummieren!)
-        
-        
-        COH(iit,:,:,:) = COH(iit,:,:,:) + coh;
+        COH(iit,:,:,:) = squeeze(COH(iit,:,:,:)) + coh;
         
     end
+    clearvars -except COH id patientID nit npcs nfreq
+
 end
 
 
@@ -167,9 +171,9 @@ freq_conn_s = sparse(freq_conn);%nfrerq x nfreq
 kron_conn = kron(roiconn_s,freq_conn_s); %nroi*nfreq = nkron
 kron_conn = kron(roiconn_s,kron_conn);
 
-threshold = prctile(reshape(COH,1,[]),99,9);
+threshold = prctile(COH(:),99.9);
 
-
+%% until here 
 %shuffled clusters
 
 onoff = COH>threshold;
