@@ -50,7 +50,7 @@ if strcmpi(method,'MT')
         x_perm = X(:,:,id_trials_2(r));
         
         clear s
-        s = fp_cpsd_mt(x_original,x_perm,ind_1, ind_2,fres+1,window,noverlap,nchunks,taparray);       
+        s = fp_cpsd_mt_matlab2019(x_original,x_perm,ind_1, ind_2,fres+1,window,noverlap,nchunks,taparray);       
         S = S+s;
         
     end

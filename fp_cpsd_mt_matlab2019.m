@@ -1,4 +1,4 @@
-function S = fp_cpsd_mt(X1,X2,ind_1,ind_2,h,window,noverlap,nchunks,taparray)
+function S = fp_cpsd_mt_matlab2019(X1,X2,ind_1,ind_2,h,window,noverlap,nchunks,taparray)
 
 ind_pow = intersect(ind_1, ind_2);
 nfft = 2*(h-1);
@@ -28,11 +28,8 @@ for k = 1:nchunks
     % now make cross-products of them to fill cross-spectrum matrix
     
     for ii = 1:n1
-        o = ind_1(ii); 
-        for jj = 1:n2
-            oo = ind_2(jj);      
-            S(:,ii,jj) = S(:,ii,jj) + mean(P1(:,:,o) .* conj(P2(:,:,oo)),2);  
-        end
+        o = ind_1(ii);        
+        S(:,ii,:) = S(:,ii,:) + mean(repmat(P1(:,:,o), 1, 1, length(ind_2)) .* conj(P2(:,:,ind_2)),2);        
     end
     
     if ~isempty(ind_pow)

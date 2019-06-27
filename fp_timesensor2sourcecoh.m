@@ -17,7 +17,6 @@ for id = 1:numel(patientID)
     D = spm_eeg_load(sprintf('redPLFP%s_off', patientID{id}));
     
     X = D(:,:,:);
-    X=X./10^(log10(range(X(:)))-2); %scale the data 
     D_ft = ftraw(D);
     n_trials = length(D_ft.trial);
     

@@ -13,7 +13,7 @@ nit=2;
 
 %%
 
-for id = 3:numel(patientID)
+for id = 1:numel(patientID)
     fprintf('Working on subject %d. \n',id)
     %load data
     clear X X1 
@@ -105,69 +105,69 @@ for id = 3:numel(patientID)
     end
     %  true GC
     
-%     %project cross spectrum to voxel space
-%     clear CSv
-%     cCS = CS(1:(end-nlfp),end-nlfp+1:end,:); %nmeg x nlfp x nfreq
-%     CSv = zeros(ndim*ns+nlfp,ndim*ns+nlfp,nfreq);
-%     for ifq = 1:nfreq
-%         
-%         csv = zeros(ns*ndim+nlfp,ns*ndim+nlfp);
-%         csv(1:ns*ndim,end-nlfp+1:end) = squeeze(A_(:,:,ifq))' * cCS(:,:,ifq);
-%         csv(end-nlfp+1:end,1:ns*ndim)= csv(1:ns*ndim,end-nlfp+1:end)';
-%         csv(1:ns*ndim,1:ns*ndim) = squeeze(A_(:,:,ifq))' * CS(1:nmeg,1:nmeg,ifq) * squeeze(A_(:,:,ifq));
-%         csv(end-nlfp+1:end,end-nlfp+1:end) = CS(end-nlfp+1:end,end-nlfp+1:end,ifq);
-%         
-%         %replace power with real values
-%         clear n
-%         n = size(csv,1);
-%         csv(1:(n+1):end) = real(diag(csv));
-%         
-%         CSv(:,:,ifq) = csv; %.*10^4; %re-scale to avoid numerical errors
-%         clear csv
-%     end
-%     clear cCS CS CSinv currentCS G
-%     G = cpsd_to_autocov(CSv, nlags);
-%     
-%     % loop over sender/receiver combinations to compute time-reversed GC
-%     for iind = 1:ninds
-%         if ~isequal(inds{iind}{1}, inds{iind}{2})
-%             %       disp(['bootstrap run ' num2str(iboot) '/' num2str(nboot) ', testing connection ' num2str(iind) '/' num2str(ninds) ': [' num2str(inds{iind}{1}) '] -> [' num2str(inds{iind}{2}) ']'])
-%             clear subset subsetvars subinds A1 SIG eA eC eK eV AR SIGR eAR eCR eKR eVR GCR
-%             subset = [inds{iind}{1} inds{iind}{2}];
-%             nsubsetvars = length(subset);
-%             subinds = {1:length(inds{iind}{1}), length(inds{iind}{1}) + (1:length(inds{iind}{2}))};
-%             
-%             % autocovariance to full forward VAR model
-%             [A1, SIG] = autocov_to_var4(G(subset, subset, :));
-%             
-%             % forward VAR model to state space VARMA models
-%             [eA, eC, eK, eV, ~] = varma2iss(reshape(A1, nsubsetvars, []), [], SIG, eye(nsubsetvars));
-%             
-%             % backward autocovariance to full backward VAR model
-%             [AR, SIGR] = autocov_to_var4(permute(G(subset, subset, :), [2 1 3]));
-%             
-%             % backward VAR to VARMA
-%             [eAR, eCR, eKR, eVR, ~] = varma2iss(reshape(AR, nsubsetvars, []), [], SIGR, eye(nsubsetvars));
-%             
-%             % GC and TRGC computation
-%             GC(:, iind) = iss_SGC(eA, eC, eK, eV, z, subinds{2}, subinds{1});
-%             GCR = iss_SGC(eAR, eCR, eKR, eVR, z, subinds{2}, subinds{1});
-%             TRGC(:, iind) = GC(:, iind) - GCR';
-%         else
-%             GC(:, iind) = 0;
-%             TRGC(:, iind) = 0;
-%         end
-%     end
-%     
-%     if ~exist('GC_all_true','var')
-%         GC_all_true=GC;
-%         TRGC_all_true=TRGC;
-%     else
-%         GC_all_true = GC_all_true + GC;
-%         TRGC_all_true = TRGC_all_true + TRGC;
-%     end
-%     clear GC TRGC
-%     
+    %project cross spectrum to voxel space
+    clear CSv
+    cCS = CS(1:(end-nlfp),end-nlfp+1:end,:); %nmeg x nlfp x nfreq
+    CSv = zeros(ndim*ns+nlfp,ndim*ns+nlfp,nfreq);
+    for ifq = 1:nfreq
+        
+        csv = zeros(ns*ndim+nlfp,ns*ndim+nlfp);
+        csv(1:ns*ndim,end-nlfp+1:end) = squeeze(A_(:,:,ifq))' * cCS(:,:,ifq);
+        csv(end-nlfp+1:end,1:ns*ndim)= csv(1:ns*ndim,end-nlfp+1:end)';
+        csv(1:ns*ndim,1:ns*ndim) = squeeze(A_(:,:,ifq))' * CS(1:nmeg,1:nmeg,ifq) * squeeze(A_(:,:,ifq));
+        csv(end-nlfp+1:end,end-nlfp+1:end) = CS(end-nlfp+1:end,end-nlfp+1:end,ifq);
+        
+        %replace power with real values
+        clear n
+        n = size(csv,1);
+        csv(1:(n+1):end) = real(diag(csv));
+        
+        CSv(:,:,ifq) = csv; %.*10^4; %re-scale to avoid numerical errors
+        clear csv
+    end
+    clear cCS CS CSinv currentCS G
+    G = cpsd_to_autocov(CSv, nlags);
+    
+    % loop over sender/receiver combinations to compute time-reversed GC
+    for iind = 1:ninds
+        if ~isequal(inds{iind}{1}, inds{iind}{2})
+            %       disp(['bootstrap run ' num2str(iboot) '/' num2str(nboot) ', testing connection ' num2str(iind) '/' num2str(ninds) ': [' num2str(inds{iind}{1}) '] -> [' num2str(inds{iind}{2}) ']'])
+            clear subset subsetvars subinds A1 SIG eA eC eK eV AR SIGR eAR eCR eKR eVR GCR
+            subset = [inds{iind}{1} inds{iind}{2}];
+            nsubsetvars = length(subset);
+            subinds = {1:length(inds{iind}{1}), length(inds{iind}{1}) + (1:length(inds{iind}{2}))};
+            
+            % autocovariance to full forward VAR model
+            [A1, SIG] = autocov_to_var4(G(subset, subset, :));
+            
+            % forward VAR model to state space VARMA models
+            [eA, eC, eK, eV, ~] = varma2iss(reshape(A1, nsubsetvars, []), [], SIG, eye(nsubsetvars));
+            
+            % backward autocovariance to full backward VAR model
+            [AR, SIGR] = autocov_to_var4(permute(G(subset, subset, :), [2 1 3]));
+            
+            % backward VAR to VARMA
+            [eAR, eCR, eKR, eVR, ~] = varma2iss(reshape(AR, nsubsetvars, []), [], SIGR, eye(nsubsetvars));
+            
+            % GC and TRGC computation
+            GC(:, iind) = iss_SGC(eA, eC, eK, eV, z, subinds{2}, subinds{1});
+            GCR = iss_SGC(eAR, eCR, eKR, eVR, z, subinds{2}, subinds{1});
+            TRGC(:, iind) = GC(:, iind) - GCR';
+        else
+            GC(:, iind) = 0;
+            TRGC(:, iind) = 0;
+        end
+    end
+    
+    if ~exist('GC_all_true','var')
+        GC_all_true=GC;
+        TRGC_all_true=TRGC;
+    else
+        GC_all_true = GC_all_true + GC;
+        TRGC_all_true = TRGC_all_true + TRGC;
+    end
+    clear GC TRGC
+    
     
     %   shuffled GC
     % loop over permutations

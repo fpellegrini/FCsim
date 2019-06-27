@@ -1,4 +1,4 @@
-function S = fp_cpsd_mt_matlab2015(X1,X2,ind_1,ind_2,h,window,noverlap,nchunks,taparray)
+function S = fp_cpsd_mt(X1,X2,ind_1,ind_2,h,window,noverlap,nchunks,taparray)
 
 ind_pow = intersect(ind_1, ind_2);
 nfft = 2*(h-1);
