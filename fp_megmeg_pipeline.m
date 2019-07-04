@@ -93,7 +93,8 @@ for id = 1:numel(patientID)
             Aroi = squeeze(A(:,:,roi_id~=0,ifq));
             A_ = reshape(Aroi, [nmeg, 3*size(Aroi,3)]);
             CSv = A_' * CS(:,:,ifq) * A_;
-            pv = real(diag(CSv)); %3*nvox x 1
+            pv = fp_project_power(CS(:,:,ifq),A_);
+%             pv = real(diag(CSv)); %3*nvox x 1
             CSn = CSv ./ sqrt(pv * pv');
             
             %region pca

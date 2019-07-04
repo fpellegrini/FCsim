@@ -112,17 +112,24 @@ for id = 1:numel(patientID)
     for ifq = 1:nfreq
         
         csv = zeros(ns*ndim+nlfp,ns*ndim+nlfp);
-        csv(1:ns*ndim,end-nlfp+1:end) = squeeze(A_(:,:,ifq))' * cCS(:,:,ifq);
-        csv(end-nlfp+1:end,1:ns*ndim)= csv(1:ns*ndim,end-nlfp+1:end)';
-        csv(1:ns*ndim,1:ns*ndim) = squeeze(A_(:,:,ifq))' * CS(1:nmeg,1:nmeg,ifq) * squeeze(A_(:,:,ifq));
-        csv(end-nlfp+1:end,end-nlfp+1:end) = CS(end-nlfp+1:end,end-nlfp+1:end,ifq);
+        csv(1:ns*ndim,end-nlfp+1:end) = squeeze(A_(:,:,ifq))' * cCS(:,:,ifq); %meg lfp
+        csv(end-nlfp+1:end,1:ns*ndim)= csv(1:ns*ndim,end-nlfp+1:end)'; %lfp meg
+        csv(end-nlfp+1:end,end-nlfp+1:end) = CS(end-nlfp+1:end,end-nlfp+1:end,ifq); %lfp lfp 
+        
+        csv1 = squeeze(A_(:,:,ifq))' * CS(1:nmeg,1:nmeg,ifq) * squeeze(A_(:,:,ifq)); %megmeg
+        pv = fp_project_power(CS(1:nmeg,1:nmeg,ifq),A_(:,:,ifq)); %voxel power 
+        n1 = size(csv1,1);
+        csv1(1:(n1+1):end) = pv;
+        csv(1:ns*ndim,1:ns*ndim)=csv1;
+        clear csv1 pv n1
+        
         
         %replace power with real values
         clear n
         n = size(csv,1);
         csv(1:(n+1):end) = real(diag(csv));
         
-        CSv(:,:,ifq) = csv; %.*10^4; %re-scale to avoid numerical errors
+        CSv(:,:,ifq) = csv; 
         clear csv
     end
     clear cCS CS CSinv currentCS G
@@ -189,10 +196,16 @@ for id = 1:numel(patientID)
         for ifq = 1:nfreq
             
             csv = zeros(ns*ndim+nlfp,ns*ndim+nlfp);
-            csv(1:ns*ndim,end-nlfp+1:end) = squeeze(A_(:,:,ifq))' * cCS(:,:,ifq);
-            csv(end-nlfp+1:end,1:ns*ndim)= csv(1:ns*ndim,end-nlfp+1:end)';
-            csv(1:ns*ndim,1:ns*ndim) = squeeze(A_(:,:,ifq))' * CS(1:nmeg,1:nmeg,ifq) * squeeze(A_(:,:,ifq));
-            csv(end-nlfp+1:end,end-nlfp+1:end) = CS(end-nlfp+1:end,end-nlfp+1:end,ifq);
+            csv(1:ns*ndim,end-nlfp+1:end) = squeeze(A_(:,:,ifq))' * cCS(:,:,ifq); %meg lfp
+            csv(end-nlfp+1:end,1:ns*ndim)= csv(1:ns*ndim,end-nlfp+1:end)'; %lfp meg
+            csv(end-nlfp+1:end,end-nlfp+1:end) = CS(end-nlfp+1:end,end-nlfp+1:end,ifq); %lfp lfp
+            
+            csv1 = squeeze(A_(:,:,ifq))' * CS(1:nmeg,1:nmeg,ifq) * squeeze(A_(:,:,ifq)); %megmeg
+            pv = fp_project_power(CS(1:nmeg,1:nmeg,ifq),A_(:,:,ifq)); %voxel power 
+            n1 = size(csv1,1);
+            csv1(1:(n1+1):end) = pv;
+            csv(1:ns*ndim,1:ns*ndim)=csv1;
+            clear csv1 pv n1          
             
             %replace power with real values
             clear n
