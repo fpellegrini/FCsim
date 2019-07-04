@@ -28,7 +28,7 @@ if nargin < 5
     refChannel = 'LFP_R01';
 end
 if nargin < 6
-    plotOn = 1;
+    plotOn = 0;
 end 
 if nargin < 7
     inode = 1917; 
@@ -37,10 +37,11 @@ if nargin< 8
     idir = 1;
 end
 
-for id = 1%:numel(patientID)
+for id = 1:numel(patientID)
     
     fileName = sprintf('redPLFP%s_off', patientID{id});
     
+    clear D
     if changeFilePaths == 1
         %rename filepaths in D
         D = wjn_meg_correct_mri(fileName);

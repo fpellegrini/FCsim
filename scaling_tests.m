@@ -74,16 +74,35 @@ clear A
 
 cCS = CS(1:(end-nlfp),end-nlfp+1:end,:); %nmeg x nlfp x nfreq
 CSv = zeros(3*ns+nlfp,3*ns+nlfp,nfreq);
-for ifq = 1:nefreq
+for ifq = 1:nfreq
 
     csv = zeros(ns*3+nlfp,ns*3+nlfp);
     csv(1:ns*3,end-nlfp+1:end) = squeeze(A_(:,:,ifq))' * cCS(:,:,ifq);
     csv(end-nlfp+1:end,1:ns*3)= csv(1:ns*3,end-nlfp+1:end)';
     csv(1:ns*3,1:ns*3) = squeeze(A_(:,:,ifq))' * CS(1:nmeg,1:nmeg,ifq) * squeeze(A_(:,:,ifq));
     csv(end-nlfp+1:end,end-nlfp+1:end) = CS(end-nlfp+1:end,end-nlfp+1:end,ifq);
+
+    %replace power with real values
+    clear n
+    n = size(csv,1);
+    csv(1:(n+1):end) = real(diag(csv));
+
+    CSv(:,:,ifq) = csv; %.*10^4; %re-scale to avoid numerical errors
+    clear csv
 end
 
-csvmeg = 
+csvmeg = sum(real(CSv(1:end-nlfp,1:end-nlfp,:)),3); 
+sfmeg = mean(diag(csvmeg));
+csvlfp = sum(real(CSv(end-nlfp+1:end,end-nlfp+1:end,:)),3);
+sflfp=mean(diag(csvlfp));
+
+csvmeg = csvmeg./sfmeg;
+csvlfp=csvlfp./sflfp;
+%%
+
+csvmeglfp =  CSv(1:end-nlfp,end-nlfp+1:end,:);
+sfmeglfp = std(csvmeglfp(:));
+csvmeglfp = csvmeglfp./sfmeglfp;
 
 a=diag(csv);
 %
