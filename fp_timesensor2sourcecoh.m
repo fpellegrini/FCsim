@@ -34,6 +34,11 @@ for id = 1:numel(patientID)
     nlfp = numel(id_lfp_chan);
     id_meg_trials = 1:n_trials;
     
+    %scaling
+    load('scaling_factor.mat')
+    X(id_meg_chan,:,:)= X(id_meg_chan,:,:)./sfmeg;
+    X(id_lfp_chan,:,:) = X(id_lfp_chan,:,:)./sflfp;
+    
     if shuffle == 1
         rng('shuffle')
         id_lfp_trials = randperm(n_trials);

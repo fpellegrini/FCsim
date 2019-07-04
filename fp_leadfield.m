@@ -39,6 +39,7 @@ end
 
 for id = 1:numel(patientID)
     
+    %take PLFP04 for patient 04! leadfield in redPLFP04 is corrupted! 
     fileName = sprintf('redPLFP%s_off', patientID{id});
     
     clear D

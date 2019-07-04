@@ -19,10 +19,10 @@ for id = 1:numel(patientID)
     if ~exist(sprintf('%s%s_work',DIRLOG,logname)) & ~exist(sprintf('%s%s_done',DIRLOG,logname))
         eval(sprintf('!touch %s%s_work',DIRLOG,logname))
         load(sprintf('BF_Patient%s.mat',patientID{id}));
+        
         D=spm_eeg_load(sprintf('redPLFP%s_off',patientID{id}));
         
         X = D(:,:,:);
-        X=X./10^(log10(range(X(:)))-2); %scale the data
         D_ft = ftraw(D);
         n_trials = length(D_ft.trial);
         
@@ -40,6 +40,11 @@ for id = 1:numel(patientID)
         id_meg_trials = 1:n_trials;
         id_lfp_trials = 1:n_trials;
         
+        %scaling
+        load('scaling_factor.mat')
+        X(id_meg_chan,:,:)= X(id_meg_chan,:,:)./sfmeg;
+        X(id_lfp_chan,:,:) = X(id_lfp_chan,:,:)./sflfp;
+        
         
         %Now calculate power, cross spectrum and filters. In P, CS, L and A, bad
         %channels are already sorted out.
@@ -54,7 +59,7 @@ for id = 1:numel(patientID)
         for is=1:ns
             L(:,is,:)= L1{is};
         end
-        L=L.*(10^(-log10(range(L(:))))); %scale leadfield to avoid numerical issues
+        L=L./10^-12;
         
         %filter
         A=zeros(nmeg,ns,nfreq);
@@ -67,7 +72,7 @@ for id = 1:numel(patientID)
         
         CS(:,:,nfreq+1:end)=[];
         
-        outname = sprintf('%sFilter2_Patient%s',DIROUT, patientID{id});
+        outname = sprintf('%sFilter_Patient%s',DIROUT, patientID{id});
         save(outname,'A','CS','-v7.3')
         clearvars -except DIROUT DIRLOG logname patientID id
         
