@@ -1,6 +1,6 @@
 clear all
 
-id=5;
+id=1;
 
 patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
 
@@ -20,6 +20,11 @@ nmeg = numel(id_meg_chan);
 id_lfp_chan = 126:131;
 nlfp = numel(id_lfp_chan);
 
+%scaling 
+load('scaling_factor.mat')
+X(id_meg_chan,:,:)= X(id_meg_chan,:,:)./sfmeg;
+X(id_lfp_chan,:,:) = X(id_lfp_chan,:,:)./sflfp;
+
 %frequency parameters
 fs = D.fsample;
 fres = 75;
@@ -36,17 +41,16 @@ clear id_trials_1 id_trials_2 CS A_
 id_trials_1 = 1:n_trials;
 id_trials_2 = 1:n_trials;
 CS = fp_tsdata_to_cpsd(X,fres,'MT',[id_meg_chan id_lfp_chan], [id_meg_chan id_lfp_chan], id_trials_1, id_trials_2);
-    
 
 %construct filters
 
-load(sprintf('BF_Patient%s.mat',patientID{id}));
+load(sprintf('BF_Patient%s_1.mat',patientID{id}));
 L1 = inverse.MEG.L;
 ns_org = numel(L1);
 for is=1:ns_org
     L(:,is,:)= L1{is};
 end 
-
+L=L./10^-12;
 
 %delete voxels that are not common in all subs
 mni_pos = fp_getMNIpos(patientID{id});
@@ -91,10 +95,7 @@ for ifq = 1:nfreq
     clear csv
 end
 
-csvmeg = sum(real(CSv(1:end-nlfp,1:end-nlfp,:)),3); 
-sfmeg = mean(diag(csvmeg));
-csvlfp = sum(real(CSv(end-nlfp+1:end,end-nlfp+1:end,:)),3);
-sflfp=mean(diag(csvlfp));
+
 
 csvmeg = csvmeg./sfmeg;
 csvlfp=csvlfp./sflfp;

@@ -18,16 +18,7 @@ for id = 1:numel(patientID)
     %load data
     clear X X1 
     D = spm_eeg_load(sprintf('redPLFP%s_off', patientID{id}));
-    X1 = D(:,:,:);
-    %rescale data channel-wise
-    X = X1;
-    for ii = 1:size(X1,1)
-        clear o u
-        o = squeeze(X1(ii,:,:));
-        u = 10^(log10(range(o(:))));
-        X(ii,:,:)=(X1(ii,:,:)./u);
-    end
-    
+    X = D(:,:,:);
     D_ft = ftraw(D);
     n_trials = length(D_ft.trial);
     
@@ -38,6 +29,11 @@ for id = 1:numel(patientID)
     nmeg = numel(id_meg_chan);
     id_lfp_chan = 126:131;
     nlfp = numel(id_lfp_chan);
+    
+    %scaling
+    load('scaling_factor.mat')
+    X(id_meg_chan,:,:)= X(id_meg_chan,:,:)./sfmeg;
+    X(id_lfp_chan,:,:) = X(id_lfp_chan,:,:)./sflfp;
     
     %frequency parameters
     fs = D.fsample;
@@ -63,7 +59,7 @@ for id = 1:numel(patientID)
         L(:,is,:) = u(:,1:2)*s(1:2,1:2);
         
     end
-    %     L = L.* (10^(-log10(range(L(:)))+5.5));
+    L = L./10^-12;
     
     %delete voxels that are not common in all subs
     clear mni_pos noEq 
