@@ -58,12 +58,12 @@ for id = 1:numel(patientID)
 
         load('BF.mat')
 %         save(sprintf('%s/BF_Patient%s',pwd,patientID{id}),'sources')
-        save(sprintf('%s/BF_Patient%s_1',pwd,patientID{id}),'sources', ...
+        save(sprintf('%s/BF_Patient%s_2',pwd,patientID{id}),'sources', ...
             'inverse','data','features','output','write','-v7.3')
         !rm ./BF.mat
         
     else
-        load(sprintf('%s/BF_Patient%s1',pwd,patientID{id}))
+        load(sprintf('%s/BF_Patient%s',pwd,patientID{id}))
     end
     
     clear leadfield
@@ -75,14 +75,19 @@ for id = 1:numel(patientID)
         chanpos = D_ft.grad.chanpos;
         chanpos(D.badchannels,:)=[];
         
-        %select leadfield at specific node and direction
-        lf = leadfield{inode}(:,idir);
-        
-        loc = mk_sensors_plane(chanpos(:,[2 1 3]));
-        close all
-        figure
-        showfield_general(lf,loc);
-        colormap('jet')
+        mni_pos = fp_getMNIpos(patientID{id});
+        inode = find(mni_pos(:,1)==0 & mni_pos(:,2)==0 & mni_pos(:,3)==0);
+        for idir = 1: 3 
+            figure
+            %select leadfield at specific node and direction
+            lf = leadfield{inode}(:,idir);
+
+            loc = mk_sensors_plane(chanpos(:,[2 1 3]));
+%             close all
+            figure
+            showfield_general(lf,loc);
+            colormap('jet')
+        end
 %         caxis([-(10^-12) 10^-12])
 %         title(sprintf('Patient %s, node %d, direction %d', patientID{id}, inode, idir))
     
