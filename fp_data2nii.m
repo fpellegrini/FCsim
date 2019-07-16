@@ -8,12 +8,12 @@ function fp_data2nii(data,id, nit, outname)
 if isempty(nit)
     nit=500;
 end
-
+keyboard
 [pos, voxID] = fp_find_commonvox;
 if ~isnan(id)
     data = data(voxID{id}); %start data
 end
-cube = nan([91 109 91]); %destimation cube
+cube = nan([91 109 91]); %destination cube
 
 %mask for all data points outside the brain
 mask= wjn_read_nii('/Users/franziskapellegrini/Dropbox/Master/Masterarbeit/MasterThesis/wjn_toolbox/spm12/toolbox/FieldMap/brainmask.nii');
@@ -25,6 +25,10 @@ cube(mask==0) = 0;
 x = round(x);
 y=round(y);
 z=round(z);
+
+x(z<0)=[];
+y(z<0)=[];
+z(z<0)=[];
 
 %fill data into cube
 for i =1:numel(x)    
