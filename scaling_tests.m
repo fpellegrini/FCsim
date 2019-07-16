@@ -44,7 +44,7 @@ CS = fp_tsdata_to_cpsd(X,fres,'MT',[id_meg_chan id_lfp_chan], [id_meg_chan id_lf
 
 %construct filters
 
-load(sprintf('BF_Patient%s_1.mat',patientID{id}));
+load(sprintf('BF_Patient%s.mat',patientID{id}));
 L1 = inverse.MEG.L;
 ns_org = numel(L1);
 for is=1:ns_org

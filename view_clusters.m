@@ -1,7 +1,7 @@
 %% group
 
 clear all
-load('p_cluster_g_freq_imag_mnc3.mat')
+load('p_cluster_g_c_freq_abs.mat')
 
 for iclus = 1:numel(p)
     if p(iclus) < 0.01

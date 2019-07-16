@@ -14,7 +14,7 @@ end
 for id = 1:numel(patientID)
 %     load(sprintf('BF_Patient%s.mat',patientID{id}));
     load(sprintf('Filter_Patient%s.mat',patientID{id}));%Filter and whole CS
-    D = spm_eeg_load(sprintf('redPLFP%s_off', patientID{id}));
+    D1 = spm_eeg_load(sprintf('PLFP%s_off', patientID{id}));
     
     X = D(:,:,:);
     D_ft = ftraw(D);
@@ -48,7 +48,7 @@ for id = 1:numel(patientID)
     
     %throw away all frequencies above 90 Hz (in filters already done) 
     CS(:,:,nfreq+1:end)=[];
-    
+   
     %cross spectrum
     if shuffle ==1
         %when trials are shuffled, the CS between meg and lfp must be
