@@ -8,20 +8,29 @@ else
     patientID{1} = patientNumber;
 end
 
-nit= 1000;
-npcs = 3;
-COH = zeros(nit,117,117,46);
+if ~exist('DIROUT','var')
+    error('Please indicate where the results should be saved.')
+end
 
-for id = 1:numel(patientID)
+ndim=2;
+nit= 2;
+npcs = 2;
+COH = zeros(nit,117,117,46);
+TRUE_COH = zeros(117,117,46);
+
+%%
+for id = 1:2%numel(patientID)
+    fprintf('Working on subject %d. \n',id)
     
-    load(sprintf('Filter_Patient%s.mat',patientID{id}));% 1D-A and true CS
-    clear A
-    
+    %load data
+    clear X
     D = spm_eeg_load(sprintf('redPLFP%s_off', patientID{id}));
-    X = D(:,:,:);  
+    X = D(:,:,:);
     D_ft = ftraw(D);
     n_trials = length(D_ft.trial);
     
+    %channel IDs
+    clear id_meg_chan id_lfp_chan
     id_meg_chan = 1:125;
     id_meg_chan(D.badchannels)=[];
     nmeg = numel(id_meg_chan);
@@ -33,26 +42,28 @@ for id = 1:numel(patientID)
     X(id_meg_chan,:,:)= X(id_meg_chan,:,:)./sfmeg;
     X(id_lfp_chan,:,:) = X(id_lfp_chan,:,:)./sflfp;
     
+    %frequency parameters
     fs = D.fsample;
     fres = 75;
     frqs = sfreqs(fres, fs);
     frqs(frqs>90) = [];
     nfreq = numel(frqs);
     
-    CS = CS(1:(end-nlfp),1:(end-nlfp),:); %throw away lfp channels
-    
     %construct filters
     
-    %leadfield
-    load(sprintf('BF_Patient%s.mat',patientID{id}));
-    L1 = inverse.MEG.L;
-    ns = numel(L1);
-    for is=1:ns
-        L(:,is,:)= L1{is};
-    end
-    L = L./10^-12;
+    %load true CS
+    load(sprintf('Filter_Patient%s.mat',patientID{id}));% 1D-A and true CS
+    clear A
+    CS = CS(1:(end-nlfp),1:(end-nlfp),:); %throw away lfp channels
     
-    A = nan(nmeg,3,ns,nfreq);
+    %leadfield
+    clear L
+    load(sprintf('BF_Patient%s.mat',patientID{id}));
+    L = fp_get_lf(inverse);
+    ns = size(L,2);
+    
+    %construct beamformer
+    A = nan(nmeg,ndim,ns,nfreq);
     for ifrq = 1:nfreq
         clear currentCS lambda CSinv
         currentCS = squeeze(CS(:,:,ifrq)); %nmeg x nmeg x nfq
@@ -66,7 +77,90 @@ for id = 1:numel(patientID)
         end
     end
     
-    %calculate coherence for permutations
+    % true coherence
+    
+    clear mni_pos label code roi_id u_roi_id csroi
+    mni_pos = fp_getMNIpos(patientID{id});
+    for ii = 1: ns
+        [label{ii},code{ii},roi_id(ii)]=fp_get_mni_anatomy(mni_pos(ii,:));
+    end
+    u_roi_id = sort(unique(roi_id));
+    nroi = numel(u_roi_id);
+    
+    csroi = nan(nroi-1,nroi-1,npcs,npcs,nfreq);
+    %project cross spectrum to voxel space and get power and coherence
+    
+    tic
+    for ifq = 1:nfreq
+        
+        clear Aroi A_ CSv pv CSn v5 cseig
+        Aroi = squeeze(A(:,:,roi_id~=0,ifq));
+        A_ = reshape(Aroi, [nmeg, ndim*size(Aroi,3)]);
+        CSv = A_' * CS(:,:,ifq) * A_;
+        pv = fp_project_power(CS(:,:,ifq),A_);
+        CSn = CSv ./ sqrt(pv * pv');
+        
+        %region pca
+        is = 1;
+        for iroi = 2:nroi
+            clear v cCS cns iid
+            
+            iid = is: is+ (sum(roi_id == u_roi_id(iroi)))*ndim-1;
+            cCS = CSn(iid,iid);
+            [v, ~, ~] = eig(real(cCS));
+            
+            if size(v,1)>npcs
+                v5{iroi} = v(:,1:npcs); %npcs * nregionvoxels
+            else
+                v5{iroi} = v;
+            end
+            
+            is = is+length(iid);
+        end
+        
+        %apply the filters to the cs
+        kr=1;
+        for kroi = 2:nroi
+            clear kid
+            
+            kid = kr: kr+ (sum(roi_id == u_roi_id(kroi)))*ndim-1;
+            jr=1;
+            for jroi =2: nroi
+                clear cCS jid
+                jid = jr:jr+ (sum(roi_id == u_roi_id(jroi)))*ndim-1;
+                cCS = CSn(kid,jid);
+                
+                cseig(kroi-1,jroi-1,:,:) = v5{kroi}' * cCS * v5{jroi};
+                
+                jr=jr+length(jid);
+            end
+            
+            kr=kr+length(kid);
+        end
+        
+        %divide by power
+        for ifc=1:npcs
+            for jfc =1:npcs
+                clear proi
+                proi = squeeze(real(diag(cseig(:,:,ifc,jfc))));
+                csroi(:,:,ifc,jfc,ifq)= cseig(:,:,ifc,jfc)./sqrt(proi' * proi);
+            end
+        end       
+    end
+    toc %ca 35 sec
+    clear true_coh
+    for ii=1:nroi-1
+        for jj= 1: nroi-1
+            for ifq = 1: nfreq
+                true_coh(ii,jj,ifq) =  sum(sum(triu(squeeze(abs(imag(csroi(ii,jj,:,:,ifq)))))));
+            end
+        end
+    end
+    
+    TRUE_COH = TRUE_COH + true_coh;
+    
+    
+    % calculate coherence for permutations
     
     for iit = 1:nit
         
@@ -77,27 +171,25 @@ for id = 1:numel(patientID)
         id_trials_2 = randperm(n_trials);
         CS = fp_tsdata_to_cpsd(X,fres,'MT',id_meg_chan, id_meg_chan, id_trials_1, id_trials_2);
         
-        
-        clear mni_pos label code roi_id u_roi_id
+        %get rois
+        clear mni_pos label code roi_id u_roi_id csroi
         mni_pos = fp_getMNIpos(patientID{id});
         for ii = 1: ns
             [label{ii},code{ii},roi_id(ii)]=fp_get_mni_anatomy(mni_pos(ii,:));
         end
         u_roi_id = sort(unique(roi_id));
-        nroi = numel(u_roi_id);
-        
+        nroi = numel(u_roi_id);       
         csroi = nan(nroi-1,nroi-1,npcs,npcs,nfreq);
-        %project cross spectrum to voxel space and get power and coherence
         
         tic
         for ifq = 1:nfreq
             
             clear Aroi A_ CSv pv CSn v5 cseig
             Aroi = squeeze(A(:,:,roi_id~=0,ifq));
-            A_ = reshape(Aroi, [nmeg, 3*size(Aroi,3)]);
+            A_ = reshape(Aroi, [nmeg, ndim*size(Aroi,3)]);
             CSv = A_' * CS(:,:,ifq) * A_;
             pv = fp_project_power(CS(:,:,ifq),A_);
-%             pv = real(diag(CSv)); %3*nvox x 1
+            %             pv = real(diag(CSv)); %3*nvox x 1
             CSn = CSv ./ sqrt(pv * pv');
             
             %region pca
@@ -105,7 +197,7 @@ for id = 1:numel(patientID)
             for iroi = 2:nroi
                 clear v cCS cns iid
                 
-                iid = is: is+ (sum(roi_id == u_roi_id(iroi)))*3-1;
+                iid = is: is+ (sum(roi_id == u_roi_id(iroi)))*ndim-1;
                 cCS = CSn(iid,iid);
                 [v, ~, ~] = eig(real(cCS));
                 
@@ -123,11 +215,11 @@ for id = 1:numel(patientID)
             for kroi = 2:nroi
                 clear kid
                 
-                kid = kr: kr+ (sum(roi_id == u_roi_id(kroi)))*3-1;
+                kid = kr: kr+ (sum(roi_id == u_roi_id(kroi)))*ndim-1;
                 jr=1;
                 for jroi =2: nroi
                     clear cCS jid
-                    jid = jr:jr+ (sum(roi_id == u_roi_id(jroi)))*3-1;
+                    jid = jr:jr+ (sum(roi_id == u_roi_id(jroi)))*ndim-1;
                     cCS = CSn(kid,jid);
                     
                     cseig(kroi-1,jroi-1,:,:) = v5{kroi}' * cCS * v5{jroi};
@@ -146,10 +238,10 @@ for id = 1:numel(patientID)
                     csroi(:,:,ifc,jfc,ifq)= cseig(:,:,ifc,jfc)./sqrt(proi' * proi);
                 end
             end
-            %         csroi(:,:,:,:,ifq)= cseig;
             
         end
         toc %ca 35 sec
+        clear coh
         
         for ii=1:nroi-1
             for jj= 1: nroi-1
@@ -162,11 +254,12 @@ for id = 1:numel(patientID)
         COH(iit,:,:,:) = squeeze(COH(iit,:,:,:)) + coh;
         
     end
-    clearvars -except COH id patientID nit npcs nfreq
-
+    clearvars -except COH TRUE_COH id patientID nit npcs nfreq ndim
+  % 
 end
 
-
+%%%%%maybe save COH and TRUE_COH at this point 
+%%
 %neighbourhood
 load('roi_conn.mat')
 roiconn_s = sparse(roi_conn);
@@ -177,14 +270,14 @@ kron_conn = kron(roiconn_s,kron_conn);
 
 threshold = prctile(COH(:),99.9);
 
-%% until here 
+%% until here
 %shuffled clusters
 
 onoff = COH>threshold;
-big_clusters = zeros(nit-1,nfreq,ns,ns);
+big_clusters = zeros(nit,nfreq,nroi,nroi);
 
 %find the clusters
-for iit = 1: nit-1
+for iit = 1: nit
     
     clear onoff_temp u ind NB
     onoff_temp = squeeze(onoff(iit,:,:)); %nfreq x ns
