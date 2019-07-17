@@ -12,17 +12,18 @@ if ~exist('DIROUT','var')
     error('Please indicate where the results should be saved.')
 end
 
+nit=2; %%%%
 [~, voxID] = fp_find_commonvox;
 nlags = 20;
 ndim = 2;
-nit=2; %%%%
+
 
 %%
 
 for id = 1:numel(patientID)
     fprintf('Working on subject %d. \n',id)
     %load data
-    clear X X1
+    clear X 
     D = spm_eeg_load(sprintf('redPLFP%s_off', patientID{id}));
     X = D(:,:,:);
     D_ft = ftraw(D);
@@ -51,21 +52,11 @@ for id = 1:numel(patientID)
     z = exp(-i*pi*frqs)';
     
     %construct filters
-    clear L1 L L2
+    
+    %leadfield
+    clear L
     load(sprintf('BF_Patient%s.mat',patientID{id}));
-    L1 = inverse.MEG.L;
-    ns_org = numel(L1);
-    for is=1:ns_org
-        
-        L2(:,is,:)= L1{is};
-        
-        %remove radial orientation
-        clear u s
-        [u, ~, s] = svd(squeeze(L2(:,is,:)),'econ');
-        L(:,is,:) = u(:,1:2)*s(1:2,1:2);
-        
-    end
-    L = L./10^-12;
+    L = fp_get_lf(inverse);
     
     %delete voxels that are not common in all subs
     clear mni_pos noEq
@@ -125,8 +116,7 @@ for id = 1:numel(patientID)
         n1 = size(csv1,1);
         csv1(1:(n1+1):end) = pv;
         csv(1:ns*ndim,1:ns*ndim)=csv1;
-        clear csv1 pv n1
-        
+        clear csv1 pv n1       
         
         %replace power with real values
         clear n

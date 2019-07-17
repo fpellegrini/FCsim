@@ -7,10 +7,10 @@ patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
 pow = nan(numel(patientID),numel(voxID{1}),46);
 pow_noise = nan(numel(patientID),numel(voxID{1}),46);
 
-for id = 3
+for id = 1:numel(patientID)
     clearvars -except id patientID pow voxID pow_noise
     
-    load(sprintf('Filter2_Patient%s.mat',patientID{id}))  
+    load(sprintf('Filter_Patient%s.mat',patientID{id}))  
     
     mni_pos = fp_getMNIpos(patientID{id});
     [~, noEq] = fp_symmetric_vol(mni_pos);
@@ -21,18 +21,20 @@ for id = 3
     CS = CS(1:nmeg,1:nmeg,:);  
 
     for ifreq = 1: nfreq    
+        
+        noise = svd(abs(CS(:,:,ifreq)));
+        noise = noise(rank(CS(:,:,ifreq)));
 
         cfilter = filter(:,:,ifreq)';
 
         for is = 1:ns    
             pow(id,is,ifreq) = real(cfilter(is,:) * CS(:,:,ifreq) * cfilter(is,:)'); 
-            pow_noise(id,is,ifreq) = real(cfilter(is,:) * eye(size(CS(:,:,ifreq))) * cfilter(is,:)'); 
+            pow_noise(id,is,ifreq) = real(cfilter(is,:) * (eye(size(CS(:,:,ifreq))).*1) * cfilter(is,:)'); 
         end    
     end 
 end
 
 pow = pow./pow_noise;
-pow = pow(id,:,:);
 
 a = squeeze(mean(pow,1));
 
@@ -40,6 +42,8 @@ a = squeeze(mean(pow,1));
 b = mean(a(:,2:10),2);
 c = mean(a(:,11:17),2);
 d = mean(a(:,2:17),2);
+
+% b = squeeze(mean(mean(pow_noise,1),3));
 
 outname = 'pow1.nii';
 fp_data2nii(b,nan,[],outname)

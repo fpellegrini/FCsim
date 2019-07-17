@@ -14,7 +14,7 @@ end
 for id = 1:numel(patientID)
 %     load(sprintf('BF_Patient%s.mat',patientID{id}));
     load(sprintf('Filter_Patient%s.mat',patientID{id}));%Filter and whole CS
-    D1 = spm_eeg_load(sprintf('PLFP%s_off', patientID{id}));
+    D = spm_eeg_load(sprintf('redPLFP%s_off', patientID{id}));
     
     X = D(:,:,:);
     D_ft = ftraw(D);

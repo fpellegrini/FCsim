@@ -8,7 +8,7 @@ function fp_data2nii(data,id, nit, outname)
 if isempty(nit)
     nit=500;
 end
-keyboard
+
 [pos, voxID] = fp_find_commonvox;
 if ~isnan(id)
     data = data(voxID{id}); %start data
