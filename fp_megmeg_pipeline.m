@@ -60,6 +60,19 @@ for id = 1:2%numel(patientID)
     clear L
     load(sprintf('BF_Patient%s.mat',patientID{id}));
     L = fp_get_lf(inverse);
+    ns_org = size(L,2);
+    
+    %get rois 
+    clear mni_pos label code roi_id u_roi_id csroi
+    mni_pos = fp_getMNIpos(patientID{id});
+    for ii = 1: ns_org
+        [label{ii},code{ii},roi_id(ii)]=fp_get_mni_anatomy(mni_pos(ii,:));
+    end
+    u_roi_id = sort(unique(roi_id));
+    nroi = numel(u_roi_id);
+    
+    %get rid of white voxels
+    L(:,roi_id==0,:)=[];
     ns = size(L,2);
     
     %construct beamformer
@@ -79,23 +92,14 @@ for id = 1:2%numel(patientID)
     
     % true coherence
     
-    clear mni_pos label code roi_id u_roi_id csroi
-    mni_pos = fp_getMNIpos(patientID{id});
-    for ii = 1: ns
-        [label{ii},code{ii},roi_id(ii)]=fp_get_mni_anatomy(mni_pos(ii,:));
-    end
-    u_roi_id = sort(unique(roi_id));
-    nroi = numel(u_roi_id);
-    
     csroi = nan(nroi-1,nroi-1,npcs,npcs,nfreq);
-    %project cross spectrum to voxel space and get power and coherence
     
     tic
     for ifq = 1:nfreq
         
-        clear Aroi A_ CSv pv CSn v5 cseig
-        Aroi = squeeze(A(:,:,roi_id~=0,ifq));
-        A_ = reshape(Aroi, [nmeg, ndim*size(Aroi,3)]);
+        clear cA A_ CSv pv CSn v5 cseig
+        cA = squeeze(A(:,:,:,ifq));
+        A_ = reshape(cA, [nmeg, ndim*size(cA,3)]);
         CSv = A_' * CS(:,:,ifq) * A_;
         pv = fp_project_power(CS(:,:,ifq),A_);
         CSn = CSv ./ sqrt(pv * pv');
@@ -185,8 +189,8 @@ for id = 1:2%numel(patientID)
         for ifq = 1:nfreq
             
             clear Aroi A_ CSv pv CSn v5 cseig
-            Aroi = squeeze(A(:,:,roi_id~=0,ifq));
-            A_ = reshape(Aroi, [nmeg, ndim*size(Aroi,3)]);
+            cA = squeeze(A(:,:,roi_id~=0,ifq));
+            A_ = reshape(cA, [nmeg, ndim*size(cA,3)]);
             CSv = A_' * CS(:,:,ifq) * A_;
             pv = fp_project_power(CS(:,:,ifq),A_);
             %             pv = real(diag(CSv)); %3*nvox x 1
@@ -254,7 +258,7 @@ for id = 1:2%numel(patientID)
         COH(iit,:,:,:) = squeeze(COH(iit,:,:,:)) + coh;
         
     end
-    clearvars -except COH TRUE_COH id patientID nit npcs nfreq ndim
+    clearvars -except COH TRUE_COH id patientID nit npcs nfreq ndim nroi
   % 
 end
 
@@ -271,7 +275,41 @@ kron_conn = kron(roiconn_s,kron_conn);
 threshold = prctile(COH(:),99.9);
 
 %% until here
-%shuffled clusters
+%true cluster 
+clear onoff
+onoff = TRUE_COH>threshold;
+
+%find the clusters
+clear u ind NB
+u = onoff(:); %should be the same indexing like in kron_conn now; nkron x 1
+
+ind = find(u==1); %remember indeces of super-threshold coherences
+NB = kron_conn;
+NB(u==0,:)=[]; %pass the neighbourhood structure only for the super-threshold voxels
+NB(:,u==0)=[];
+
+%components assigns every voxel to a cluster, even if this means that every voxel is its own cluster
+clear ci x clu
+[ci, x] = components(NB); %x is the histogram of the clusters
+clu = zeros(size(kron_conn,1),1);%refill with sub-threshold voxels
+clu(ind)= ci; %nkron x 1
+clu = reshape(clu,[nfreq nroi nroi]);
+
+% if numel(x)>0
+%     big_clu_id = find(x==max(x));
+%     big_clu_id=big_clu_id(1); %in case there are two clusters with the same size, take the first one
+%     true_clusters = (clu == big_clu_id);
+% end
+
+%save true cluster for later
+clear true_clu_pos true_total_pos true_sizes_pos
+true_clu = clu;
+true_total = numel(x);
+true_sizes = x;
+    
+
+
+%% shuffled clusters
 
 onoff = COH>threshold;
 big_clusters = zeros(nit,nfreq,nroi,nroi);
@@ -293,7 +331,7 @@ for iit = 1: nit
     [ci, x] = components(NB); %x is the histogram of the clusters
     clu = zeros(size(kron_conn,1),1);%refill with sub-threshold voxels
     clu(ind)= ci; %nkron x 1
-    clu = reshape(clu,[nfreq ns ns]); %nfreq x ns
+    clu = reshape(clu,[nfreq nroi nroi]); 
     
     if numel(x)>0
         big_clu_id = find(x==max(x));
@@ -303,32 +341,32 @@ for iit = 1: nit
     
 end
 
-% %compare not only cluster size but also magnitude of coherence within
-% %the relevant cluster
-%
-% clear a
-% a = zeros(size(COH)); %only shuffled clusters
-% a(big_clusters==1) = COH(big_clusters==1);
-% shufCoh = squeeze(sum(sum(sum(a,2),3),4));
-%
-% if true_total>0 %when at least one true cluster exists
-%     for iclus = 1:true_total
-%         clear trueCoh temp
-%         trueCoh = sum(sum(sum(true_coh(true_clu==iclus)))); %scalar
-%         p(iclus) = sum(shufCoh>trueCoh)/numel(shufCoh);
-%     end
-%
-% elseif sum(shufCoh)== 0  %when no cluster was found it any iteration
-%     p= nan;
-%
-% else %when only in shuffled conditions clusters were found
-%     clear trueCoh
-%     trueCoh = 0;
-%     p = sum(shufCoh>trueCoh)/numel(shufCoh);
-% end
-%
-%
-% outname = sprintf('%sp_megmeg_%s',DIROUT,abs_imag);
-% save(outname,'p','threshold','true_clu','true_sizes','-v7.3')
-%
-%
+%compare not only cluster size but also magnitude of coherence within
+%the relevant cluster
+
+clear a
+a = zeros(size(COH)); %only shuffled clusters
+a(big_clusters==1) = COH(big_clusters==1);
+shufCoh = squeeze(sum(sum(sum(a,2),3),4));
+
+if true_total>0 %when at least one true cluster exists
+    for iclus = 1:true_total
+        clear trueCoh temp
+        trueCoh = sum(sum(sum(TRUE_COH(true_clu==iclus)))); %scalar
+        p(iclus) = sum(shufCoh>trueCoh)/numel(shufCoh);
+    end
+
+elseif sum(shufCoh)== 0  %when no cluster was found it any iteration
+    p= nan;
+
+else %when only in shuffled conditions clusters were found
+    clear trueCoh
+    trueCoh = 0;
+    p = sum(shufCoh>trueCoh)/numel(shufCoh);
+end
+
+
+outname = sprintf('%sp_megmeg_%s',DIROUT,abs_imag);
+save(outname,'p','threshold','true_clu','true_sizes','-v7.3')
+
+

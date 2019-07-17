@@ -264,11 +264,11 @@ clu = zeros(size(kron_conn,1),1);%refill with sub-threshold voxels
 clu(ind)= ci; %nkron x 1
 clu = reshape(clu,[nfreq ns]); %nfreq x ns
 
-% if numel(x)>0
-%     big_clu_id = find(x==max(x));
-%     big_clu_id=big_clu_id(1); %in case there are two clusters with the same size, take the first one
-%     clusters_neg_true = (clu == big_clu_id);
-% end
+if numel(x)>0
+    big_clu_id = find(x==max(x));
+    big_clu_id=big_clu_id(1); %in case there are two clusters with the same size, take the first one
+    clusters_neg_true = (clu == big_clu_id);
+end
 
 %save true cluster for later
 clear true_clu_neg true_total_neg true_sizes_neg
