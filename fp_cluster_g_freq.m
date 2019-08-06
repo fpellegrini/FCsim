@@ -65,7 +65,7 @@ for id = 1:numel(patientID)
 end
 
 avg_coh = squeeze(sum(COH,1));
-threshold = prctile(reshape(avg_coh,1,[]),99);
+threshold = prctile(reshape(avg_coh,1,[]),99.99);
 
 %cat the chunks
 avg_coh = squeeze(reshape(avg_coh,[size(COH,2)*size(COH,3),size(COH,4), size(COH,5)]));
@@ -73,58 +73,48 @@ onoff = avg_coh>threshold;
 
 %true cluster
 clear clu total x big_clu_id
-[clu, total] = findcluster(squeeze(onoff(1,:,:))',...
+[clu, true_total] = findcluster(squeeze(onoff(1,:,:))',...
     match_conn, match_conn, minnbchan);
-true_clu = clu';
-true_total = total;
+true_clu = fp_order_clusters(clu',true_total);
 true_avg_coh = squeeze(avg_coh(1,:,:))';
 
 onoff(1,:,:) =[]; %remove true coherence dimension
 nit = size(onoff,1);
 
-
 %shuffled clusters
-big_clusters = zeros(nit,nfreq,ns);
+shuf_clusters = zeros(nit,ns,nfreq);
 avg_coh = avg_coh(end-nit+1:end,:,:);%select shuffled clusters only
 
 %find the clusters
-for iit = 1: nit
-    
+for iit = 1: nit    
     clear clu total x big_clu_id
     [clu, total] = findcluster(squeeze(onoff(iit,:,:))',...
         match_conn,  minnbchan);
-    if total>0
-        clear x
-        x = hist(clu(:),0:total);
-        big_clu_id = find(x(2:end)==max(x(2:end)));
-        big_clu_id=big_clu_id(1); %in case there are two clusters with the same size, take the first one
-        big_clusters(iit,:,:) = (clu == big_clu_id)';
-    end
+    shuf_clusters(iit,:,:) = fp_order_clusters(clu,total);
     
 end
 
 %compare not only cluster size but also magnitude of coherence within
 %the relevant cluster
-clear a
-a = zeros(size(avg_coh)); %only shuffled clusters
-a(big_clusters==1) = avg_coh(big_clusters==1);
-shufCoh = squeeze(sum(sum(a,2),3)); %cat across chunks
-
-
-if true_total>0 %when at least one true cluster exists
+if true_total>0 %when at least one true cluster exists    
+    
     for iclus = 1:true_total
+        
+        clear a shufCoh
+        a = zeros(size(avg_coh));
+        a(shuf_clusters==iclus) = avg_coh(shuf_clusters==iclus);
+        shufCoh = squeeze(sum(sum(a,2),3)); %cat across chunks
+        
         clear trueCoh temp
         trueCoh = sum(sum(true_avg_coh(true_clu==iclus))); %scalar
         p(iclus) = sum(shufCoh>trueCoh)/numel(shufCoh);
     end
     
-elseif sum(shufCoh)== 0  %when no cluster was found it any iteration
+elseif sum(shuf_clusters)== 0  %when no cluster was found it any iteration
     p= nan;
     
 else %when only in shuffled conditions clusters were found
-    clear trueCoh
-    trueCoh = 0;
-    p = sum(shufCoh>trueCoh)/numel(shufCoh);
+    p = 1;
 end
 
 
