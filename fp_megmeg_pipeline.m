@@ -1,6 +1,6 @@
-function fp_megmeg_pipeline(patientNumber)
+function fp_megmeg_pipeline(patientNumber,DIROUT)
 
-% fp_addpath
+fp_addpath
 
 if isempty(patientNumber)
     patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
@@ -13,13 +13,13 @@ if ~exist('DIROUT','var')
 end
 
 ndim=2;
-nit= 2;
+nit= 1000;
 npcs = 2;
 COH = zeros(nit,117,117,46);
 TRUE_COH = zeros(117,117,46);
 
 %%
-for id = 1:2%numel(patientID)
+for id = 1:numel(patientID)
     fprintf('Working on subject %d. \n',id)
     
     %load data
@@ -168,6 +168,8 @@ for id = 1:2%numel(patientID)
     
     for iit = 1:nit
         
+        fprintf('Working on iteration %d. \n',iit)
+        
         %cross spectrum
         clear CS coh
         id_trials_1 = 1:n_trials;
@@ -175,25 +177,16 @@ for id = 1:2%numel(patientID)
         id_trials_2 = randperm(n_trials);
         CS = fp_tsdata_to_cpsd(X,fres,'MT',id_meg_chan, id_meg_chan, id_trials_1, id_trials_2);
         
-        %get rois
-        clear mni_pos label code roi_id u_roi_id csroi
-        mni_pos = fp_getMNIpos(patientID{id});
-        for ii = 1: ns
-            [label{ii},code{ii},roi_id(ii)]=fp_get_mni_anatomy(mni_pos(ii,:));
-        end
-        u_roi_id = sort(unique(roi_id));
-        nroi = numel(u_roi_id);       
         csroi = nan(nroi-1,nroi-1,npcs,npcs,nfreq);
         
         tic
         for ifq = 1:nfreq
             
             clear Aroi A_ CSv pv CSn v5 cseig
-            cA = squeeze(A(:,:,roi_id~=0,ifq));
+            cA = squeeze(A(:,:,:,ifq));
             A_ = reshape(cA, [nmeg, ndim*size(cA,3)]);
             CSv = A_' * CS(:,:,ifq) * A_;
             pv = fp_project_power(CS(:,:,ifq),A_);
-            %             pv = real(diag(CSv)); %3*nvox x 1
             CSn = CSv ./ sqrt(pv * pv');
             
             %region pca
@@ -262,7 +255,8 @@ for id = 1:2%numel(patientID)
   % 
 end
 
-%%%%%maybe save COH and TRUE_COH at this point 
+outname = sprintf('%sROI_COH_allsubs',DIROUT);
+save(outname,'COH','TRUE_COH','-v7.3')
 %%
 %neighbourhood
 load('roi_conn.mat')
@@ -274,7 +268,7 @@ kron_conn = kron(roiconn_s,kron_conn);
 
 threshold = prctile(COH(:),99.9);
 
-%% until here
+%%
 %true cluster 
 clear onoff
 onoff = TRUE_COH>threshold;
@@ -293,26 +287,20 @@ clear ci x clu
 [ci, x] = components(NB); %x is the histogram of the clusters
 clu = zeros(size(kron_conn,1),1);%refill with sub-threshold voxels
 clu(ind)= ci; %nkron x 1
-clu = reshape(clu,[nfreq nroi nroi]);
-
-% if numel(x)>0
-%     big_clu_id = find(x==max(x));
-%     big_clu_id=big_clu_id(1); %in case there are two clusters with the same size, take the first one
-%     true_clusters = (clu == big_clu_id);
-% end
+clu = reshape(clu,[nfreq nroi-1 nroi-1]);
 
 %save true cluster for later
 clear true_clu_pos true_total_pos true_sizes_pos
 true_clu = clu;
 true_total = numel(x);
-true_sizes = x;
     
 
 
 %% shuffled clusters
 
+clear onoff
 onoff = COH>threshold;
-big_clusters = zeros(nit,nfreq,nroi,nroi);
+big_clusters = zeros(nit,nfreq,nroi-1,nroi-1);
 
 %find the clusters
 for iit = 1: nit
@@ -331,7 +319,7 @@ for iit = 1: nit
     [ci, x] = components(NB); %x is the histogram of the clusters
     clu = zeros(size(kron_conn,1),1);%refill with sub-threshold voxels
     clu(ind)= ci; %nkron x 1
-    clu = reshape(clu,[nfreq nroi nroi]); 
+    clu = reshape(clu,[nfreq nroi-1 nroi-1]); 
     
     if numel(x)>0
         big_clu_id = find(x==max(x));
@@ -365,7 +353,7 @@ else %when only in shuffled conditions clusters were found
     p = sum(shufCoh>trueCoh)/numel(shufCoh);
 end
 
-
+%%
 outname = sprintf('%sp_megmeg_%s',DIROUT,abs_imag);
 save(outname,'p','threshold','true_clu','true_sizes','-v7.3')
 
