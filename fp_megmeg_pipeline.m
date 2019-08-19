@@ -1,6 +1,6 @@
 function fp_megmeg_pipeline(patientNumber,DIROUT)
 
-fp_addpath
+% fp_addpath
 
 if isempty(patientNumber)
     patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
@@ -165,21 +165,24 @@ for id = 1:numel(patientID)
     
     
     % calculate coherence for permutations
-    
+   
     for iit = 1:nit
+        tic
         
         fprintf('Working on iteration %d. \n',iit)
         
         %cross spectrum
+        
         clear CS coh
         id_trials_1 = 1:n_trials;
         rng('shuffle')
         id_trials_2 = randperm(n_trials);
         CS = fp_tsdata_to_cpsd(X,fres,'MT',id_meg_chan, id_meg_chan, id_trials_1, id_trials_2);
         
+        
         csroi = nan(nroi-1,nroi-1,npcs,npcs,nfreq);
         
-        tic
+        
         for ifq = 1:nfreq
             
             clear Aroi A_ CSv pv CSn v5 cseig
@@ -237,7 +240,7 @@ for id = 1:numel(patientID)
             end
             
         end
-        toc %ca 35 sec
+        
         clear coh
         
         for ii=1:nroi-1
@@ -249,7 +252,7 @@ for id = 1:numel(patientID)
         end
         
         COH(iit,:,:,:) = squeeze(COH(iit,:,:,:)) + coh;
-        
+        toc 
     end
     clearvars -except COH TRUE_COH id patientID nit npcs nfreq ndim nroi
   % 

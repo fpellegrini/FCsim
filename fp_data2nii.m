@@ -16,7 +16,7 @@ end
 cube = nan([91 109 91]); %destination cube
 
 %mask for all data points outside the brain
-mask= wjn_read_nii('/Users/franziskapellegrini/Dropbox/Master/Masterarbeit/MasterThesis/wjn_toolbox/spm12/toolbox/FieldMap/brainmask.nii');
+mask= wjn_read_nii('/Users/franziskapellegrini/Documents/Master/Masterarbeit/MasterThesis/wjn_toolbox/spm12/toolbox/FieldMap/brainmask.nii');
 mask = mask.img;
 cube(mask==0) = 0;
 

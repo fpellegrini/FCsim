@@ -27,8 +27,11 @@ fprintf('\n')
 %% sensorspace 
 cd ~/matlab/fp/
 DIROUT = '/home/bbci/data/haufe/Franziska/data/';
+afs = {'theta','alpha','beta','gamma_low','gamma_high'};
 
-mgsub({},@fp_test_sensorspace_coh_allchans_group,{[],DIROUT},'qsub_optqsub_opts','-l h_vmem=16G')
+for i_afs= 1:4
+    mgsub({},@fp_test_sensorspace_coh_allchans_group,{[],afs{i_afs},DIROUT},'qsub_optqsub_opts','-l h_vmem=16G')
+end
 
 % for i_afs = 1:11
 %     mgsub({},@fp_test_sensorspace_coh_allchans,{[],DIROUT,DIRLOG},'qsub_optqsub_opts','-l h_vmem=16G')
@@ -50,7 +53,8 @@ cd ~/matlab/fp/
 DIROUT = '/home/bbci/data/haufe/Franziska/data/';
 DIRLOG = '/home/bbci/data/haufe/Franziska/log/surrogate/';
 
-for i=1:550
+for i=1:500
+    
     mgsub({},@fp_surrogate_coh,{[],DIROUT,DIRLOG},'qsub_optqsub_opts','-l h_vmem=16G')
     pause(1)
 end
@@ -64,12 +68,12 @@ cd ~/matlab/fp/
 
 mgsub({},@fp_get_thresholds_ss_freq,{[],'abs',DIROUT},'qsub_optqsub_opts','-l h_vmem=16G')
 mgsub({},@fp_get_thresholds_ss_freq,{[],'imag',DIROUT},'qsub_optqsub_opts','-l h_vmem=16G')
-pause(2)
+pause(1)
 
 for i_afs = 1:numel(afs)
     for i_abs_imag = 1:numel(abs_imag)       
-      mgsub({},@fp_get_thresholds_ss,{[],afs{i_afs},abs_imag{i_abs_imag},DIROUT},'qsub_optqsub_opts','-l h_vmem=16G')  
-      pause(2)
+      mgsub({},@fp_get_thresholds_ss,{[],afs{i_afs},abs_imag{i_abs_imag},DIROUlllT},'qsub_optqsub_opts','-l h_vmem=16G')  
+      pause(1)
     end 
 end 
 
@@ -79,38 +83,44 @@ afs = {'theta','alpha','beta','gamma_low','gamma_high'};
 abs_imag = {'abs','imag'};
 cd ~/matlab/fp/
 
-for i_afs = 1:numel(afs)
-    for i_abs_imag = 1:numel(abs_imag)       
-      mgsub({},@fp_cluster_ss,{[],afs{i_afs},2,abs_imag{i_abs_imag},DIROUT},'qsub_optqsub_opts','-l h_vmem=16GB')  
-      pause(2)
-    end 
-end 
-
-mgsub({},@fp_cluster_ss_freq,{[],2,'abs',DIROUT},'qsub_optqsub_opts','-l h_vmem=16G')
-mgsub({},@fp_cluster_ss_freq,{[],2,'imag',DIROUT},'qsub_optqsub_opts','-l h_vmem=16G')
-pause(2)
-mgsub({},@fp_cluster_ss_c_freq,{[],'abs',DIROUT},'qsub_optqsub_opts','-l h_vmem=16G') %components fun 
-mgsub({},@fp_cluster_ss_c_freq,{[],'imag',DIROUT},'qsub_optqsub_opts','-l h_vmem=16G')
+% for i_afs = 1:numel(afs)
+%     for i_abs_imag = 1:numel(abs_imag)       
+%       mgsub({},@fp_cluster_ss,{[],afs{i_afs},2,abs_imag{i_abs_imag},DIROUT},'qsub_optqsub_opts','-l h_vmem=16GB')  
+%       pause(2)
+%     end 
+% end 
+% 
+% mgsub({},@fp_cluster_ss_freq,{[],2,'abs',DIROUT},'qsub_optqsub_opts','-l h_vmem=16G')
+% mgsub({},@fp_cluster_ss_freq,{[],2,'imag',DIROUT},'qsub_optqsub_opts','-l h_vmem=16G')
+% pause(2)
+% mgsub({},@fp_cluster_ss_c_freq,{[],'abs',DIROUT},'qsub_optqsub_opts','-l h_vmem=16G') %components fun 
+% mgsub({},@fp_cluster_ss_c_freq,{[],'imag',DIROUT},'qsub_optqsub_opts','-l h_vmem=16G')
 
 %% cluster group
 DIROUT = '/home/bbci/data/haufe/Franziska/data/';
 afs = {'theta','alpha','beta','gamma_low','gamma_high'};
 abs_imag = {'abs','imag'};
 cd ~/matlab/fp/
-
-for i_afs = 1:numel(afs)
-    for i_abs_imag = 1:numel(abs_imag)       
-      mgsub({},@fp_cluster_g,{2, afs{i_afs},abs_imag{i_abs_imag},DIROUT},'qsub_optqsub_opts','-l h_vmem=16G')  
-      pause(2)
-    end 
-end 
-
+% 
+% for i_afs = 1:numel(afs)
+%     for i_abs_imag = 1:numel(abs_imag)       
+%       mgsub({},@fp_cluster_g,{2, afs{i_afs},abs_imag{i_abs_imag},DIROUT},'qsub_optqsub_opts','-l h_vmem=16G')  
+%       pause(2)
+%     end 
+% end 
+% 
 mgsub({},@fp_cluster_g_freq,{2,'abs',DIROUT},'qsub_optqsub_opts','-l h_vmem=16G') 
 mgsub({},@fp_cluster_g_freq,{2,'imag',DIROUT},'qsub_optqsub_opts','-l h_vmem=16G')
 pause(2)
 mgsub({},@fp_cluster_g_c_freq,{'abs',DIROUT},'qsub_optqsub_opts','-l h_vmem=16G') %components fun 
 mgsub({},@fp_cluster_g_c_freq,{'imag',DIROUT},'qsub_optqsub_opts','-l h_vmem=16G')
 
+
+mgsub({},@fp_cluster_g_freq_j,{2,'abs',DIROUT},'qsub_optqsub_opts','-l h_vmem=16G') 
+mgsub({},@fp_cluster_g_freq_j,{2,'imag',DIROUT},'qsub_optqsub_opts','-l h_vmem=16G')
+pause(2)
+mgsub({},@fp_cluster_g_c_freq_j,{'abs',DIROUT},'qsub_optqsub_opts','-l h_vmem=16G') %components fun 
+mgsub({},@fp_cluster_g_c_freq_j,{'imag',DIROUT},'qsub_optqsub_opts','-l h_vmem=16G')
 
 %% eloreta filters
 
@@ -123,8 +133,28 @@ for i=1:11
     pause(2)
 end
 
+%% filters
+cd ~/matlab/fp/
+DIROUT = '/home/bbci/data/haufe/Franziska/data/';
 
+DIRLOG = '/home/bbci/data/haufe/Franziska/log/filters_dics/';
 
+for i=1:11
+    mgsub({},@fp_savefilter,{[],DIROUT,DIRLOG},'qsub_optqsub_opts','-l h_vmem=16G')
+    pause(2)
+end
 
+%% gc_pipeline
 
+cd ~/matlab/fp/
+DIROUT = '/home/bbci/data/haufe/Franziska/data/';
+
+mgsub({},@fp_gc_pipeline,{[],DIROUT},'qsub_optqsub_opts','-l h_vmem=16G')
+
+%% megmeg_pipeline
+
+cd ~/matlab/fp/
+DIROUT = '/home/bbci/data/haufe/Franziska/data/';
+
+mgsub({},@fp_megmeg_pipeline,{[],DIROUT},'qsub_optqsub_opts','-l h_vmem=16G')
 

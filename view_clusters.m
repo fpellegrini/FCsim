@@ -1,7 +1,7 @@
 %% group
 
 clear all
-load('p_cluster_g_c_freq_abs.mat')
+load('p_cluster_g_freq_imag_test.mat')
 
 for iclus = 1:numel(p)
     if p(iclus) < 0.01
@@ -11,7 +11,7 @@ for iclus = 1:numel(p)
         
         %spatial localization
         b = sum(a,1);
-        outname = sprintf('cluster_g_freq_imag_mnc3_%d.nii',iclus);
+        outname = sprintf('cluster_g_freq_imag_test_%d.nii',iclus);
         fp_data2nii(b,nan,[],outname)
         
         %spectral localization
@@ -23,7 +23,7 @@ for iclus = 1:numel(p)
         xticks = linspace(1,length(c), numel(xticklabels));
         set(gca,'XTick', xticks,'XTickLabel',xticklabels)
         
-        outname1 = sprintf('cluster_g_freq_imag_mnc3_%d.png',iclus);
+        outname1 = sprintf('cluster_g_freq_imag_test_%d.png',iclus);
         print(outname1,'-dpng');
         close all
         
@@ -35,10 +35,10 @@ end
 afs = {'theta','alpha','beta','gamma_low','gamma_high'};
 abs_imag = {'abs','imag'};
 
-for iafs = [1 3:numel(afs)]
-    for iabs = 1:2
+for iafs = [1:numel(afs)]
+    for iabs = 2
         clearvars -except iafs afs iabs abs_imag
-        load(sprintf('p_cluster_g_%s_%s.mat',afs{iafs},abs_imag{iabs}))
+        load(sprintf('p_cluster_g_%s_%s_j2.mat',afs{iafs},abs_imag{iabs}))
 
         for iclus = 1:numel(p)
             if p(iclus) < 0.01
@@ -48,7 +48,7 @@ for iafs = [1 3:numel(afs)]
 
                 %spatial localization
                 b = sum(a,1);
-                outname = sprintf('cluster_g_%s_%s_%d.nii',afs{iafs},abs_imag{iabs},iclus);
+                outname = sprintf('cluster_g_%s_%s_j2_%d.nii',afs{iafs},abs_imag{iabs},iclus);
                 fp_data2nii(b,nan,[],outname)
 
             end

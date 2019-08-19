@@ -1,4 +1,4 @@
-function [p, true_clu] = fp_cluster_g_freq(minnbchan,abs_imag,DIROUT)
+function [p, true_clu] = fp_cluster_g_freq_old(minnbchan,abs_imag,DIROUT)
 %group statistics, finds clusters across space and frequencies with the
 %findclusters fun
 
