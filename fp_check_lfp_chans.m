@@ -1,7 +1,7 @@
 function fp_check_lfp_chans
 
-cd ~/Dropbox/Data_MEG_Project/
-DIROUT = '~/Dropbox/Data_MEG_Project/figures/lfp_chans/';
+cd ~/Dropbox/Franziska/Data_MEG_Project/
+DIROUT = '~/Dropbox/Franziska/Data_MEG_Project/figures/lfp_chans/';
 if ~exist(DIROUT); mkdir(DIROUT); end 
 
 patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'}; %'12' has too few sensors

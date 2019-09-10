@@ -2,8 +2,8 @@ function fp_dics_coherence(fileName, freqRange, refChannel)
 %input: filename, freqrange, refchannel 
 %Example: fp_dics_coherence('redPLFP04_off', [13 30], 'LFP_R01')
 
-matlabbatch{1}.spm.tools.beamforming.data.dir = {'/Users/franziskapellegrini/Dropbox/Data_MEG_Project/'};
-matlabbatch{1}.spm.tools.beamforming.data.D = {sprintf('/Users/franziskapellegrini/Dropbox/Data_MEG_Project/%s.mat',fileName)};
+matlabbatch{1}.spm.tools.beamforming.data.dir = {'/Users/franziskapellegrini/Dropbox/Franziska/Data_MEG_Project/'};
+matlabbatch{1}.spm.tools.beamforming.data.D = {sprintf('/Users/franziskapellegrini/Dropbox/Franziska/Data_MEG_Project/%s.mat',fileName)};
 matlabbatch{1}.spm.tools.beamforming.data.val = 1;
 matlabbatch{1}.spm.tools.beamforming.data.gradsource = 'inv';
 matlabbatch{1}.spm.tools.beamforming.data.space = 'MNI-aligned';

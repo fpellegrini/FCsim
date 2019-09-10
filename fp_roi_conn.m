@@ -1,6 +1,6 @@
 function roi_conn = fp_roi_conn
 
-DIROUT = '~/Dropbox/Data_MEG_Project/';
+DIROUT = '~/Dropbox/Franziska/Data_MEG_Project/';
 
 patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
 id=6;

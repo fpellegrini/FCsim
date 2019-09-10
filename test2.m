@@ -1,4 +1,4 @@
-cd ~/Dropbox/Data_MEG_Project/
+cd ~/Dropbox/Franziska/Data_MEG_Project/
 load('BF_Patient08.mat')
 X = data.D(:,:,:);
 fres=300;

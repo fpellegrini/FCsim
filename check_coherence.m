@@ -1,6 +1,6 @@
 patientNumber = '04';
 
-cd ~/Dropbox/Data_MEG_Project/
+cd ~/Dropbox/Franziska/Data_MEG_Project/
 
 fileName = 'redPLFP04_off.mat';
 

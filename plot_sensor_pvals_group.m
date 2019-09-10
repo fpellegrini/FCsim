@@ -1,5 +1,5 @@
 
-DIROUT = '~/Dropbox/Data_MEG_Project/figures/sensorspace_coh_group/';
+DIROUT = '~/Dropbox/Franziska/Data_MEG_Project/figures/sensorspace_coh_group/';
 afs = {'theta','alpha','beta','gamma_low','gamma_high'};
 
 for iafs = 1:numel(afs)

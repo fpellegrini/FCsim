@@ -1,7 +1,7 @@
 function fp_sensorspace_coh(patientNumber)
 
-cd ~/Dropbox/Data_MEG_Project/
-DIROUT = '~/Dropbox/Data_MEG_Project/figures/sensorspace_coh/';
+cd ~/Dropbox/Franziska/Data_MEG_Project/
+DIROUT = '~/Dropbox/Franziska/Data_MEG_Project/figures/sensorspace_coh/';
 if ~exist(DIROUT); mkdir(DIROUT); end
 
 if ~exist('patientNumber','var')

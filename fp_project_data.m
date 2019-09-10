@@ -1,6 +1,6 @@
 function sData = fp_project_data(patientNumber)
 
-cd ~/Dropbox/Data_MEG_Project/
+cd ~/Dropbox/Franziska/Data_MEG_Project/
 
 if nargin < 1
     patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};

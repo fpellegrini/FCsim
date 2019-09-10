@@ -1,7 +1,7 @@
 function fp_check_node_symmetry(patientNumber) 
 
-cd ~/Dropbox/Data_MEG_Project/
-DIROUT = '~/Dropbox/Data_MEG_Project/figures/check_node_symmetry/';
+cd ~/Dropbox/Franziska/Data_MEG_Project/
+DIROUT = '~/Dropbox/Franziska/Data_MEG_Project/figures/check_node_symmetry/';
 if ~exist(DIROUT); mkdir(DIROUT); end
 
 if ~exist('patientNumber','var')
