@@ -4,7 +4,7 @@ function fp_data2nii(data,id, nit, outname)
 %nan.
 %nit is number of iterations (default: 500)
 %outname example: 'test.nii'
-
+% keyboard
 if isempty(nit)
     nit=500;
 end
@@ -12,6 +12,9 @@ end
 [pos, voxID] = fp_find_commonvox;
 if ~isnan(id)
     data = data(voxID{id}); %start data
+end
+if sum(data)==0
+    error('data is all zero') 
 end
 cube = nan([91 109 91]); %destination cube
 
