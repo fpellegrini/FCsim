@@ -1,48 +1,89 @@
-
 clear all
-% generation of sensor signal 
+
+%parameters
 patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'}; 
-id = 1;
+id = 3;
+nfreq = 46;
+id_meg_trials = 1;
+ntrial = 42;
+fres = 75;
+inode = 2100; %randi(size(A,2),1);
+isens = randi(125,1);
+itrial = randi(ntrial,1);
+idir = randi(2,1);
 
+%load MEG time series and CS
 D = spm_eeg_load(sprintf('redPLFP%s_off', patientID{id}));
-load(sprintf('Filter_Patient%s.mat',patientID{id}));%Filter and whole CS
-CS(:,:,47:end)=[];
-id_meg_chan = 1:125;
-id_meg_chan(D.badchannels)=[];
-nmeg = numel(id_meg_chan);
-inode = randi(size(A,2),1);
+X = D(:,:,:);
+X(id_meg_chan,:,:)= X(id_meg_chan,:,:)./10^-6;
 
-pv = fp_project_power(CS(id_meg_chan,id_meg_chan,:),A);
-pow = squeeze(pv(inode,:));
-clear L
+%multiply by random 3D-Matrix
+% rand3D = randn(3);
+% signal = rand3D(:,1) * squeeze(X(isens,:,itrial)); %random time meg series
+x = squeeze(X(isens,:,itrial)); %random time meg series
+
+%leadfield
 load(sprintf('BF_Patient%s.mat',patientID{id}));
 L = fp_get_lf(inverse);
+L1 = squeeze(L(:,inode,idir));
+nmeg = size(L1,1);
+id_meg_chan = 1:nmeg;
+signal = L1 * x;
+signal = signal ./ norm(signal, 'fro'); %signal on sensor level 
 
-whitenoise = randn(size(pow));
+%add white noise 
+whitenoise = randn(size(signal));
 whitenoise = whitenoise ./ norm(whitenoise, 'fro');
-pow1 = 0.95*pow + 0.10*whitenoise; 
-pow1 = pow1 ./ norm(pow1, 'fro');
+signal = 0.9*signal + 0.1*whitenoise; 
+signal = signal ./ norm(signal, 'fro');
 
-L1 = squeeze(L(:,inode,1));
+%filter
+load(sprintf('Filter_Patient%s.mat',patientID{id}))
+clear CS
+ns = size(A,2);
 
+%meg-meg CS
+CS = fp_tsdata_to_cpsd(signal,fres,'MT',id_meg_chan, id_meg_chan, id_meg_trials, id_meg_trials);
+CS(:,:,nfreq+1:end) = [];
+
+%power
+for ifreq = 1: nfreq   
+    for is = 1:ns
+        pow(is,ifreq) = real(squeeze(A(:,is,ifreq))' * CS(:,:,ifreq) * squeeze(A(:,is,ifreq)));
+        pow_noise(is,ifreq) = real(squeeze(A(:,is,ifreq))' * eye(size(CS(:,:,ifreq))) * squeeze(A(:,is,ifreq)));
+    end
+end
+%same as:
+% pv = fp_project_power(CS,A);
     
-signal = L1*pow1;
-    
-
 %% project to source 
 
-for ifreq= 1:46 
-    signal_v(:,ifreq) = squeeze(A(:,:,ifreq))' * squeeze(signal(:,ifreq)); 
-    signal_n(:,ifreq) = squeeze(A(:,:,ifreq))' * eye(size(signal(:,ifreq)));
-end
-
-a = signal_v; 
+a = pow;% ./signal_n; 
 
 b = mean(a(:,2:10),2);
 c = mean(a(:,11:17),2);
 d = mean(a(:,2:17),2);
+e = mean(pow_noise,2);
+f = mean(a,2);
+g = mean(pow./pow_noise,2);
 
-% b = squeeze(mean(mean(pow_noise,1),3));
+subplot(1,2,1)
+plot(f)
+hold on 
+plot(inode,0,'r+')
+title('signal power')
+xlabel('voxel id')
+ylabel('pow')
 
+subplot(1,2,2)
+plot(e) 
+title('noise power')
+xlabel('voxel id')
+ylabel('pow')
+
+% imagesc(zscore(signal_v))
+% figure
+% imagesc(zscore(signal_n))
+%%
 outname = 'pow3.nii';
-fp_data2nii(c,nan,[],outname)
+fp_data2nii(f./10^20,id,[],outname)
