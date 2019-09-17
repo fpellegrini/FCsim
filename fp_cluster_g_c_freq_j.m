@@ -69,7 +69,7 @@ end
 avg_coh = squeeze(sum(COH,1));
 s_a_coh = reshape(avg_coh,[nchunk*nit,nfreq,ns]);
 s_a_coh(1,:,:) = [];
-threshold = prctile(reshape(s_a_coh,1,[]),99.9);
+threshold = prctile(reshape(s_a_coh,1,[]),99);
 clear s_a_coh
 
 %cat the chunks
@@ -98,7 +98,6 @@ clu = reshape(clu,[nfreq ns]); %nfreq x ns
 clear true_clu true_total true_sizes
 true_total = numel(x);
 true_clu = fp_order_clusters(clu,true_total);
-true_sizes = x;
 true_avg_coh = squeeze(avg_coh(1,:,:))';
 
 onoff(1,:,:) =[]; %remove true coherence dimension
@@ -148,6 +147,9 @@ if true_total>0 %when at least one true cluster exists
         clear trueCoh temp
         trueCoh = sum(sum(true_avg_coh(true_clu==iclus))); %scalar
         p(iclus) = sum(shufCoh>trueCoh)/numel(shufCoh);
+        if p(iclus) < 0.01
+            break
+        end
     end
     
 elseif sum(shuf_clusters)== 0  %when no cluster was found it any iteration
@@ -158,7 +160,7 @@ else %when only in shuffled conditions clusters were found
 end
 
 outname = sprintf('%sp_cluster_g_c_freq_%s_j',DIROUT,abs_imag);
-save(outname,'p','threshold','true_clu','true_sizes','-v7.3')
+save(outname,'p','threshold','true_clu','-v7.3')
 
 
 

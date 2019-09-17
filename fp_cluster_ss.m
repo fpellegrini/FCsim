@@ -54,13 +54,13 @@ for id = 1:numel(patientID)
     [sym_pos, noEq] = fp_symmetric_vol(mni_pos);
     [~,flip_id] = fp_flip_vol(sym_pos);    
     
-    load(sprintf('%sthreshold_Patient%s_%s_%s.mat',DIROUT,patientID{id},fband, abs_imag));
+    load(sprintf('%sthreshold_e_Patient%s_%s_%s.mat',DIROUT,patientID{id},fband, abs_imag));
     shufCoh = [];
     
     for ichunk = 1:nchunk
         %load coherences
         clear coh flip_coh abs_coh avg_coh
-        load(sprintf('Coherences_Patient%s_chunk%d.mat',patientID{id},ichunk));
+        load(sprintf('Coherences_e_Patient%s_chunk%d.mat',patientID{id},ichunk));
         
         coh(:,:,noEq,:) = [];
         [nit, ~, ns,~] = size(coh);
@@ -143,7 +143,7 @@ for id = 1:numel(patientID)
 end
 
 if numel(patientID)==11 && exist('DIROUT')
-    outname = sprintf('%sp_cluster_ss_%s_%s',DIROUT,fband,abs_imag);
+    outname = sprintf('%sp_e_cluster_ss_%s_%s',DIROUT,fband,abs_imag);
     save(outname,'p','TRUE_CLU','-v7.3')
 end
 

@@ -66,7 +66,7 @@ for id = 1:numel(patientID)
 end
 
 avg_coh = squeeze(sum(COH,1));
-threshold = prctile(reshape(avg_coh,1,[]),99.99);
+threshold = prctile(reshape(avg_coh,1,[]),99.9);
 
 %cat the chunks
 avg_coh = squeeze(reshape(avg_coh,[size(COH,2)*size(COH,3),size(COH,4), size(COH,5)]));
@@ -111,6 +111,9 @@ if true_total>0 %when at least one true cluster exists
         clear trueCoh temp
         trueCoh = sum(sum(true_avg_coh(true_clu==iclus))); %scalar
         p(iclus) = sum(shufCoh>trueCoh)/numel(shufCoh);
+        if p(iclus) < 0.01
+            break
+        end
     end
     
 elseif sum(shuf_clusters)== 0  %when no cluster was found it any iteration
@@ -121,5 +124,5 @@ else %when only in shuffled conditions clusters were found
 end
 
 
-outname = sprintf('%sp_cluster_g_freq_%s_j2',DIROUT,abs_imag);
+outname = sprintf('%sp_cluster_g_freq_%s_j',DIROUT,abs_imag);
 save(outname,'p','true_clu','-v7.3')

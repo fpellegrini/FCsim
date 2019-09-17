@@ -1,4 +1,4 @@
-function [p, true_clu] = fp_cluster_g(minnbchan,fband, abs_imag,DIROUT)
+function [p, true_clu] = fp_cluster_g_j(minnbchan,fband, abs_imag,DIROUT)
 %group statistics, cluster analysis with findclusters fun
 
 fp_addpath 
@@ -9,7 +9,7 @@ else
     warning('Results will not be saved')
 end
 
-patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
+patientID = {'04'; '07'; '09'; '10';'11';'20';'22';'25'};
 
 if isempty(minnbchan)
     minnbchan = 2;
@@ -41,6 +41,7 @@ frqs(frqs>90) = [];
 frq_id = find(frqs> frq_band(1) & frqs< frq_band(2));
 
 [commonvox_pos, voxID] = fp_find_commonvox;
+voxID([3,7,8])=[];
 
 nchunk = 50;
 
@@ -151,5 +152,5 @@ else %when only in shuffled conditions clusters were found
 end
 
 
-outname = sprintf('%sp_cluster_g_%s_%s',DIROUT,fband,abs_imag);
+outname = sprintf('%sp_cluster_g_%s_%s_j',DIROUT,fband,abs_imag);
 save(outname,'p','true_clu','-v7.3')

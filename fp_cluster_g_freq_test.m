@@ -159,6 +159,9 @@ if true_total>0 %when at least one true cluster exists
         clear trueCoh temp
         true_clu_val = sum(sum(true_testval(true_clu==iclus))); %scalar
         p(iclus) = sum(shuf_clu_val>true_clu_val)/numel(shuf_clu_val);
+        if p(iclus) < 0.01
+            break
+        end
     end
     
 elseif sum(shuf_clusters)== 0  %when no cluster was found it any iteration
