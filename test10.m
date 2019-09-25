@@ -7,7 +7,7 @@ ns= size(A,2);
 
 z = zeros(1,ns);
 
-z(2100)=0.8;
+z(inode)=0.8;
 
-outname = 'pow4.nii';
+outname = 'pow1.nii';
 fp_data2nii(z,id,[],outname)

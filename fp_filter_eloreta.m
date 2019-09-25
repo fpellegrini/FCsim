@@ -1,4 +1,6 @@
 function A = fp_filter_eloreta(CS,L)
+
+ns = size(L,2);
 filter = squeeze(mkfilt_eloreta_v2(L));
 
 for is = 1:ns

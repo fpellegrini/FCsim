@@ -18,20 +18,16 @@ for id = 1:numel(patientID)
     
     if ~exist(sprintf('%s%s_work',DIRLOG,logname)) & ~exist(sprintf('%s%s_done',DIRLOG,logname))
         eval(sprintf('!touch %s%s_work',DIRLOG,logname))
+        
         load(sprintf('BF_Patient%s.mat',patientID{id}));
         
-        D=spm_eeg_load(sprintf('redPLFP%s_off',patientID{id}));
-        
+        D=spm_eeg_load(sprintf('redPLFP%s_off',patientID{id}));        
         X = D(:,:,:);
         D_ft = ftraw(D);
         n_trials = length(D_ft.trial);
         
-        fs = D.fsample;
-        fres = 75;
-        frqs = sfreqs(fres, fs);
-        frqs(frqs>90) = [];
-        nfreq = numel(frqs);
-        
+        %channel IDs
+        clear id_meg_chan id_lfp_chan
         id_meg_chan = 1:125;
         id_meg_chan(D.badchannels)=[];
         nmeg = numel(id_meg_chan);
@@ -39,35 +35,33 @@ for id = 1:numel(patientID)
         nlfp = numel(id_lfp_chan);
         id_meg_trials = 1:n_trials;
         id_lfp_trials = 1:n_trials;
-        
+               
         %scaling
-        load('scaling_factor.mat')
-        X(id_meg_chan,:,:)= X(id_meg_chan,:,:)./sfmeg;
-        X(id_lfp_chan,:,:) = X(id_lfp_chan,:,:)./sflfp;
+        X(id_meg_chan,:,:)= X(id_meg_chan,:,:)./10^6;
         
+        %frequency parameters
+        fs = D.fsample;
+        fres = 75;
+        frqs = sfreqs(fres, fs);
+        frqs(frqs>90) = [];
+        nfreq = numel(frqs);        
         
         %Now calculate power, cross spectrum and filters. In P, CS, L and A, bad
         %channels are already sorted out.
         
-        %cross spectrum
-        
+        %cross spectrum        
         CS = fp_tsdata_to_cpsd(X,fres,'MT',[id_meg_chan,id_lfp_chan], [id_meg_chan,id_lfp_chan], id_meg_trials, id_lfp_trials);
         
         %leadfield
-        L1 = inverse.MEG.L;
-        ns = numel(L1);
-        for is=1:ns
-            L(:,is,:)= L1{is};
-        end
-        L=L./10^-12;
+        clear L
+        L = fp_get_lf(inverse);
+        ns = size(L,2);
         
         %filter
         A=zeros(nmeg,ns,nfreq);
         
         for ifrq = 1:nfreq
-            currentCS = squeeze(CS(1:end-nlfp,1:end-nlfp,ifrq));
-            A(:,:,ifrq) = fp_filter(currentCS, L);
-            clear currentCS
+            A(:,:,ifrq) = fp_filter(squeeze(CS(1:end-nlfp,1:end-nlfp,ifrq)), L);
         end
         
         CS(:,:,nfreq+1:end)=[];

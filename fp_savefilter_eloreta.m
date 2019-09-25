@@ -3,6 +3,7 @@ function fp_savefilter_eloreta(patientNumber,DIROUT,DIRLOG)
 
 fp_addpath
 
+if ~exist(DIROUT); mkdir(DIROUT); end
 if ~exist(DIRLOG); mkdir(DIRLOG); end
 
 if isempty(patientNumber)

@@ -2,7 +2,7 @@ clear all
 
 %parameters
 patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'}; 
-id = 3;
+id = 1;
 nfreq = 46;
 id_meg_trials = 1;
 ntrial = 42;
@@ -82,14 +82,12 @@ plot(e)
 title('noise power')
 xlabel('voxel id')
 ylabel('pow')
-%%
+
 figure
 plot(g)
-hold on 
-plot(inode,0,'r+')
 % imagesc(zscore(signal_v))
 % figure
 % imagesc(zscore(signal_n))
 %%
-outname = 'g_eloreta.nii';
-fp_data2nii(g./10^-4,id,[],outname)
+outname = 'eloreta_g.nii';
+fp_data2nii(e./10^-3,id,[],outname)
