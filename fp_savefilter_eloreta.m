@@ -21,16 +21,12 @@ for id = 1:numel(patientID)
         load(sprintf('Filter_Patient%s.mat',patientID{id}))
         clear A
         
+        clear L
         load(sprintf('BF_Patient%s.mat',patientID{id}));
+        L = fp_get_lf(inverse);
+        ns = size(L,2);
         
-        L1 = inverse.MEG.L;
-        ns = numel(L1);
-        for is=1:ns
-            L(:,is,:)= L1{is};
-        end
-        L=L./10^-12;
-        
-        fs = data.D.fsample;
+        fs = 300;
         fres = 75;
         frqs = sfreqs(fres, fs);
         frqs(frqs>90) = [];
@@ -43,7 +39,7 @@ for id = 1:numel(patientID)
         nlfp = numel(id_lfp_chan);
         
         %filter
-        A=zeros(nmeg,ns);
+        A=zeros(nmeg,ns,nfreq);
         
         for ifrq = 1:nfreq
             currentCS = squeeze(CS(1:end-nlfp,1:end-nlfp,ifrq));
