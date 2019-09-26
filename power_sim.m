@@ -2,14 +2,11 @@ clear all
 
 %parameters
 patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'}; 
-id = 3;
+id = 1;
 nfreq = 46;
-id_meg_trials = 1;
-ntrial = 42;
 fres = 75;
 inode = 2100; %randi(size(A,2),1);
 isens = randi(125,1);
-itrial = randi(ntrial,1);
 idir = randi(2,1);
 
 %load MEG time series and CS
@@ -17,11 +14,9 @@ D = spm_eeg_load(sprintf('redPLFP%s_off', patientID{id}));
 X = D(:,:,:);
 id_meg_chan = 1:125;
 X(id_meg_chan,:,:)= X(id_meg_chan,:,:)./10^-6;
-
-%multiply by random 3D-Matrix
-% rand3D = randn(3);
-% signal = rand3D(:,1) * squeeze(X(isens,:,itrial)); %random time meg series
-x = squeeze(X(isens,:,itrial)); %random time meg series
+x = squeeze(X(isens,:,:)); %random time meg series
+ntrials = size(x,2);
+id_meg_trials = 1:ntrials;
 
 %leadfield
 load(sprintf('BF_Patient%s.mat',patientID{id}));
@@ -29,14 +24,19 @@ L = fp_get_lf(inverse);
 L1 = squeeze(L(:,inode,idir));
 nmeg = size(L1,1);
 id_meg_chan = 1:nmeg;
-signal = L1 * x;
-signal = signal ./ norm(signal, 'fro'); %signal on sensor level 
 
-%add white noise 
-whitenoise = randn(size(signal));
-whitenoise = whitenoise ./ norm(whitenoise, 'fro');
-signal = 0.9*signal + 0.1*whitenoise; 
-signal = signal ./ norm(signal, 'fro');
+for itrial = 1:ntrials
+    clear sig whitenoise 
+    sig = L1 * x(:,itrial)';
+    sig = sig ./ norm(sig, 'fro');
+    %signal on sensor level 
+
+    %add white noise 
+    whitenoise = randn(size(sig));
+    whitenoise = whitenoise ./ norm(whitenoise, 'fro');
+    sig = 0.9*sig + 0.1*whitenoise; 
+    signal(:,:,itrial) = sig ./ norm(sig, 'fro');
+end
 
 %filter
 load(sprintf('Filter_Patient%s_e.mat',patientID{id}))
@@ -68,7 +68,6 @@ e = mean(pow_noise,2);
 f = mean(a,2);
 g = mean(pow./pow_noise,2);
 h = mean(pow - pow_noise*(pow_noise\pow),2);
-
 subplot(1,2,1)
 plot(f)
 hold on 
@@ -91,5 +90,5 @@ plot(inode,0,'r+')
 % figure
 % imagesc(zscore(signal_n))
 %%
-outname = 'g_eloreta.nii';
-fp_data2nii(g./10^-4,id,[],outname)
+outname = 'f_sub6_eloreta.nii';
+fp_data2nii(f./10^-10,id,[],outname)
