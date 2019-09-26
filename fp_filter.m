@@ -3,7 +3,7 @@ function A = fp_filter(CS, L)
 ns = size(L,2);
 lambda = mean(diag(real(CS)))/100;
 
-CSinv=pinv(real(CS)); %+lambda * eye(size(CS))
+CSinv=pinv(real(CS)+lambda * eye(size(CS)));
 
 for is=1:ns %iterate across nodes 
     Lloc=squeeze(L(:,is,:));
