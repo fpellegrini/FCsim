@@ -242,7 +242,7 @@ for id = 2%numel(patientID)
             for jj= 1: nroi-1
                 for ifq = 1: nfreq
                     
-                    csred=[];
+                    cs_red=[];
                     cs_red{1} = csroi(ii,ii,:,:,ifq);
                     cs_red{2} = csroi(ii,jj,:,:,ifq);
                     cs_red{3} = csroi(jj,jj,:,:,ifq);
@@ -252,10 +252,10 @@ for id = 2%numel(patientID)
                     cab=imag(cs_red{2});
                     cbbinv=inv(real(cs_red{3})+regu*eye(p)*mean(diag(real(cs_red{3}))));
                     X=cab*cbbinv*cab';
-                    % MIM
+                    % MIM Ewald Eq. 14
                     mim(ii,jj,ifq)=(trace(caainv*X));
                     caainvsqrt=sqrtm(caainv);
-                    Y=caainvsqrt*X*caainvsqrt;
+                    Y=caainvsqrt*X*caainvsqrt; %Eq. 23
                     [~,s,~]=svd(Y);
                     % MIC
                     mic(ii,jj,ifq)=sqrt(s(1,1));

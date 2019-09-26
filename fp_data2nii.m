@@ -4,9 +4,9 @@ function fp_data2nii(data,id, nit, outname)
 %nan.
 %nit is number of iterations (default: 500)
 %outname example: 'test.nii'
-% keyboard
+keyboard
 if isempty(nit)
-    nit=500;
+    nit=50;
 end
 
 [pos, voxID] = fp_find_commonvox;
