@@ -1,18 +1,16 @@
-function fp_data2nii(data,id, nit, outname)
+function fp_data2nii(data, pos, nit, outname)
 %data should have be of size 1 x nvox 
-%id is index of patient in patientID variable, if data is group data id =
-%nan.
+%pos are the positions in mni format 
 %nit is number of iterations (default: 500)
 %outname example: 'test.nii'
-keyboard
+% keyboard
+
+sf = 10^6;%scaling factor 
+
 if isempty(nit)
     nit=50;
 end
 
-[pos, voxID] = fp_find_commonvox;
-if ~isnan(id)
-    data = data(voxID{id}); %start data
-end
 if sum(data)==0
     error('data is all zero') 
 end
@@ -29,9 +27,11 @@ x = round(x);
 y=round(y);
 z=round(z);
 
-x(z<0)=[];
-y(z<0)=[];
-z(z<0)=[];
+data(z<1) = [];
+x(z<1)=[];
+y(z<1)=[];
+z(z<1)=[];
+
 
 %fill data into cube
 for i =1:numel(x)    
@@ -39,13 +39,18 @@ for i =1:numel(x)
 end 
 
 %interpolation of missing values
-Vq = cube.*(10^3);
-Vq = inpaintn(Vq,nit);
+Vq = cube.*sf;
+
+% Vq = inpaintn(Vq,nit);
 
 %read in some template 
-V= wjn_read_nii('./mri/rPLFP04.nii');
+V= wjn_read_nii('./mri/rPLFP22.nii');
 V.fname = outname;
 V.img = Vq;
 
 %write nifti 
 spm_write_vol(V,Vq);
+
+X = wjn_read_nii(['./', outname,]);
+s=20;
+wjn_nii_smooth(X.fname,s)
