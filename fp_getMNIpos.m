@@ -1,7 +1,7 @@
 function mni_pos = fp_getMNIpos(patientNumber)
 %transforms mni-aligned posisitions to mni positions (even grid with origin
 %at zero
-
+% keyboard
 load(sprintf('BF_Patient%s.mat',patientNumber))
 
 ori_pos = sources.grid.pos;

@@ -3,7 +3,7 @@ function fp_savefilter_temp(DIROUT)
 
 patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
 
-for id = 1:numel(patientID)
+for id = [1 2 8]
     
     load(sprintf('BF_Patient%s.mat',patientID{id}));
     
@@ -52,7 +52,7 @@ for id = 1:numel(patientID)
     
     CS(:,:,nfreq+1:end)=[];
     
-    outname = sprintf('%sFilter_Patient%s',DIROUT, patientID{id});
+    outname = sprintf('%sFilter_Patient%s_wo_reg',DIROUT, patientID{id});
     save(outname,'A','CS','-v7.3')
     clearvars -except DIROUT DIRLOG logname patientID id
     

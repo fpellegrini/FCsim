@@ -3,12 +3,12 @@
 
 clear all
 patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
-[~, voxID] = fp_find_commonvox;
+[commonvox_pos, voxID] = fp_find_commonvox;
 pow = nan(numel(patientID),numel(voxID{1}),46);
 pow_noise = nan(numel(patientID),numel(voxID{1}),46);
 
 for id = 1:numel(patientID)
-    clearvars -except id patientID pow voxID pow_noise
+    clearvars -except id patientID pow voxID pow_noise commonvox_pos
     
     load(sprintf('Filter_Patient%s.mat',patientID{id}))  
     
@@ -36,17 +36,11 @@ end
 
 pow = pow./pow_noise;
 
-a = squeeze(mean(pow,1));
-
- %spatial localization
-b = mean(a(:,2:10),2);
-c = mean(a(:,11:17),2);
-d = mean(a(:,2:17),2);
-e = mean(a,2);
-% b = squeeze(mean(mean(pow_noise,1),3));
+a = squeeze(sum(pow,1));
+e = sum(a,2);
 %%
-outname = 'real_pow_all1_dics.nii';
-fp_data2nii(e./10^-7,nan,[],outname)
+outname = 'real_pow_all_dics.nii';
+fp_data2nii(e./10^-4,commonvox_pos,[],outname)
 
 % outname = 'pow2_e.nii';
 % fp_data2nii(c,nan,[],outname)

@@ -2,7 +2,7 @@ clear all
 
 %parameters
 patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'}; 
-id = 1;
+id = 8;
 nfreq = 46;
 fres = 75;
 inode = 2100; %randi(size(A,2),1);
@@ -39,36 +39,39 @@ for itrial = 1:ntrials
 end
 
 %filter
-load(sprintf('Filter_Patient%s_e2D.mat',patientID{id}))
+load(sprintf('Filter_Patient%s_dics_2D.mat',patientID{id}))
 clear CS
-ns = size(A,2);
+ns = size(A,3);
 
 %meg-meg CS
 CS = fp_tsdata_to_cpsd(signal,fres,'MT',id_meg_chan, id_meg_chan, id_meg_trials, id_meg_trials);
 CS(:,:,nfreq+1:end) = [];
 
 %power
-for ifreq= 1:nfreq
-    for idim = 1:2  
+for idim = 1:2  
+    for ifreq = 1: nfreq
         for is = 1:ns
-            pow(is,idim,ifreq) = real(squeeze(A(:,is,idim))' * CS(:,:,ifreq) * squeeze(A(:,is,idim)));
+            pow(is,idim,ifreq) = real(squeeze(A(idim,:,is,ifreq)) * CS(:,:,ifreq) * squeeze(A(idim,:,is,ifreq))');
+            pow_noise(is,idim,ifreq) = real(squeeze(A(idim,:,is,ifreq)) * eye(size(CS(:,:,ifreq))) *  squeeze(A(idim,:,is,ifreq))');
         end
     end
 end
 
-pow = sum(sum(pow,2),3);
+pow = squeeze(sum(pow,2));
+pow_noise = squeeze(sum(pow_noise,2));
     
 %% project to source 
 
-a = pow;% ./signal_n; 
+g = pow ./ pow_noise;
+g = squeeze(mean(g,2));
 
-plot(a)
+plot(g)
 hold on 
 plot(inode,0,'r+')
-title('signal power')
+title('power')
 xlabel('voxel id')
 ylabel('pow')
 
 %%
-outname = 'f_sub1_e2D.nii';
-fp_data2nii(a./10^-8,sources.pos,[],outname)
+outname = 'g_sub8_dics2D.nii';
+fp_data2nii(g./10^-4,sources.pos,[],outname)
