@@ -31,17 +31,17 @@ for id = 1:numel(patientID)
             
             if ichunk ==1
                 %true coherence
-                [coh(1,:,:,:)] = fp_timesensor2sourcecoh_e(patientID{id}, 0);
+                [coh(1,:,:,:)] = fp_timesensor2sourcecoh_e2D(patientID{id}, 0);
                 for iit = 2:nit
                     iit
                     %shuffled coherences
-                    [coh(iit,:,:,:)] = fp_timesensor2sourcecoh_e(patientID{id}, 1);
+                    [coh(iit,:,:,:)] = fp_timesensor2sourcecoh_e2D(patientID{id}, 1);
                 end
             else
                 for iit = 1:nit
                     iit
                     %only shuffled coherences
-                    [coh(iit,:,:,:)] = fp_timesensor2sourcecoh_e(patientID{id}, 1);
+                    [coh(iit,:,:,:)] = fp_timesensor2sourcecoh_e2D(patientID{id}, 1);
                 end
             end
             
