@@ -19,16 +19,16 @@ if isempty(abs_imag)
     abs_imag = 'imag';
 end
 
-[commonvox_pos, voxID] = fp_find_commonvox;
-
+[~, voxID] = fp_find_commonvox;
 nchunk = 50;
+alpha = 0.0001;
 
 for id = 1:numel(patientID)
     
     %get neighbouring nodes and node positions
     clear conn mni_pos match_conn sym_pos flip_id match_pos noEq
     mni_pos = fp_getMNIpos(patientID{id});
-    conn = fp_find_neighbours(patientID{id}); %think about how to do that
+    conn = fp_find_neighbours(patientID{id});
     match_conn = conn(voxID{id},voxID{id});
     
     %get flip id and symmetric head
@@ -39,7 +39,7 @@ for id = 1:numel(patientID)
     for ichunk = 1:nchunk
         %load coherences
         clear coh flip_coh abs_coh avg_coh
-        load(sprintf('Coherences_Patient%s_chunk%d.mat',patientID{id},ichunk));
+        load(sprintf('Coherences_e_Patient%s_chunk%d.mat',patientID{id},ichunk));
         nfreq = size(coh,2);
         
         %flip coherence
@@ -57,7 +57,7 @@ for id = 1:numel(patientID)
             error('Method unknown!')
         end
         
-        r_coh = atanh(abs_coh);
+        r_coh = log10(abs_coh);
         %median across lfp channels (already flipped) and across frequencies
         COH(id,ichunk,:,:,:) = squeeze(median(r_coh,4));
         
@@ -85,7 +85,7 @@ for ifreq = 1:nfreq
 %         [hn(ivox,ifreq), pn(ivox,ifreq)] = kstest(dbCoh(:,ifreq,ivox)); %not one is n.d.
 %         [ht(ivox,ifreq), pt(ivox,ifreq),stats] = ttest(dbCoh(:,ifreq,ivox),0,'tail','right','alpha',0.001);
 %         testval = stats(1);
-        [ps(ivox,ifreq), hs(ivox,ifreq),stats] = signrank(dbCoh(:,ifreq,ivox),0,'tail','right','alpha',0.001);
+        [ps(ivox,ifreq), hs(ivox,ifreq),stats] = signrank(dbCoh(:,ifreq,ivox),0,'tail','right','alpha',alpha);
         testval(ivox,ifreq) = stats.signedrank;
     end
 end
@@ -127,7 +127,7 @@ for iit = 1:nit
     %         [hn(ivox,ifreq), pn(ivox,ifreq)] = kstest(dbCoh(:,ifreq,ivox)); %not one is n.d.
     %         [ht(ivox,ifreq), pt(ivox,ifreq),stats] = ttest(dbCoh(:,ifreq,ivox),0,'tail','right','alpha',0.001);
     %         testval = stats(1);
-            [ps(ivox,ifreq), hs(ivox,ifreq),stats] = signrank(dbCoh(:,ifreq,ivox),0,'tail','right','alpha',0.001);
+            [ps(ivox,ifreq), hs(ivox,ifreq),stats] = signrank(dbCoh(:,ifreq,ivox),0,'tail','right','alpha',alpha);
             testval(ivox,ifreq) = stats.signedrank;
         end
     end

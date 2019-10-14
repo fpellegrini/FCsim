@@ -20,6 +20,7 @@ end
 [commonvox_pos, voxID] = fp_find_commonvox;
 ns = size(commonvox_pos,1);
 nchunk = 50;
+alpha = 0.0001;
 %%
 for id = 1:nsubs
     
@@ -37,7 +38,7 @@ for id = 1:nsubs
     for ichunk = 1:nchunk
         %load coherences
         clear coh flip_coh abs_coh avg_coh
-        load(sprintf('Coherences_Patient%s_chunk%d.mat',patientID{id},ichunk));
+        load(sprintf('Coherences_e_Patient%s_chunk%d.mat',patientID{id},ichunk));
         
         [nit,nfreq,~,~] = size(coh);
         freq_conn = fp_get_freq_conn(nfreq);
@@ -58,8 +59,10 @@ for id = 1:nsubs
             error('Method unknown!')
         end
         
+        r_coh = log10(abs_coh);
+         
         %median across lfp channels (already flipped) and across frequencies
-        COH(id,ichunk,:,:,:) = squeeze(median(abs_coh,4));
+        COH(id,ichunk,:,:,:) = squeeze(median(r_coh,4));
     end
 end
 
@@ -84,7 +87,7 @@ for ifreq = 1:nfreq
 %         [hn(ivox,ifreq), pn(ivox,ifreq)] = kstest(dbCoh(:,ifreq,ivox)); %not one is n.d.
 %         [ht(ivox,ifreq), pt(ivox,ifreq),stats] = ttest(dbCoh(:,ifreq,ivox),0,'tail','right','alpha',0.001);
 %         testval = stats(1);
-        [ps(ivox,ifreq), hs(ivox,ifreq),stats] = signrank(dbCoh(:,ifreq,ivox),0,'tail','right','alpha',0.001);
+        [ps(ivox,ifreq), hs(ivox,ifreq),stats] = signrank(dbCoh(:,ifreq,ivox),0,'tail','right','alpha',alpha);
         testval(ivox,ifreq) = stats.signedrank;
     end
 end
@@ -138,7 +141,7 @@ for iit = 1:nit
     %         [hn(ivox,ifreq), pn(ivox,ifreq)] = kstest(dbCoh(:,ifreq,ivox)); %not one is n.d.
     %         [ht(ivox,ifreq), pt(ivox,ifreq),stats] = ttest(dbCoh(:,ifreq,ivox),0,'tail','right','alpha',0.001);
     %         testval = stats(1);
-            [ps(ivox,ifreq), hs(ivox,ifreq),stats] = signrank(dbCoh(:,ifreq,ivox),0,'tail','right','alpha',0.001);
+            [ps(ivox,ifreq), hs(ivox,ifreq),stats] = signrank(dbCoh(:,ifreq,ivox),0,'tail','right','alpha',alpha);
             testval(ivox,ifreq) = stats.signedrank;
         end
     end
@@ -197,6 +200,3 @@ end
 %%
 outname = sprintf('%sp_cluster_g_c_freq_%s_test',DIROUT,abs_imag);
 save(outname,'p','true_clu','true_p','-v7.3')
-
-
-
