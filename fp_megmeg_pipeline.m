@@ -169,38 +169,19 @@ for id = 1:numel(patientID)
         id_trials_1 = 1:n_trials;
         rng('shuffle')
         id_trials_2 = randperm(n_trials);
-        CS = fp_tsdata_to_cpsd(X,fres,'MT',id_meg_chan, id_meg_chan, id_trials_1, id_trials_2);
-        
+        CS = fp_tsdata_to_cpsd(X,fres,'MT',id_meg_chan, id_meg_chan, id_trials_1, id_trials_2);      
         
         csroi = nan(nroi-1,nroi-1,npcs,npcs,nfreq);
         
         
         for ifq = 1:nfreq
             
-            clear Aroi A_ CSv pv CSn v5 cseig
+            clear Aroi A_ CSv pv CSn cseig
             cA = squeeze(A(:,:,:,ifq));
             A_ = reshape(cA, [nmeg, ndim*size(cA,3)]);
             CSv = A_' * CS(:,:,ifq) * A_;
             pv = fp_project_power(CS(:,:,ifq),A_);
             CSn = CSv ./ sqrt(pv * pv');
-            
-            %region pca
-            is = 1;
-            for iroi = 2:nroi
-                clear v cCS cns iid
-                
-                iid = is: is+ (sum(roi_id == u_roi_id(iroi)))*ndim-1;
-                cCS = CSn(iid,iid);
-                [v, ~, ~] = eig(real(cCS));
-                
-                if size(v,1)>npcs
-                    v5{iroi} = v(:,1:npcs); %npcs * nregionvoxels
-                else
-                    v5{iroi} = v;
-                end
-                
-                is = is+length(iid);
-            end
             
             %apply the filters to the cs
             kr=1;
@@ -238,12 +219,12 @@ for id = 1:numel(patientID)
         for ii=1:nroi-1
             for jj= 1: nroi-1
                 for ifq = 1: nfreq
-                    coh(ii,jj,ifq) =  sum(sum(triu(squeeze(abs(imag(csroi(ii,jj,:,:,ifq)))))));
+                    coh(ii,jj,ifq) =  sum(sum(squeeze(abs(imag(csroi(ii,jj,:,:,ifq))))));
                 end
             end
         end
         
-        COH(iit,:,:,:) = squeeze(COH(iit,:,:,:)) + coh;
+        COH(iit,:,:,:) = squeeze(COH(iit,:,:,:)) + log10(coh);
         toc 
     end
     clearvars -except COH TRUE_COH id patientID nit npcs nfreq ndim nroi

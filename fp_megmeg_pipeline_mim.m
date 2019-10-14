@@ -38,9 +38,7 @@ for id = 2%numel(patientID)
     nlfp = numel(id_lfp_chan);
     
     %scaling
-    load('scaling_factor.mat')
-    X(id_meg_chan,:,:)= X(id_meg_chan,:,:)./sfmeg;
-    X(id_lfp_chan,:,:) = X(id_lfp_chan,:,:)./sflfp;
+    X(id_meg_chan,:,:)= X(id_meg_chan,:,:)./(10^6);
     
     %frequency parameters
     fs = D.fsample;
@@ -52,7 +50,7 @@ for id = 2%numel(patientID)
     %construct filters
     
     %load true CS
-    load(sprintf('Filter_Patient%s.mat',patientID{id}));% 1D-A and true CS
+    load(sprintf('Filter_Patient%s_e.mat',patientID{id}));% 1D-A and true CS
     clear A
     CS = CS(1:(end-nlfp),1:(end-nlfp),:); %throw away lfp channels
     
@@ -180,30 +178,13 @@ for id = 2%numel(patientID)
         tic
         for ifq = 1:nfreq
             
-            clear Aroi A_ CSv pv CSn v5 cseig
+            clear Aroi A_ CSv pv CSn cseig
             cA = squeeze(A(:,:,:,ifq));
             A_ = reshape(cA, [nmeg, ndim*size(cA,3)]);
             CSv = A_' * CS(:,:,ifq) * A_;
             pv = fp_project_power(CS(:,:,ifq),A_);
             CSn = CSv ./ sqrt(pv * pv');
             
-            %region pca
-            is = 1;
-            for iroi = 2:nroi
-                clear v cCS cns iid
-                
-                iid = is: is+ (sum(roi_id == u_roi_id(iroi)))*ndim-1;
-                cCS = CSn(iid,iid);
-                [v, ~, ~] = eig(real(cCS));
-                
-                if size(v,1)>npcs
-                    v5{iroi} = v(:,1:npcs); %npcs * nregionvoxels
-                else
-                    v5{iroi} = v;
-                end
-                
-                is = is+length(iid);
-            end
             
             %apply the filters to the cs
             kr=1;
@@ -265,7 +246,7 @@ for id = 2%numel(patientID)
             end
         end
         
-        COH(iit,:,:,:) = squeeze(COH(iit,:,:,:)) + coh;
+        COH(iit,:,:,:) = squeeze(COH(iit,:,:,:)) + log10(coh);
         
     end
     clearvars -except COH TRUE_COH id patientID nit npcs nfreq ndim nroi
