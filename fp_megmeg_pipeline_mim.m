@@ -159,7 +159,7 @@ for id = 2%numel(patientID)
         end
     end
     
-    TRUE_COH = TRUE_COH + true_coh;
+    TRUE_COH = TRUE_COH + log10(true_coh);
     
     
     % calculate coherence for permutations
