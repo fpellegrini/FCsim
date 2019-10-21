@@ -1,4 +1,4 @@
-function [p, true_clu] = fp_cluster_g_c_freq_test(abs_imag, DIROUT)
+function [p, true_clu] = fp_cluster_g_c_freq_test_fwf(abs_imag, DIROUT)
 %Group statistics, finds clusters with components fun.
 %Clustering across space and frequencies.
 
@@ -183,8 +183,8 @@ if true_total>0 %when at least one true cluster exists
         
         clear a shuf_clu_val
         a = zeros(size(shuf_testval));
-%         a(shuf_clu==iclus) = shuf_testval(shuf_clu==iclus); %compare first clu with first, second with second etc
-        a(shuf_clu==1) = shuf_testval(shuf_clu==1); %take always the biggest cluster 
+        a(shuf_clu==iclus) = shuf_testval(shuf_clu==iclus); %compare first clu with first, second with second etc
+%         a(shuf_clu==1) = shuf_testval(shuf_clu==1); %take always the biggest cluster 
         shuf_clu_val = squeeze(sum(sum(a,2),3));
         
         clear trueCoh temp
@@ -202,5 +202,5 @@ else %when only in shuffled conditions clusters were found
     p = 1;
 end
 %%
-outname = sprintf('%sp_cluster_g_c_freq_%s_test',DIROUT,abs_imag);
+outname = sprintf('%sp_cluster_g_c_freq_%s_test_fwf',DIROUT,abs_imag);
 save(outname,'p','true_total','true_clu','true_p','-v7.3')

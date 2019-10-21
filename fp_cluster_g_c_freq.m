@@ -146,7 +146,7 @@ if true_total>0 %when at least one true cluster exists
         clear trueCoh temp
         trueCoh = sum(sum(true_avg_coh(true_clu==iclus))); %scalar
         p(iclus) = sum(shufCoh>trueCoh)/numel(shufCoh);
-        if p(iclus) < 0.01
+        if p(iclus) > 0.01
             break
         end 
     end

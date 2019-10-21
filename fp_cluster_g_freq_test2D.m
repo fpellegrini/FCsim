@@ -1,6 +1,6 @@
-function [p, true_clu] = fp_cluster_g_c_freq_test(abs_imag, DIROUT)
-%Group statistics, finds clusters with components fun.
-%Clustering across space and frequencies.
+function [p, true_clu] = fp_cluster_g_freq_test2D(minnbchan,abs_imag,DIROUT)
+%group statistics, finds clusters across space and frequencies with the
+%findclusters fun
 
 fp_addpath
 
@@ -13,6 +13,9 @@ end
 patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
 nsubs = numel(patientID);
 
+if isempty(minnbchan)
+    minnbchan = 2;
+end
 if isempty(abs_imag)
     abs_imag = 'imag';
 end
@@ -21,7 +24,7 @@ end
 nchunk = 50;
 alpha = 0.001;
 %%
-for id = 1:nsubs    
+for id = 1:nsubs
     fprintf('Working on subject %s',patientID{id})
     
     %get neighbouring nodes and node positions
@@ -36,7 +39,7 @@ for id = 1:nsubs
     for ichunk = 1:nchunk
         %load coherences
         clear coh flip_coh abs_coh avg_coh
-        load(sprintf('Coherences_e_Patient%s_chunk%d.mat',patientID{id},ichunk));
+        load(sprintf('Coherences_e2D_Patient%s_chunk%d.mat',patientID{id},ichunk));
         
         %flip coherence
         coh(:,:,noEq,:) = [];
@@ -53,31 +56,24 @@ for id = 1:nsubs
         else
             error('Method unknown!')
         end
-         
+        
         %median across lfp channels (already flipped) and across frequencies
-        COH(id,ichunk,:,:,:) = squeeze(median(r_coh,4));
-    end   
+        COH(id,ichunk,:,:,:) = squeeze(median(r_coh,4));       
+    end
 end
 
 [nsub, nchunk,niit,nfreq,ns] = size(COH);
 
 conn = fp_find_neighbours(patientID{id});
-match_conn = conn(voxID{id},voxID{id}); %same for all subjects 
-
-freq_conn = fp_get_freq_conn(nfreq);
-conn_s = sparse(match_conn); %nvox x nvox
-freq_conn_s = sparse(freq_conn);%nfrerq x nfreq
-kron_conn = kron(conn_s,freq_conn_s); % nvox*nfreq = nkron
+match_conn = conn(voxID{id},voxID{id});
 
 nCOH = reshape(COH,[nsub,nchunk*niit,nfreq,ns]);
 tCoh = squeeze(nCOH(:,1,:,:));
 sCoh = nCOH(:,2:end,:,:);
-nit = size(sCoh,2); %update nit to number of *shuffled* it
+nit = size(sCoh,2);
 
-
-
-%% true 
-
+%% true
+ 
 clear o cCoh csCoh dbCoh ps hs testval
 
 %debias
@@ -98,28 +94,16 @@ end
 toc
 
 onoff = hs;
-clear u ind A
-
-u = onoff(:); %should be the same indexing like in kron_conn now; nkron x 1
-ind = find(u==1); %remember indeces of super-threshold coherences
-A = kron_conn;
-A(u==0,:)=[]; %pass the neighbourhood structure only for the super-threshold voxels
-A(:,u==0)=[];
-
-%components assigns every voxel to a cluster, even if this means that every voxel is its own cluster
-clear ci x clu
-[ci, x] = components(A); %x is the histogram of the clusters
-clu = zeros(size(kron_conn,1),1);%refill with sub-threshold voxels
-clu(ind)= ci; %nkron x 1
-clu = reshape(clu,[nfreq ns]); %nfreq x ns
-
-true_total = numel(x);
-true_clu = fp_order_clusters(clu,true_total);
+clear clu total
+[clu, total] = findcluster(onoff,...
+    match_conn, match_conn, minnbchan);
+true_clu = fp_order_clusters(clu',total);
+true_total = total;
 true_testval = testval;
 true_p = ps;
 
-
 %% shuffled
+
 
 for iit = 1:nit 
     tic
@@ -151,22 +135,9 @@ for iit = 1:nit
     end
 
     onoff = hs;
-    clear u ind A
-    u = onoff(:); %should be the same indexing like in kron_conn now; nkron x 1
-    
-    ind = find(u==1); %remember indeces of super-threshold coherences
-    A = kron_conn;
-    A(u==0,:)=[]; %pass the neighbourhood structure only for the super-threshold voxels
-    A(:,u==0)=[];
-    
-    %components assigns every voxel to a cluster, even if this means that every voxel is its own cluster
-    clear ci x clu
-    [ci, x] = components(A); %x is the histogram of the clusters
-    clu = zeros(size(kron_conn,1),1);%refill with sub-threshold voxels
-    clu(ind)= ci; %nkron x 1
-    clu = reshape(clu,[nfreq ns]); %nfreq x ns
-    
-    total = numel(x);
+    clear clu total
+    [clu, total] = findcluster(onoff,...
+        match_conn, match_conn, minnbchan);
     shuf_clu(iit,:,:) = fp_order_clusters(clu,total);
     shuf_total(iit) = total;
     shuf_testval(iit,:,:) = testval;
@@ -175,7 +146,7 @@ for iit = 1:nit
     toc
 end
 
-%% 
+%%
 
 if true_total>0 %when at least one true cluster exists    
     
@@ -201,6 +172,7 @@ elseif sum(shuf_total)== 0  %when no cluster was found it any iteration
 else %when only in shuffled conditions clusters were found
     p = 1;
 end
-%%
-outname = sprintf('%sp_cluster_g_c_freq_%s_test',DIROUT,abs_imag);
-save(outname,'p','true_total','true_clu','true_p','-v7.3')
+
+
+outname = sprintf('%sp_cluster_g_freq_%s_test2D',DIROUT,abs_imag);
+save(outname,'p','true_clu','true_p','true_total','-v7.3')

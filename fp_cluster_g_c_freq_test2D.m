@@ -1,4 +1,4 @@
-function [p, true_clu] = fp_cluster_g_c_freq_test(abs_imag, DIROUT)
+function [p, true_clu] = fp_cluster_g_c_freq_test2D(abs_imag, DIROUT)
 %Group statistics, finds clusters with components fun.
 %Clustering across space and frequencies.
 
@@ -36,7 +36,7 @@ for id = 1:nsubs
     for ichunk = 1:nchunk
         %load coherences
         clear coh flip_coh abs_coh avg_coh
-        load(sprintf('Coherences_e_Patient%s_chunk%d.mat',patientID{id},ichunk));
+        load(sprintf('Coherences_e2D_Patient%s_chunk%d.mat',patientID{id},ichunk));
         
         %flip coherence
         coh(:,:,noEq,:) = [];
@@ -202,5 +202,5 @@ else %when only in shuffled conditions clusters were found
     p = 1;
 end
 %%
-outname = sprintf('%sp_cluster_g_c_freq_%s_test',DIROUT,abs_imag);
+outname = sprintf('%sp_cluster_g_c_freq_%s_test2D',DIROUT,abs_imag);
 save(outname,'p','true_total','true_clu','true_p','-v7.3')

@@ -1,4 +1,4 @@
-function [p, true_clu] = fp_cluster_g_c_freq_test(abs_imag, DIROUT)
+function [p, true_clu] = fp_cluster_g_c_freq_test_0005(abs_imag, DIROUT)
 %Group statistics, finds clusters with components fun.
 %Clustering across space and frequencies.
 
@@ -19,7 +19,7 @@ end
 
 [~, voxID] = fp_find_commonvox;
 nchunk = 50;
-alpha = 0.001;
+alpha = 0.0005;
 %%
 for id = 1:nsubs    
     fprintf('Working on subject %s',patientID{id})
@@ -202,5 +202,5 @@ else %when only in shuffled conditions clusters were found
     p = 1;
 end
 %%
-outname = sprintf('%sp_cluster_g_c_freq_%s_test',DIROUT,abs_imag);
+outname = sprintf('%sp_cluster_g_c_freq_%s_test0005',DIROUT,abs_imag);
 save(outname,'p','true_total','true_clu','true_p','-v7.3')
