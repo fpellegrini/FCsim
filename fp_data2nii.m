@@ -38,7 +38,7 @@ for i =1:numel(x)
     cube(x(i),y(i),z(i)) = data(i);
 end 
 
-%interpolation of missing values
+%scale
 Vq = cube.*sf;
 
 % Vq = inpaintn(Vq,nit);
