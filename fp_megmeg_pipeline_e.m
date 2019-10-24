@@ -1,6 +1,6 @@
 function fp_megmeg_pipeline_e(patientNumber,DIROUT)
 
-% fp_addpath
+fp_addpath_sabzi
 
 if isempty(patientNumber)
     patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
@@ -17,6 +17,7 @@ nit= 1000;
 npcs = 2;
 COH = zeros(nit,117,117,46);
 TRUE_COH = zeros(117,117,46);
+fres = 75;
 
 %%
 for id = 1:numel(patientID)
@@ -38,13 +39,12 @@ for id = 1:numel(patientID)
     nlfp = numel(id_lfp_chan);
     
     %scaling
-    load('scaling_factor.mat')
     X(id_meg_chan,:,:)= X(id_meg_chan,:,:)./(10^6);
     
     %construct filters
     
     %load true CS
-    load(sprintf('Filter_Patient%s.mat',patientID{id}));% 1D-A and true CS
+    load(sprintf('Filter_Patient%s_e.mat',patientID{id}));% 1D-A and true CS
     clear A
     CS = CS(1:(end-nlfp),1:(end-nlfp),:); %throw away lfp channels
     nfreq = size(CS,3);
@@ -166,7 +166,7 @@ for id = 1:numel(patientID)
         coh_roi = nan(nroi-1,nroi-1,npcs,npcs,nfreq);   
         A_ = reshape(A, [nmeg, ndim*ns]);        
         
-        for ifq = 1:freq
+        for ifq = 1:nfreq
             
             clear CSv pv CSn cseig 
             CSv = A_' * CS(:,:,ifq) * A_;
@@ -216,7 +216,7 @@ for id = 1:numel(patientID)
         COH(iit,:,:,:) = squeeze(COH(iit,:,:,:)) + log10(coh);
         toc
     end
-    clearvars -except COH TRUE_COH id patientID nit npcs nfreq ndim nroi
+    clearvars -except COH TRUE_COH id patientID nit npcs nfreq ndim nroi fres
     %
 end
 
