@@ -21,45 +21,51 @@ end
 nchunk = 50;
 alpha = 0.001;
 %%
-for id = 1:nsubs    
-    fprintf('Working on subject %s',patientID{id})
-    
-    %get neighbouring nodes and node positions
-    clear mni_pos sym_pos flip_id match_pos noEq
-    
-    %get flip id and symmetric head
-    mni_pos = fp_getMNIpos(patientID{id});
-    [sym_pos, noEq] = fp_symmetric_vol(mni_pos);
-    match_pos = sym_pos(voxID{id},:);
-    [~,flip_id] = fp_flip_vol(match_pos);
-    
-    for ichunk = 1:nchunk
-        %load coherences
-        clear coh flip_coh abs_coh avg_coh
-        load(sprintf('Coherences_e2D_Patient%s_chunk%d.mat',patientID{id},ichunk));
-        
-        %flip coherence
-        coh(:,:,noEq,:) = [];
-        match_coh = coh(:,:,voxID{id},:);
-        flip_coh = match_coh;
-        flip_coh(:,:,:,4:6) = match_coh(:,:,flip_id,4:6);
-        
-        %absolute value
-        if strcmp(abs_imag,'abs')
-            r_coh= log10(abs(flip_coh));
-        elseif strcmp(abs_imag,'imag')
-            r_coh = log10(abs(imag(flip_coh)));
-            r_coh(:,1,:,:) = []; %delete inf at freq=1
-        else
-            error('Method unknown!')
-        end
-         
-        %median across lfp channels (already flipped) and across frequencies
-        COH(id,ichunk,:,:,:) = squeeze(median(r_coh,4));
-    end   
-end
-
-[nsub, nchunk,niit,nfreq,ns] = size(COH);
+% for id = 1:nsubs    
+%     fprintf('Working on subject %s',patientID{id})
+%     
+%     %get neighbouring nodes and node positions
+%     clear mni_pos sym_pos flip_id match_pos noEq
+%     
+%     %get flip id and symmetric head
+%     mni_pos = fp_getMNIpos(patientID{id});
+%     [sym_pos, noEq] = fp_symmetric_vol(mni_pos);
+%     match_pos = sym_pos(voxID{id},:);
+%     [~,flip_id] = fp_flip_vol(match_pos);
+%     
+%     for ichunk = 1:nchunk
+%         %load coherences
+%         clear coh flip_coh abs_coh avg_coh
+%         load(sprintf('Coherences_e2D_Patient%s_chunk%d.mat',patientID{id},ichunk));
+%         
+%         %flip coherence
+%         coh(:,:,noEq,:) = [];
+%         match_coh = coh(:,:,voxID{id},:);
+%         flip_coh = match_coh;
+%         flip_coh(:,:,:,4:6) = match_coh(:,:,flip_id,4:6);
+%         
+%         %absolute value
+%         if strcmp(abs_imag,'abs')
+%             r_coh= log10(abs(flip_coh));
+%         elseif strcmp(abs_imag,'imag')
+%             r_coh = log10(abs(imag(flip_coh)));
+%             r_coh(:,1,:,:) = []; %delete inf at freq=1
+%         else
+%             error('Method unknown!')
+%         end
+%          
+%         %median across lfp channels (already flipped) and across frequencies
+%         COH(id,ichunk,:,:,:) = squeeze(median(r_coh,4));
+%     end   
+% end
+% 
+% [nsub, nchunk,niit,nfreq,ns] = size(COH);
+%%
+%%%%%%%%%%%%
+load('db_coh_usw')
+id=1;
+[nsub, nit, nfreq, ns] = size(sCoh);
+%%%%%%%%%%%%
 
 conn = fp_find_neighbours(patientID{id});
 match_conn = conn(voxID{id},voxID{id}); %same for all subjects 
@@ -69,21 +75,21 @@ conn_s = sparse(match_conn); %nvox x nvox
 freq_conn_s = sparse(freq_conn);%nfrerq x nfreq
 kron_conn = kron(conn_s,freq_conn_s); % nvox*nfreq = nkron
 
-nCOH = reshape(COH,[nsub,nchunk*niit,nfreq,ns]);
-tCoh = squeeze(nCOH(:,1,:,:));
-sCoh = nCOH(:,2:end,:,:);
-nit = size(sCoh,2); %update nit to number of *shuffled* it
+% nCOH = reshape(COH,[nsub,nchunk*niit,nfreq,ns]);
+% tCoh = squeeze(nCOH(:,1,:,:));
+% sCoh = nCOH(:,2:end,:,:);
+% nit = size(sCoh,2); %update nit to number of *shuffled* it
 
 
 
 %% true 
 
-clear o cCoh csCoh dbCoh ps hs testval
-
-%debias
+% clear o cCoh csCoh dbCoh ps hs testval
+% 
+% %debias
 tic
-o = squeeze(mean(sCoh,2)); 
-dbCoh = tCoh-o; 
+% o = squeeze(mean(sCoh,2)); 
+% dbCoh = tCoh-o; 
 
 %sign-rank test
 for ifreq = 1:nfreq
@@ -97,7 +103,7 @@ for ifreq = 1:nfreq
 end
 toc
 
-onoff = hs;
+onoff = hs';
 clear u ind A
 
 u = onoff(:); %should be the same indexing like in kron_conn now; nkron x 1
@@ -111,7 +117,7 @@ clear ci x clu
 [ci, x] = components(A); %x is the histogram of the clusters
 clu = zeros(size(kron_conn,1),1);%refill with sub-threshold voxels
 clu(ind)= ci; %nkron x 1
-clu = reshape(clu,[nfreq ns]); %nfreq x ns
+clu = reshape(clu,[nfreq ns]); 
 
 true_total = numel(x);
 true_clu = fp_order_clusters(clu,true_total);
@@ -150,7 +156,7 @@ for iit = 1:nit
         end
     end
 
-    onoff = hs;
+    onoff = hs';
     clear u ind A
     u = onoff(:); %should be the same indexing like in kron_conn now; nkron x 1
     
