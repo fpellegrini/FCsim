@@ -70,17 +70,22 @@ for id = 1:numel(patientID)
         
     end
    
-    CSv = squeeze(sum(CSv,2));
-    pv = squeeze(sum(pv,1))';
+%     %sum across dimensions 
+%     CSv = squeeze(sum(CSv,2));
+%     pv = squeeze(sum(pv,1))';
     
     %coherence
     coh = CSv;
-    for ifreq = 1:nfreq
-        clear plfp
-        plfp = diag(squeeze(CS(nmeg+1:end,nmeg+1:end,ifreq))); %power of lfp channels
-        coh(ifreq, :, :) = squeeze(CSv(ifreq, :, :)) ...
-            ./ sqrt(pv(:,ifreq)*plfp');
+    for idim = 1:ndim
+        for ifreq = 1:nfreq
+            clear plfp
+            plfp = diag(squeeze(CS(nmeg+1:end,nmeg+1:end,ifreq))); %power of lfp channels
+            coh(ifreq, idim,:, :) = squeeze(CSv(ifreq, idim,:, :)) ...
+                ./ sqrt(squeeze(pv(idim,ifreq,:))*plfp');
+        end
     end
+    
+    coh = squeeze(sum(coh,2));
     
     
     COH_all{id} = coh;
