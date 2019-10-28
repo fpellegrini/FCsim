@@ -2,7 +2,7 @@ clear all
 
 %parameters
 patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'}; 
-id = 8;
+id = 2;
 nfreq = 46;
 fres = 75;
 inode = 2100; %randi(size(A,2),1);
@@ -38,17 +38,30 @@ for itrial = 1:ntrials
     signal(:,:,itrial) = sig ./ norm(sig, 'fro');
 end
 
-%filter
-load(sprintf('Filter_Patient%s_dics_2D.mat',patientID{id}))
-clear CS
-ns = size(A,3);
-
 %meg-meg CS
 CS = fp_tsdata_to_cpsd(signal,fres,'MT',id_meg_chan, id_meg_chan, id_meg_trials, id_meg_trials);
 CS(:,:,nfreq+1:end) = [];
 
+ns = size(L,2);
+
+%filter
+A=zeros(2,nmeg,ns,nfreq);
+
+for ifrq = 1:nfreq
+    cCS = CS(:,:,ifrq);
+    lambda = mean(diag(real(cCS)))/100;
+    
+    CSinv=pinv(real(cCS)+lambda * eye(size(cCS)));
+    
+    for is=1:ns %iterate across nodes
+        Lloc=squeeze(L(:,is,:));
+        A(:,:,is,ifrq) = pinv(Lloc'*CSinv*Lloc)*Lloc'*CSinv; %create filter
+    end
+end
+
+
 %power
-for idim = 1:2  
+for idim = 1:2
     for ifreq = 1: nfreq
         for is = 1:ns
             pow(is,idim,ifreq) = real(squeeze(A(idim,:,is,ifreq)) * CS(:,:,ifreq) * squeeze(A(idim,:,is,ifreq))');
@@ -73,5 +86,5 @@ xlabel('voxel id')
 ylabel('pow')
 
 %%
-outname = 'g_sub8_dics2D.nii';
-fp_data2nii(g./10^-4,sources.pos,[],outname)
+outname = 'g_sub2_dics2D.nii';
+fp_data2nii(g./10^-5,sources.pos,[],outname,id)
