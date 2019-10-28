@@ -1,4 +1,3 @@
-
 function fp_test_sensorspace_coh_allchans_group(patientNumber,fband, DIROUT)
 
 fp_addpath
@@ -40,7 +39,12 @@ cond = 0;
 nboot = 1;
 N_it = 1000;
 nsubs = numel(patientID);
-nfreq = 8;
+
+fs = 300;
+fres = 75;
+frqs = sfreqs(fres, fs);
+frq_inds = find(frqs > frq_band(1) & frqs < frq_band(2));
+nfreq = numel(frq_inds);
 
 COH = nan(nsubs,N_it,nfreq,N_MEG, N_lfp);
 
@@ -57,12 +61,6 @@ for id = 1:numel(patientID)
     meg_inds = MEG_INDS;
     meg_inds(D.badchannels) = [];
     N_meg = length(meg_inds);
-    
-    
-    fs = D.fsample;
-    fres = 75;
-    frqs = sfreqs(fres, fs);
-    frq_inds = find(frqs > frq_band(1) & frqs < frq_band(2));
     
     data1 = [D_ft.trial{:}];
     
