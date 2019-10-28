@@ -11,11 +11,11 @@ id = d(ind2sub(t1.dim,a));
 label = [];code =[]; 
 if isempty(a)
     id = 0;
-else
-    for i = 1:length(ROI)
-        if ROI(i).ID == id
-            label = ROI(i).Nom_L;
-            code = ROI(i).Nom_C;
-        end
-    end      
+% else
+%     for i = 1:length(ROI)
+%         if ROI(i).ID == id
+%             label = ROI(i).Nom_L;
+%             code = ROI(i).Nom_C;
+%         end
+%     end      
 end

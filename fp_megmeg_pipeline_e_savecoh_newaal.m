@@ -1,4 +1,4 @@
-function fp_megmeg_pipeline_e_savecoh(patientNumber,DIROUT)
+function fp_megmeg_pipeline_e_savecoh_newaal(patientNumber,DIROUT)
 
 fp_addpath_sabzi
 

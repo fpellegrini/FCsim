@@ -10,7 +10,7 @@ pow_noise = nan(numel(patientID),numel(voxID{1}),46);
 for id = 1:numel(patientID)
     clearvars -except id patientID pow voxID pow_noise commonvox_pos
     
-    load(sprintf('Filter_Patient%s.mat',patientID{id}))  
+    load(sprintf('Filter_Patient%s_e.mat',patientID{id}))  
     
     mni_pos = fp_getMNIpos(patientID{id});
     [~, noEq] = fp_symmetric_vol(mni_pos);
@@ -37,10 +37,11 @@ end
 pow = pow./pow_noise;
 
 a = squeeze(sum(pow,1));
-e = sum(a,2);
+e = sum(a(:,6:15),2);
+
 %%
-outname = 'real_pow_all_dics.nii';
-fp_data2nii(e./10^-4,commonvox_pos,[],outname)
+outname = 'real_pow_beta_eloreta.nii';
+fp_data2nii(e./10^-4,commonvox_pos,[],outname,[])
 
 % outname = 'pow2_e.nii';
 % fp_data2nii(c,nan,[],outname)

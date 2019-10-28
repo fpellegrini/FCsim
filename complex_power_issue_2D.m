@@ -28,11 +28,15 @@ for id = 1:numel(patientID)
 end
 
 e = squeeze(sum(sum(sum(pow,1),3),4));
+alpha = squeeze(sum(sum(sum(pow(:,:,:,4:6),1),3),4));
 beta = squeeze(sum(sum(sum(pow(:,:,:,6:15),1),3),4));
 %%
 outname = 'real_pow_beta_e2D.nii';
-fp_data2nii(beta./10^-8,commonvox_pos,[],outname)
+fp_data2nii(beta./10^-8,commonvox_pos,[],outname,[])
+
+outname = 'real_pow_alpha_e2D.nii';
+fp_data2nii(alpha./10^-8,commonvox_pos,[],outname,[])
 
 outname = 'real_pow_all_e2D.nii';
-fp_data2nii(e./10^-8,commonvox_pos,[],outname)
+fp_data2nii(e./10^-8,commonvox_pos,[],outname,[])
 
