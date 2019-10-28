@@ -49,9 +49,9 @@ for id = 1:nsubs
         
         %absolute value
         if strcmp(abs_imag,'abs')
-            r_coh= log10(abs(flip_coh));
+            r_coh= abs(flip_coh);
         elseif strcmp(abs_imag,'imag')
-            r_coh = log10(abs(imag(flip_coh)));
+            r_coh = abs(imag(flip_coh));
             r_coh(:,1,:,:) = []; %delete inf at freq=1
         else
             error('Method unknown!')
@@ -78,7 +78,7 @@ clear o cCoh csCoh dbCoh ps hs testval
 
 %debias
 tic
-o = squeeze(mean(sCoh,2)); 
+o = squeeze(median(sCoh,2)); 
 dbCoh = tCoh-o; 
 
 %sign-rank test
