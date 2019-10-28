@@ -2,7 +2,7 @@ clear all
 
 %parameters
 patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'}; 
-id = 8;
+id = 2;
 nfreq = 46;
 fres = 75;
 inode = 2100; %randi(size(A,2),1);
@@ -39,7 +39,7 @@ for itrial = 1:ntrials
 end
 
 %filter
-load(sprintf('Filter_Patient%s_wo_reg.mat',patientID{id}))
+load(sprintf('Filter_Patient%s_e.mat',patientID{id}))
 clear CS
 ns = size(A,2);
 
@@ -81,14 +81,7 @@ plot(e)
 title('noise power')
 xlabel('voxel id')
 ylabel('pow')
+
 %%
-figure
-plot(g)
-hold on 
-plot(inode,0,'r+')
-% imagesc(zscore(signal_v))
-% figure
-% imagesc(zscore(signal_n))
-%%
-outname = 'g_sub8_dics_wo_reg.nii';
-fp_data2nii(g./10^-5,sources.pos,[],outname)
+outname = 'f_sub2_eloreta.nii';
+fp_data2nii(g./10^-10,sources.pos,[],outname,id)

@@ -2,7 +2,7 @@ clear all
 
 %parameters
 patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'}; 
-id = 1;
+id = 2;
 nfreq = 46;
 fres = 75;
 inode = 2100; %randi(size(A,2),1);
@@ -70,5 +70,5 @@ xlabel('voxel id')
 ylabel('pow')
 
 %%
-outname = 'f_sub1_e2D.nii';
-fp_data2nii(a./10^-8,sources.pos,[],outname)
+outname = 'f_sub2_e2D.nii';
+fp_data2nii(a./max(a(:)),sources.pos,[],outname)
