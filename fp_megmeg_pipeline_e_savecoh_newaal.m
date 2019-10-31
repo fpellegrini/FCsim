@@ -28,7 +28,7 @@ for id = 1:numel(patientID)
     if ~exist(sprintf('%s%s_work',DIRLOG,logname)) & ~exist(sprintf('%s%s_done',DIRLOG,logname))
         eval(sprintf('!touch %s%s_work',DIRLOG,logname))
         tic
-        
+%%        
         %load data
         clear X
         D = spm_eeg_load(sprintf('redPLFP%s_off', patientID{id}));
@@ -45,7 +45,6 @@ for id = 1:numel(patientID)
         nlfp = numel(id_lfp_chan);
         
         %scaling
-        load('scaling_factor.mat')
         X(id_meg_chan,:,:)= X(id_meg_chan,:,:)./(10^6);
         
         %construct filters
@@ -54,6 +53,7 @@ for id = 1:numel(patientID)
         load(sprintf('Filter_Patient%s_e.mat',patientID{id}));% 1D-A and true CS
         clear A
         CS = CS(1:(end-nlfp),1:(end-nlfp),:); %throw away lfp channels
+        CS(:,:,1)=[];
         nfreq = size(CS,3);
         
         %leadfield
@@ -86,14 +86,19 @@ for id = 1:numel(patientID)
         cA = A;
         A_ = reshape(cA, [nmeg, ndim*ns]);
         for ifq = 1:nfreq
-            clear CSv pv
-            CSv = A_' * CS(:,:,ifq) * A_;
-            pv = fp_project_power(CS(:,:,ifq),A_);
-            CSn(ifq,:,:) = CSv ./ sqrt(pv * pv');
+            clear pv
+            CSv(ifq,:,:) = A_' * CS(:,:,ifq) * A_;
+%             pv = fp_project_power(CS(:,:,ifq),A_);
+        end       
+        
+        %zscoring
+        ZS = diag(sqrt(mean(diag(squeeze(sum(real(CSv), 1))))./diag(squeeze(sum(real(CSv), 1)))));
+        for ifreq = 1:nfreq
+            CSz(ifreq,:, :) = ZS'*squeeze(CSv(ifreq,:, :))*ZS;
         end
-        CSs = squeeze(sum(CSn,1));
         
         %region pca
+        CSs = squeeze(sum(CSz,1));       
         is = 1;
         for iroi = 2:nroi
             clear v cCS cns iid
@@ -105,9 +110,11 @@ for id = 1:numel(patientID)
             v5{iroi} = v(:,1:npcs); %nregionvoxels*2 x npcs
             is = is+length(iid);
         end
+        clear CSs
         
         %apply the pca-filters to the cs
         for ifq = 1:nfreq
+            
             clear cseig
             kr=1;
             for kroi = 2:nroi
@@ -118,7 +125,7 @@ for id = 1:numel(patientID)
                 for jroi =2: nroi
                     clear cCS jid
                     jid = jr:jr+ (sum(roi_id == u_roi_id(jroi)))*ndim-1;
-                    cCS = squeeze(CSn(ifq,kid,jid));
+                    cCS = squeeze(CSz(ifq,kid,jid));
                     
                     cseig(kroi-1,jroi-1,:,:) = v5{kroi}' * cCS * v5{jroi};
                     
@@ -143,14 +150,12 @@ for id = 1:numel(patientID)
         for ii=1:nroi-1
             for jj= 1: nroi-1
                 for ifq = 1: nfreq
-                    true_coh(ii,jj,ifq) =  sum(sum(triu(squeeze(abs(imag(coh_roi(ii,jj,:,:,ifq)))))));
+                    true_coh(ii,jj,ifq) =  sum(sum(squeeze(abs(imag(coh_roi(ii,jj,:,:,ifq))))));
                 end
             end
         end
         
-        
-        true_coh = log10(true_coh);
-        
+ %%       
         
         % calculate coherence for permutations
         
@@ -168,14 +173,21 @@ for id = 1:numel(patientID)
             clear A_ coh_roi
             coh_roi = nan(nroi-1,nroi-1,npcs,npcs,nfreq);
             A_ = reshape(A, [nmeg, ndim*ns]);
+            clear CSv pv CSz cseig
             
-            for ifq = 1:nfreq
+            for ifq = 1:nfreq              
+                CSv(ifq,:,:) = A_' * CS(:,:,ifq) * A_;
+%                 pv = fp_project_power(CS(:,:,ifq),A_);
+%                 CSz = CSv ./ sqrt(pv * pv');
+            end
+            
+            %zscoring
+            ZS = diag(sqrt(mean(diag(squeeze(sum(real(CSv), 1))))./diag(squeeze(sum(real(CSv), 1)))));
+            
+            for ifreq = 1:nfreq
                 
-                clear CSv pv CSn cseig
-                CSv = A_' * CS(:,:,ifq) * A_;
-                pv = fp_project_power(CS(:,:,ifq),A_);
-                CSn = CSv ./ sqrt(pv * pv');
-                
+                CSz = ZS'*squeeze(CSv(ifreq,:, :))*ZS;
+                               
                 %apply the filters to the cs
                 kr=1;
                 for kroi = 2:nroi
@@ -186,7 +198,7 @@ for id = 1:numel(patientID)
                     for jroi =2: nroi
                         clear cCS jid
                         jid = jr:jr+ (sum(roi_id == u_roi_id(jroi)))*ndim-1;
-                        cCS = CSn(kid,jid);
+                        cCS = CSz(kid,jid);
                         
                         cseig(kroi-1,jroi-1,:,:) = v5{kroi}' * cCS * v5{jroi};
                         
@@ -216,14 +228,14 @@ for id = 1:numel(patientID)
                 end
             end
             
-            COH_sub(iit,:,:,:) = log10(coh);
+            COH_sub(iit,:,:,:) = coh;
         end
         
         outname = sprintf('%sroi_coh_sub%s',DIROUT,patientID{id});
         save(outname,'COH_sub','true_coh','-v7.3')
         
         eval(sprintf('!mv %s%s_work %s%s_done',DIRLOG,logname,DIRLOG,logname))
-        clearvars -except id patientID nit npcs nfreq ndim nroi DIRLOG
+        clearvars -except id patientID nit npcs nfreq ndim nroi DIRLOG DIROUT
         toc
     end
 end
