@@ -1,7 +1,7 @@
 function neighb = fp_find_neighbours(patientNumber)
 
 mni_pos = fp_getMNIpos(patientNumber);
-c = fp_symmetric_vol(mni_pos);
+[c, ~] = fp_symmetric_vol(mni_pos);
 
 dist = pdist(c); %eucledean distance
 dist1 = squareform(dist);
