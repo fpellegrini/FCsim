@@ -1,4 +1,4 @@
-function fp_megmeg_pipeline_e_savecoh_newaal(patientNumber,DIROUT)
+function fp_megmeg_pipeline_new(patientNumber,DIROUT)
 
 fp_addpath_sabzi
 
@@ -72,63 +72,51 @@ for id = 1:numel(patientID)
         nroi = numel(u_roi_id);
         
         %get rid of white voxels
-        L(:,roi_id==0,:)=[];
-        ns = size(L,2);
+%         L(:,roi_id==0,:)=[];
+%         ns = size(L,2);
         
         %project to source  
         A = squeeze(mkfilt_eloreta_v2(L));
         A = permute(A,[1, 3, 2]);
         
-        clear A_ CSv CSz v5 cseig
-        A_ = reshape(A, [nmeg, ndim*ns]);
-        for ifq = 1:nfreq
-            clear pv
-            CSv(ifq,:,:) = A_' * CS(:,:,ifq) * A_;
-        end       
         
-        %zscoring
-        ZS = diag(sqrt(mean(diag(squeeze(sum(real(CSv), 1))))./diag(squeeze(sum(real(CSv), 1)))));
-        for ifreq = 1:nfreq
-            CSz(ifreq,:, :) = ZS'*squeeze(CSv(ifreq,:, :))*ZS;
-        end
-        
-        %region pca
-        CSs = squeeze(sum(CSz,1));       
-        is = 1;
-        for iroi = 2:nroi
-            clear v cCS cns iid
+        for aroi = 1:nroi-1
+            aroi
             
-            iid = is: is+ (sum(roi_id == u_roi_id(iroi)))*ndim-1;
-            cCS = CSs(iid,iid);
-            [v, ~, ~] = eig(real(cCS));
+            %project to source level
+            clear A_ CSv         
+            A_ = A(:, :,roi_id == aroi);
+            nsroi = size(A_,3);
+            A_ = reshape(A_, [nmeg, ndim*nsroi]);
             
-            v5{iroi} = v(:,1:npcs); %nregionvoxels*2 x npcs
-            is = is+length(iid);
-        end
-        clear CSs
-        
-        %apply the pca-filters to the cs
-        for ifq = 1:nfreq
-            
-            clear cseig
-            kr=1;
-            for kroi = 2:nroi
-                clear kid
-                
-                kid = kr: kr+ (sum(roi_id == u_roi_id(kroi)))*ndim-1;
-                jr=1;
-                for jroi =2: nroi
-                    clear cCS jid
-                    jid = jr:jr+ (sum(roi_id == u_roi_id(jroi)))*ndim-1;
-                    cCS = squeeze(CSz(ifq,kid,jid));
-                    
-                    cseig(kroi-1,jroi-1,:,:) = v5{kroi}' * cCS * v5{jroi};
-                    
-                    jr=jr+length(jid);
-                end
-                
-                kr=kr+length(kid);
+            for ifq = 1:nfreq
+                CSv(ifq,:,:) = A_' * CS(:,:,ifq) * A_;
             end
+            
+            %zscoring
+            clear ZS CSz
+            ZS = diag(sqrt(mean(diag(squeeze(sum(real(CSv), 1))))./diag(squeeze(sum(real(CSv), 1)))));
+            for ifreq = 1:nfreq
+                CSz(ifreq,:, :) = ZS'*squeeze(CSv(ifreq,:, :))*ZS;
+            end
+            
+            %region pca
+            clear CSs v v5
+            CSs = squeeze(sum(CSz,1)); %covariance
+            [v, ~, ~] = eig(real(CSs));
+            V = v(:,1:npcs); %nregionvoxels*2 x npcs
+            
+            
+            %concatenate filters 
+            P(:, :, aroi) = A_*ZS*real(V);
+            
+        end
+        
+        CSroi = [];
+        for ifreq = 1:nfreq
+            CSroi(:, :, ifreq) = reshape(P, nmeg, [])'*CS(:, :, ifreq)*reshape(P, nmeg, []);
+        end
+
             
             coh_roi = nan(nroi-1,nroi-1,npcs,npcs,nfreq);
             
@@ -197,7 +185,7 @@ for id = 1:numel(patientID)
                         jid = jr:jr+ (sum(roi_id == u_roi_id(jroi)))*ndim-1;
                         cCS = CSz(kid,jid);
                         
-                        cseig(kroi-1,jroi-1,:,:) = v5{kroi}' * cCS * v5{jroi};
+                        cseig(kroi-1,jroi-1,:,:) = V{kroi}' * cCS * V{jroi};
                         
                         jr=jr+length(jid);
                     end
