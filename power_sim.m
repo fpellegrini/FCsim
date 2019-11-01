@@ -83,5 +83,5 @@ xlabel('voxel id')
 ylabel('pow')
 
 %%
-outname = 'f_sub2_eloreta.nii';
-fp_data2nii(g./10^-10,sources.pos,[],outname,id)
+outname = 'g_sub2_eloreta.nii';
+fp_data2nii(g./10^-6,sources.pos,[],outname,id)

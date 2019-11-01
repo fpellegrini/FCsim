@@ -4,26 +4,24 @@
 clear all
 patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
 [commonvox_pos, voxID] = fp_find_commonvox;
-pow = nan(numel(patientID),numel(voxID{1}),46);
-pow_noise = nan(numel(patientID),numel(voxID{1}),46);
+pow = nan(numel(patientID),numel(voxID{1}),45);
+pow_noise = nan(numel(patientID),numel(voxID{1}),45);
 
 for id = 1:numel(patientID)
-    clearvars -except id patientID pow voxID pow_noise commonvox_pos
+    clearvars -except id patientID pow voxID pow_noise commonvox_pos pow_eloreta
     
-    load(sprintf('Filter_Patient%s_e.mat',patientID{id}))  
+    load(sprintf('Filter_Patient%s.mat',patientID{id}))  
     
     mni_pos = fp_getMNIpos(patientID{id});
     [~, noEq] = fp_symmetric_vol(mni_pos);
     A(:,noEq,:) = [];
     filter = A(:,voxID{id},:);
+    filter(:,:,1)=[];
     
     [nmeg, ns, nfreq] = size(filter); 
     CS = CS(1:nmeg,1:nmeg,:);  
 
     for ifreq = 1: nfreq    
-        
-        noise = svd(abs(CS(:,:,ifreq)));
-        noise = noise(rank(CS(:,:,ifreq)));
 
         cfilter = filter(:,:,ifreq)';
 
@@ -34,14 +32,24 @@ for id = 1:numel(patientID)
     end 
 end
 
+%%
 pow = pow./pow_noise;
 
-a = squeeze(sum(pow,1));
-e = sum(a(:,6:15),2);
+% %%
+% ae = squeeze(sum(pow_eloreta,1));
+% ad = squeeze(sum(pow,1));
+% sae = sum(ae(:,4:6),2);
+% sad = sum(ad(:,4:6),2);
+% 
+% %%
+% 
+% scatter3(commonvox_pos(:,1),commonvox_pos(:,2),commonvox_pos(:,3),10,A__)
+% figure
+% scatter3(commonvox_pos(:,1),commonvox_pos(:,2),commonvox_pos(:,3),10,As__)
 
-%%
-outname = 'real_pow_beta_eloreta.nii';
-fp_data2nii(e./10^-4,commonvox_pos,[],outname,[])
+
+outname = 'real_pow_alpha_eloreta.nii';
+fp_data2nii(h./10^-8,commonvox_pos,[],outname,[])
 
 % outname = 'pow2_e.nii';
 % fp_data2nii(c,nan,[],outname)

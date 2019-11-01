@@ -1,8 +1,10 @@
-function fp_cluster_proto(DIROUT,clusterfun,abs_imag,testmethod,alpha,fwf, j)
+function fp_cluster_proto(DIROUT,filtertype, clusterfun,abs_imag,testmethod,alpha,fwf, j)
 %Group statistics.
 %Clustering group statistics across space and frequencies.
 %
 %Input:
+%
+%filtertype; either 'e' for eloreta, 'e2D' for eloreta 2D or 'd' for dics 
 %
 %clusterfun = either 'c' for components fun or 'f' for findclusters fun 
 %
@@ -35,7 +37,7 @@ if j == 0
     j_s = 'allsubs';
     patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
     [~, voxID] = fp_find_commonvox;
-elseif j_s == 1
+elseif j == 1
     j_s = 'j';
     patientID = {'04'; '07'; '09'; '10';'11';'20';'22';'25'};
     [~, voxID] = fp_find_commonvox;
@@ -51,7 +53,7 @@ minnbchan = 2;
 %%
 
 for id = 1:nsubs    
-    fprintf('Working on subject %s',patientID{id})
+    fprintf('Working on subject %s \n',patientID{id})
     
     %get neighbouring nodes and node positions
     clear flip_id noEq
@@ -60,15 +62,24 @@ for id = 1:nsubs
     [flip_id, noEq] = fp_get_flip_id(patientID{id},voxID{id});
     
     for ichunk = 1:nchunk
- 
-        inname = sprintf('Coherences_e_Patient%s_chunk%d.mat',patientID{id},ichunk);                
-        COH1(id,ichunk,:,:,:) = fp_get_coh(inname, noEq, vox_ind,flip_id, abs_imag);
+        fprintf('Working on chunk %d \n',ichunk)
+        
+        if strcmp(filtertype, 'e')
+            inname = sprintf('Coherences_e_Patient%s_chunk%d.mat',patientID{id},ichunk); 
+        elseif strcmp(filtertype, 'e2D')
+            inname = sprintf('Coherences_e2D_Patient%s_chunk%d.mat',patientID{id},ichunk);
+        elseif strcmp(filtertype,'d')
+            inname = sprintf('Coherences_Patient%s_chunk%d.mat',patientID{id},ichunk); 
+        else 
+            error('Wrong filtertype!')
+        end
+        COH1(id,ichunk,:,:,:) = fp_get_coh(inname, noEq, voxID{id},flip_id, abs_imag);
         
     end   
 end
 
-[nsub, nchunk,niit,nfreq,ns] = size(COH1);
-COH = reshape(COH1,[nsub,nchunk*niit,nfreq,ns]);
+[nsubs, nchunk,niit,nfreq,ns] = size(COH1);
+COH = reshape(COH1,[nsubs,nchunk*niit,nfreq,ns]);
 nit = size(COH,2)-1; %update nit to number of *shuffled* it
 
 %true and shuffled coherences
@@ -76,6 +87,8 @@ tCoh = squeeze(COH(:,1,:,:));
 sCoh = COH(:,2:end,:,:);
 
 %% true 
+fprintf('Testing...\n')
+tic
 if strcmp(testmethod,'s')    
     [true_p,onoff,true_val] = fp_get_signrank_results(tCoh,sCoh,alpha);
     
@@ -88,7 +101,10 @@ elseif strcmp(testmethod,'t')
 else
     error('Testmethod unknown.')
 end
+toc
 
+fprintf('Finding clusters...\n')
+tic
 if strcmp(clusterfun, 'c')
     kron_conn = fp_get_kron_conn(patientID{id}, voxID{id}, nfreq); %same for every id
     [true_clu, true_total] = fp_get_cluster_components(onoff,kron_conn);
@@ -101,15 +117,20 @@ elseif strcmp(clusterfun, 'f')
 else
     error('Cluster method unknown.')
 end
+toc
 
 %% shuffled
 
 for iit = 1:nit 
+    
+    fprintf('Working on iteration %d \n',iit)
     clear onoff cCoh csCoh
     
     %select current shuffled coh
     cCoh = squeeze(sCoh(:,iit,:,:)); 
     
+    fprintf('Testing...\n')
+    tic
     if strcmp(testmethod,'s')
         
         if iit == 1
@@ -126,22 +147,25 @@ for iit = 1:nit
         onoff = squeeze(sum(cCoh,1)) > threshold;
         shuf_val(iit,:,:) = squeeze(sum(cCoh,1));
     end
+    toc
     
+    fprintf('Finding clusters...\n')
+    tic
     if strcmp(clusterfun, 'c')
         [shuf_clu(iit,:,:), shuf_total(iit)] = fp_get_cluster_components(onoff,kron_conn);
         
-    elseif strcmp(clusterfun, 'f')
+    else strcmp(clusterfun, 'f')
         [shuf_clu(iit,:,:), shuf_total(iit)] = fp_get_cluster_findclusters(onoff, match_conn,minnbchan);
-        
-    else
+ 
     end
+    toc
     
 end
 %%
 p = fp_get_cluster_p(true_total, shuf_total, true_val, shuf_val, true_clu, shuf_clu, fwf);
 
 %%
-outname = sprintf('%sp_cluster_g_%s_freq_%s_%s_%s_%s_%s',DIROUT,clusterfun, abs_imag,...
-    testmethod, alpha_s, fwf_s, j_s);
+outname = sprintf('%sp_cluster_g_%s_freq_%s_%s_%s_%s_%s_%s',DIROUT,clusterfun, abs_imag,...
+    testmethod, alpha_s, fwf_s, j_s, filtertype);
 
 save(outname,'p','true_total','true_clu','true_p','true_val','-v7.3')
