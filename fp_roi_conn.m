@@ -14,18 +14,19 @@ conn = fp_find_neighbours(patientID{id});
 ns = size(conn,1);
 
 for ii = 1: ns
-    [~,~,roi_id(ii)]=fp_get_mni_anatomy(sym_pos(ii,:));
+    [~,~,roi_id(ii)]=fp_get_mni_anatomy_new(sym_pos(ii,:));
 end 
 
 u_roi_id = sort(unique(roi_id));
-load('ROI_MNI_V5_List.mat')
+load('ROI_new.mat')
 
-nroi =length(ROI);
+nroi =length(ROI_new.label);
 roi_conn = zeros(nroi,nroi);
 
 u=[];
 for o = 1:nroi 
-    u = [u ROI(o).ID];
+%     u = [u ROI(o).ID];
+    u = [u ROI_new.id_new(o)];
 end
 
 n1= find(~ismember(u,u_roi_id)); %hinzufuegen
@@ -61,6 +62,6 @@ end
 roi_conn(n1,:)=[];
 roi_conn(:,n1)=[];
 
-outname = sprintf('%sroi_conn',DIROUT);
+outname = sprintf('%sroi_conn_new',DIROUT);
 save(outname,'roi_conn','-v7.3')
 

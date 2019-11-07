@@ -74,7 +74,7 @@ for id = 1:5%nsubs
     
 end
 
-[nsubs,niit,nroi,~,nfreq] = size(sCoh);
+[nsubs,nit,nroi,~,nfreq] = size(sCoh);
 
 %% true
 fprintf('Testing...\n')
@@ -94,7 +94,7 @@ end
 
 fprintf('Finding clusters...\n')
 kron_conn = fp_get_kron_conn_megmeg(nfreq);
-[true_clu, true_total] = fp_get_cluster_components(onoff,kron_conn);
+[true_clu, true_total] = fp_get_cluster_components_megmeg(onoff,kron_conn);
 %findclusters is not appropriate for this application
 
 %% shuffled
@@ -133,7 +133,7 @@ for iit = 1:nit
     
 end
 %%
-p = fp_get_cluster_p(true_total, shuf_total, true_val, shuf_val, true_clu, shuf_clu, fwf);
+p = fp_get_cluster_p_megmeg(true_total, shuf_total, true_val, shuf_val, true_clu, shuf_clu, fwf);
 
 %%
 outname = sprintf('%sp_cluster_g_freq_%s_%s_%s_%s_%s_%s',DIROUT, abs_imag,...
