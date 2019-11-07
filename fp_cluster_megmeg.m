@@ -79,7 +79,9 @@ end
 %% true
 fprintf('Testing...\n')
 if strcmp(testmethod,'s')
-    %     [true_p,onoff,true_val] = fp_get_signrank_results(tCoh,sCoh,alpha);
+    tic
+    [true_p,onoff,true_val] = fp_get_signrank_results_megmeg(tCoh,sCoh,alpha);
+    toc
     
 elseif strcmp(testmethod,'t')
     threshold = prctile(reshape(sum(sCoh,1),1,[]),99.9);
@@ -111,16 +113,16 @@ for iit = 1:nit
     tic
     if strcmp(testmethod,'s')
         
-        %         if iit == 1
-        %             csCoh = sCoh(:,2:end,:,:);
-        %         elseif iit == nit
-        %             csCoh = sCoh(:,1:end-1,:,:);
-        %         else
-        %             csCoh = sCoh(:,[1:iit-1 iit+1:end],:,:);
-        %         end
-        %
-        %         [~, onoff, shuf_val(iit,:,:)] = fp_get_signrank_results(cCoh,csCoh,alpha);
-        %
+        if iit == 1
+            csCoh = sCoh(:,2:end,:,:,:);
+        elseif iit == nit
+            csCoh = sCoh(:,1:end-1,:,:,:);
+        else
+            csCoh = sCoh(:,[1:iit-1 iit+1:end],:,:,:);
+        end
+        
+        [true_p,onoff,true_val] = fp_get_signrank_results_megmeg(cCoh,csCoh,alpha);
+        
     elseif strcmp(testmethod,'t')
         onoff = squeeze(sum(cCoh,1)) > threshold;
         shuf_val(iit,:,:,:) = squeeze(sum(cCoh,1));
