@@ -1,4 +1,4 @@
-function fp_megmeg_pipeline_new(patientNumber,DIROUT,imethod)
+function fp_megmeg_pipeline_new(patientNumber,DIROUT,filtertype,imethod)
 
 % fp_addpath_sabzi
 
@@ -71,21 +71,43 @@ for id = 1:5 %:numel(patientID)
         u_roi_id = sort(unique(roi_id));
         nroi = numel(u_roi_id)-1; %because white voxels are not counted 
         
-        %project to source  
-        A = squeeze(mkfilt_eloreta_v2(L));
-        A = permute(A,[1, 3, 2]);
+        %construct source filter 
+        if strcmp(filtertype,'e')
+            A = squeeze(mkfilt_eloreta_v2(L));
+            A = permute(A,[1, 3, 2]);
+            fqA = ones(1,nfreq);%only one filter for all freqs. 
+            nfqA = 1;
+            
+        elseif strcmp(filtertype,'d')
+            A=zeros(nmeg,ndim,ns_org,nfreq);
+            
+            for ifrq = 1:nfreq
+                cCS = CS(:,:,ifrq);
+                lambda = mean(diag(real(cCS)))/100;
+                
+                CSinv=pinv(real(cCS)+lambda * eye(size(cCS)));
+                
+                for is=1:ns_org %iterate across nodes
+                    Lloc=squeeze(L(:,is,:));
+                    A(:,:,is,ifrq) = (pinv(Lloc'*CSinv*Lloc)*Lloc'*CSinv)'; %create filter
+                end
+            end
+            fqA = 1:nfreq; %This filter is frequency specific. 
+            nfqA = nfreq; 
+        end
+        
         
         clear P
         for aroi = 1:nroi
             
             %project to source level
             clear A_ CSv         
-            A_ = A(:, :,roi_id == aroi);
+            A_ = A(:, :,roi_id == aroi,:);
             nsroi = size(A_,3);
-            A_ = reshape(A_, [nmeg, ndim*nsroi]);
+            A_ = reshape(A_, [nmeg, ndim*nsroi, nfqA]);
             
             for ifq = 1:nfreq
-                CSv(ifq,:,:) = A_' * CS(:,:,ifq) * A_;
+                CSv(ifq,:,:) = A_(:,:,fqA(ifq))' * CS(:,:,ifq) * A_(:,:,fqA(ifq));
             end
             
             %zscoring
@@ -102,14 +124,16 @@ for id = 1:5 %:numel(patientID)
             V{aroi} = v(:,1:npcs); %nregionvoxels*2 x npcs
             
             
-            %concatenate filters 
-            P(:, :, aroi) = A_*ZS*real(V{aroi});
+            %concatenate filters
+            for ifq = 1:nfqA
+                P(:, :, aroi,ifq) = A_(:,:,fqA(ifq)) * ZS * real(V{aroi});
+            end
         end
         
         %apply all filters 
         CSroi = [];
         for ifreq = 1:nfreq
-            CSroi(:, :, ifreq) = reshape(P, nmeg, [])'*CS(:, :, ifreq)*reshape(P, nmeg, []);
+            CSroi(:, :, ifreq) = reshape(P(:,:,:,fqA(ifreq)), nmeg, [])'*CS(:, :, ifreq)*reshape(P(:,:,:,fqA(ifreq)), nmeg, []);
         end
 
         %divide by power to obtain coherence
