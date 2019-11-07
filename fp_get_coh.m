@@ -1,6 +1,8 @@
 function coh = fp_get_coh(inname, noEq, vox_ind,flip_id, abs_imag)
 
 load(inname);
+
+if size(
 coh(:,:,noEq,:) = [];
 match_coh = coh(:,:,vox_ind,:);
 flip_coh = match_coh;

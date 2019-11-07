@@ -1,7 +1,7 @@
 %% group
 
 clear all
-load('p_cluster_g_c_freq_imag_test2D.mat')
+load('p_cluster_g_f_freq_imag_s_001__j_d.mat')
 [pos, ~] = fp_find_commonvox;
 
 for iclus = 1:numel(p)
@@ -13,7 +13,7 @@ for iclus = 1:numel(p)
         
         %spatial localization
         b = squeeze(sum(a,1));
-        outname = sprintf('cluster_g_c_freq_imag_test2D_%d.nii',iclus);
+        outname = sprintf('cluster_g_f_freq_imag_s_001__j_d_%d.nii',iclus);
         fp_data2nii(b,pos,[],outname)
         
         %spectral localization
@@ -25,7 +25,7 @@ for iclus = 1:numel(p)
         xticks = linspace(1,length(c), numel(xticklabels));
         set(gca,'XTick', xticks,'XTickLabel',xticklabels)
         
-        outname1 = sprintf('cluster_g_freq_imag_test2D_%d.png',iclus);
+        outname1 = sprintf('cluster_g_f_freq_imag_s_001__j_d_%d.png',iclus);
         print(outname1,'-dpng');
         close all
         

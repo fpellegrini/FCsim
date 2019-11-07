@@ -93,7 +93,7 @@ if strcmp(testmethod,'s')
     [true_p,onoff,true_val] = fp_get_signrank_results(tCoh,sCoh,alpha);
     
 elseif strcmp(testmethod,'t')
-    threshold = prctile(reshape(sCoh,1,[]),99.9);
+    threshold = prctile(reshape(sum(sCoh,1),1,[]),99.9);
     onoff = squeeze(sum(tCoh,1)) > threshold;
     true_val = squeeze(sum(tCoh,1));
     true_p = [];
