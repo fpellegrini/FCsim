@@ -1,6 +1,6 @@
-function fp_megmeg_pipeline_new(patientNumber,DIROUT)
+function fp_megmeg_pipeline_new(patientNumber,DIROUT,imethod)
 
-fp_addpath_sabzi
+% fp_addpath_sabzi
 
 if isempty(patientNumber)
     patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
@@ -12,16 +12,16 @@ if ~exist('DIROUT','var')
     error('Please indicate where the results should be saved.')
 end
 
-DIRLOG = '~/log/megmeg_savecoh/';
+DIRLOG = './log/megmeg/';
 if ~exist(DIRLOG); mkdir(DIRLOG); end
 
 ndim=2;
-nit= 1000;
+nit= 10; %1000
 npcs = 5;
 fres = 75;
 
 %%
-for id = 1:numel(patientID)
+for id = 1:5 %:numel(patientID)
     fprintf('Working on subject %d. \n',id)
     logname = sprintf('%s',patientID{id});
     
@@ -69,19 +69,14 @@ for id = 1:numel(patientID)
             [~,~,roi_id(ii)]=fp_get_mni_anatomy_new(mni_pos(ii,:));
         end
         u_roi_id = sort(unique(roi_id));
-        nroi = numel(u_roi_id);
-        
-        %get rid of white voxels
-%         L(:,roi_id==0,:)=[];
-%         ns = size(L,2);
+        nroi = numel(u_roi_id)-1; %because white voxels are not counted 
         
         %project to source  
         A = squeeze(mkfilt_eloreta_v2(L));
         A = permute(A,[1, 3, 2]);
         
-        
-        for aroi = 1:nroi-1
-            aroi
+        clear P
+        for aroi = 1:nroi
             
             %project to source level
             clear A_ CSv         
@@ -104,226 +99,127 @@ for id = 1:numel(patientID)
             clear CSs v v5
             CSs = squeeze(sum(CSz,1)); %covariance
             [v, ~, ~] = eig(real(CSs));
-            V = v(:,1:npcs); %nregionvoxels*2 x npcs
+            V{aroi} = v(:,1:npcs); %nregionvoxels*2 x npcs
             
             
             %concatenate filters 
-            P(:, :, aroi) = A_*ZS*real(V);
-            
+            P(:, :, aroi) = A_*ZS*real(V{aroi});
         end
         
+        %apply all filters 
         CSroi = [];
         for ifreq = 1:nfreq
             CSroi(:, :, ifreq) = reshape(P, nmeg, [])'*CS(:, :, ifreq)*reshape(P, nmeg, []);
         end
 
+        %divide by power to obtain coherence
+        clear Cohroi
+        for ifreq = 1: nfreq
+            clear pow
+            pow = real(diag(CSroi(:,:,ifreq))); 
+            Cohroi(:,:,ifreq) = CSroi(:,:,ifreq)./ sqrt(pow*pow');
+        end 
+        
+        %integrate across npcs       
+        if strcmp(imethod,'sum')
+%             imethod
             
-            coh_roi = nan(nroi-1,nroi-1,npcs,npcs,nfreq);
-            
-            %divide by power
-            for ifc=1:npcs
-                for jfc =1:npcs
-                    clear proi
-                    proi = squeeze(real(diag(cseig(:,:,ifc,jfc))));
-                    coh_roi(:,:,ifc,jfc,ifq)= cseig(:,:,ifc,jfc)./sqrt(proi' * proi);
-                end
+            %sum up coherence across npcs
+            ic = 1;
+            for iroi = 1:nroi
+                jc = 1;
+                for jroi = 1:nroi
+                    true_coh(iroi,jroi,:) = squeeze(sum(sum(Cohroi(ic:ic+npcs-1,jc:jc+npcs-1,:),1),2));
+                    jc = jc+npcs;
+                end 
+                ic=ic+npcs;
             end
+                    
             
-        end
+        elseif strcmp(imethod,'mim')
+            imethod
+        else 
+            error('Unknown imethod')
+        end              
         
-        clear true_coh
-        for ii=1:nroi-1
-            for jj= 1: nroi-1
-                for ifq = 1: nfreq
-                    true_coh(ii,jj,ifq) =  sum(sum(squeeze(abs(imag(coh_roi(ii,jj,:,:,ifq))))));
-                end
-            end
-        end
-        
- %%       
-        
-        % calculate coherence for permutations
-        
+%%      calculate coherence for permutations
+       
         for iit = 1:nit
+            tic
             fprintf('Working on iteration %d. \n',iit)
             
-            %cross spectrum
-            
-            clear CS coh
+            clear CS P_shuf
             id_trials_1 = 1:n_trials;
             rng('shuffle')
             id_trials_2 = randperm(n_trials);
             CS = fp_tsdata_to_cpsd(X,fres,'MT',id_meg_chan, id_meg_chan, id_trials_1, id_trials_2);
             
-            clear A_ coh_roi
-            coh_roi = nan(nroi-1,nroi-1,npcs,npcs,nfreq);
-            A_ = reshape(A, [nmeg, ndim*ns]);
-            clear CSv pv CSz cseig
+            for aroi = 1: nroi
+                
+                %project CS to source level
+                clear A_ CSv
+                A_ = A(:, :,roi_id == aroi);
+                nsroi = size(A_,3);
+                A_ = reshape(A_, [nmeg, ndim*nsroi]);
+                
+                for ifq = 1:nfreq
+                    CSv(ifq,:,:) = A_' * CS(:,:,ifq) * A_;
+                end
+                
+                %zscoring
+                clear ZS CSz
+                ZS = diag(sqrt(mean(diag(squeeze(sum(real(CSv), 1))))./diag(squeeze(sum(real(CSv), 1)))));
+                for ifreq = 1:nfreq
+                    CSz(ifreq,:, :) = ZS'*squeeze(CSv(ifreq,:, :))*ZS;
+                end
             
-            for ifq = 1:nfreq              
-                CSv(ifq,:,:) = A_' * CS(:,:,ifq) * A_;
-%                 pv = fp_project_power(CS(:,:,ifq),A_);
-%                 CSz = CSv ./ sqrt(pv * pv');
+                P_shuf(:, :, aroi) = A_*ZS*real(V{aroi});
             end
             
-            %zscoring
-            ZS = diag(sqrt(mean(diag(squeeze(sum(real(CSv), 1))))./diag(squeeze(sum(real(CSv), 1)))));
-            
+            %apply all filters
+            CSroi = [];
             for ifreq = 1:nfreq
-                
-                CSz = ZS'*squeeze(CSv(ifreq,:, :))*ZS;
-                               
-                %apply the filters to the cs
-                kr=1;
-                for kroi = 2:nroi
-                    clear kid
-                    
-                    kid = kr: kr+ (sum(roi_id == u_roi_id(kroi)))*ndim-1;
-                    jr=1;
-                    for jroi =2: nroi
-                        clear cCS jid
-                        jid = jr:jr+ (sum(roi_id == u_roi_id(jroi)))*ndim-1;
-                        cCS = CSz(kid,jid);
-                        
-                        cseig(kroi-1,jroi-1,:,:) = V{kroi}' * cCS * V{jroi};
-                        
-                        jr=jr+length(jid);
-                    end
-                    
-                    kr=kr+length(kid);
-                end
-                
-                %divide by power
-                for ifc=1:npcs
-                    for jfc =1:npcs
-                        clear proi
-                        proi = squeeze(real(diag(cseig(:,:,ifc,jfc))));
-                        coh_roi(:,:,ifc,jfc,ifq)= cseig(:,:,ifc,jfc)./sqrt(proi' * proi);
-                    end
-                end
+                CSroi(:, :, ifreq) = reshape(P_shuf, nmeg, [])'*CS(:, :, ifreq)*reshape(P, nmeg, []);
             end
             
+            %divide by power to obtain coherence
+            clear Cohroi
+            for ifreq = 1: nfreq
+                clear pow
+                pow = real(diag(CSroi(:,:,ifreq)));
+                Cohroi(:,:,ifreq) = CSroi(:,:,ifreq)./ sqrt(pow*pow');
+            end
+            
+            %integrate across npcs
             clear coh
-            
-            for ii=1:nroi-1
-                for jj= 1: nroi-1
-                    for ifq = 1: nfreq
-                        coh(ii,jj,ifq) =  sum(sum(squeeze(abs(imag(coh_roi(ii,jj,:,:,ifq))))));
+            if strcmp(imethod,'sum')
+%                 imethod
+                
+                %sum up coherence across npcs
+                ic = 1;
+                for iroi = 1:nroi
+                    jc = 1;
+                    for jroi = 1:nroi
+                        coh(iroi,jroi,:) = squeeze(sum(sum(Cohroi(ic:ic+npcs-1,jc:jc+npcs-1,:),1),2));
+                        jc = jc+npcs;
                     end
+                    ic=ic+npcs;
                 end
+                               
+            elseif strcmp(imethod,'mim')
+                imethod
+            else
+                error('Unknown imethod')
             end
             
-            COH_sub(iit,:,:,:) = coh;
+            COH(iit,:,:,:) = coh;
+            toc
         end
         
         outname = sprintf('%sroi_coh_sub%s',DIROUT,patientID{id});
-        save(outname,'COH_sub','true_coh','-v7.3')
+        save(outname,'COH','true_coh','-v7.3')
         
         eval(sprintf('!mv %s%s_work %s%s_done',DIRLOG,logname,DIRLOG,logname))
-        clearvars -except id patientID nit npcs nfreq ndim nroi DIRLOG DIROUT
         toc
     end
 end
-
-%
-% %%
-% %neighbourhood
-% load('roi_conn.mat')
-% roiconn_s = sparse(roi_conn);
-% freq_conn = fp_get_freq_conn(nfreq);
-% freq_conn_s = sparse(freq_conn);%nfrerq x nfreq
-% kron_conn = kron(roiconn_s,freq_conn_s); %nroi*nfreq = nkron
-% kron_conn = kron(roiconn_s,kron_conn);
-%
-% threshold = prctile(COH(:),99.9);
-%
-% %%
-% %true cluster
-% clear onoff
-% onoff = TRUE_COH>threshold;
-%
-% %find the clusters
-% clear u ind NB
-% u = onoff(:); %should be the same indexing like in kron_conn now; nkron x 1
-%
-% ind = find(u==1); %remember indeces of super-threshold coherences
-% NB = kron_conn;
-% NB(u==0,:)=[]; %pass the neighbourhood structure only for the super-threshold voxels
-% NB(:,u==0)=[];
-%
-% %components assigns every voxel to a cluster, even if this means that every voxel is its own cluster
-% clear ci x clu
-% [ci, x] = components(NB); %x is the histogram of the clusters
-% clu = zeros(size(kron_conn,1),1);%refill with sub-threshold voxels
-% clu(ind)= ci; %nkron x 1
-% clu = reshape(clu,[nfreq nroi-1 nroi-1]);
-%
-% %save true cluster for later
-% clear true_clu_pos true_total_pos
-% true_clu = clu;
-% true_total = numel(x);
-%
-%
-%
-% %% shuffled clusters
-%
-% clear onoff
-% onoff = COH>threshold;
-% big_clusters = zeros(nit,nfreq,nroi-1,nroi-1);
-%
-% %find the clusters
-% for iit = 1: nit
-%
-%     clear onoff_temp u ind NB
-%     onoff_temp = squeeze(onoff(iit,:,:)); %nfreq x ns
-%     u = onoff_temp(:); %should be the same indexing like in kron_conn now; nkron x 1
-%
-%     ind = find(u==1); %remember indeces of super-threshold coherences
-%     NB = kron_conn;
-%     NB(u==0,:)=[]; %pass the neighbourhood structure only for the super-threshold voxels
-%     NB(:,u==0)=[];
-%
-%     %components assigns every voxel to a cluster, even if this means that every voxel is its own cluster
-%     clear ci x clu
-%     [ci, x] = components(NB); %x is the histogram of the clusters
-%     clu = zeros(size(kron_conn,1),1);%refill with sub-threshold voxels
-%     clu(ind)= ci; %nkron x 1
-%     clu = reshape(clu,[nfreq nroi-1 nroi-1]);
-%
-%     if numel(x)>0
-%         big_clu_id = find(x==max(x));
-%         big_clu_id=big_clu_id(1); %in case there are two clusters with the same size, take the first one
-%         big_clusters(iit,:,:,:) = (clu == big_clu_id);
-%     end
-%
-% end
-%
-% %compare not only cluster size but also magnitude of coherence within
-% %the relevant cluster
-%
-% clear a
-% a = zeros(size(COH)); %only shuffled clusters
-% a(big_clusters==1) = COH(big_clusters==1);
-% shufCoh = squeeze(sum(sum(sum(a,2),3),4));
-%
-% if true_total>0 %when at least one true cluster exists
-%     for iclus = 1:true_total
-%         clear trueCoh temp
-%         trueCoh = sum(sum(sum(TRUE_COH(true_clu==iclus)))); %scalar
-%         p(iclus) = sum(shufCoh>trueCoh)/numel(shufCoh);
-%     end
-%
-% elseif sum(shufCoh)== 0  %when no cluster was found it any iteration
-%     p= nan;
-%
-% else %when only in shuffled conditions clusters were found
-%     clear trueCoh
-%     trueCoh = 0;
-%     p = sum(shufCoh>trueCoh)/numel(shufCoh);
-% end
-%
-% %%
-% outname = sprintf('%sp_megmeg_%s',DIROUT,abs_imag);
-% save(outname,'p','threshold','true_clu','-v7.3')
-%
-
