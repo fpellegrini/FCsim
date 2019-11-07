@@ -4,5 +4,6 @@ load('roi_conn_new.mat')
 roiconn_s = sparse(roi_conn);
 freq_conn = fp_get_freq_conn(nfreq);
 freq_conn_s = sparse(freq_conn);%nfreq x nfreq
-kron_conn = kron(roiconn_s,roiconn_s);
-kron_conn = kron(kron_conn,freq_conn_s);
+kron_conn = kron(roiconn_s,freq_conn_s);
+kron_conn = kron(roiconn_s,kron_conn); 
+%this kron_conn matches a onoff tensor of size (nrois,nrois,nfreqs) 
