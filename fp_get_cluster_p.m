@@ -3,10 +3,6 @@ function p = fp_get_cluster_p(true_total, shuf_total, true_testval, shuf_testval
 %first, second with second etc. Otherwise clusters are always compared
 %against the largest shuffled cluster. 
 
-if (~exist(fwf,'var'))|(fwf~=1)
-    fwf = 0;
-end 
-
 if true_total>0 %when at least one true cluster exists    
     
     for iclus = 1:true_total

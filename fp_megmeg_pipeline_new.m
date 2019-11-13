@@ -50,10 +50,16 @@ for id = 1:5 %:numel(patientID)
         %construct filters
         
         %load true CS
+        clear id_trials_1 id_trials_2 CS
+%         id_trials_1 = 1:n_trials;
+%         id_trials_2 = 1:n_trials;
+%         CS = fp_tsdata_to_cpsd(X,fres,'MT',[id_meg_chan], [id_meg_chan], id_trials_1, id_trials_2);
+    
         load(sprintf('Filter_Patient%s_e.mat',patientID{id}));% 1D-A and true CS
         clear A
         CS = CS(1:(end-nlfp),1:(end-nlfp),:); %throw away lfp channels
         CS(:,:,1)=[];
+        
         nfreq = size(CS,3);
         
         %leadfield
