@@ -68,7 +68,7 @@ for id = 1:numel(patientID)
     % true CS
     load(sprintf('Filter_Patient%s_e.mat',patientID{id}));% 1D-A and true CS
     clear A
-    clear id_trials_1 id_trials_2 CS A_
+%     clear id_trials_1 id_trials_2 A_ CS
 %     id_trials_1 = 1:n_trials;
 %     id_trials_2 = 1:n_trials;
 %     CS = fp_tsdata_to_cpsd(X,fres,'MT',[id_meg_chan id_lfp_chan], [id_meg_chan id_lfp_chan], id_trials_1, id_trials_2);
@@ -106,6 +106,23 @@ for id = 1:numel(patientID)
         CSv(:,:,ifq) = csv;
         clear csv
     end
+    
+%     %flip sources 
+%     mni_pos = fp_getMNIpos(patientID{id});
+% 
+%     %get flip id and symmetric head
+%     [sym_pos, noEq] = fp_symmetric_vol(mni_pos);
+%     match_pos = sym_pos(voxID{id},:);
+%     [~,flip_id] = fp_flip_vol(match_pos);
+%     flip_id1 = nan(size(flip_id,1)*2,1);
+%     flip_id1(1:2:end-1)=flip_id;
+%     flip_id1(2:2:end)=flip_id;
+%     
+%     CSv1=CSv;
+%     flip_coh(:,:,4:6) = coh(:,flip_id,4:6);
+%     CSv(
+    
+
     clear cCS CS CSinv currentCS G
     G = cpsd_to_autocov(CSv, nlags);
  
