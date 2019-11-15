@@ -136,41 +136,41 @@ for id = 1:5 %:numel(patientID)
             end
         end
         
-        %apply all filters 
+        %apply all filters
         CSroi = [];
         for ifreq = 1:nfreq
-            CSroi(:, :, ifreq) = reshape(P(:,:,:,fqA(ifreq)), nmeg, [])'*CS(:, :, ifreq)*reshape(P(:,:,:,fqA(ifreq)), nmeg, []);
+            CSroi(:, :, ifreq) = reshape(P, nmeg, [])'*CS(:, :, ifreq)*reshape(P, nmeg, []);
         end
-
+        
         %divide by power to obtain coherence
         clear Cohroi
         for ifreq = 1: nfreq
             clear pow
-            pow = real(diag(CSroi(:,:,ifreq))); 
+            pow = real(diag(CSroi(:,:,ifreq)));
             Cohroi(:,:,ifreq) = CSroi(:,:,ifreq)./ sqrt(pow*pow');
-        end 
+        end
         
-        %integrate across npcs       
+        %integrate across npcs
+        clear coh
         if strcmp(imethod,'sum')
-%             imethod
             
             %sum up coherence across npcs
             ic = 1;
             for iroi = 1:nroi
                 jc = 1;
                 for jroi = 1:nroi
-                    true_coh(iroi,jroi,:) = squeeze(sum(sum(Cohroi(ic:ic+npcs-1,jc:jc+npcs-1,:),1),2));
+                    coh(iroi,jroi,:) = squeeze(sum(sum(Cohroi(ic:ic+npcs-1,jc:jc+npcs-1,:),1),2));
                     jc = jc+npcs;
-                end 
+                end
                 ic=ic+npcs;
             end
-                    
             
         elseif strcmp(imethod,'mim')
             imethod
-        else 
+        else
             error('Unknown imethod')
-        end              
+        end
+           
         
 %%      calculate coherence for permutations
        
@@ -209,7 +209,7 @@ for id = 1:5 %:numel(patientID)
             %apply all filters
             CSroi = [];
             for ifreq = 1:nfreq
-                CSroi(:, :, ifreq) = reshape(P_shuf, nmeg, [])'*CS(:, :, ifreq)*reshape(P, nmeg, []);
+                CSroi(:, :, ifreq) = reshape(P_shuf, nmeg, [])'*CS(:, :, ifreq)*reshape(P_shuf, nmeg, []);
             end
             
             %divide by power to obtain coherence
