@@ -17,6 +17,7 @@ nit= 2;
 npcs = 2;
 COH = zeros(nit,117,117,46);
 TRUE_COH = zeros(117,117,46);
+regu=.000001;
 
 %%
 for id = 2%numel(patientID)
@@ -243,7 +244,9 @@ for id = 2%numel(patientID)
                     
 %                     coh(ii,jj,ifq) =  sum(sum(triu(squeeze(abs(imag(csroi(ii,jj,:,:,ifq)))))));
                 end
+                jc=jc+npcs;
             end
+            ic=ic+npcs;
         end
         
         COH(iit,:,:,:) = squeeze(COH(iit,:,:,:)) + log10(coh);

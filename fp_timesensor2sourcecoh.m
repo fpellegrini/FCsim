@@ -36,8 +36,7 @@ for id = 1:numel(patientID)
     
     %scaling
     load('scaling_factor.mat')
-    X(id_meg_chan,:,:)= X(id_meg_chan,:,:)./sfmeg;
-    X(id_lfp_chan,:,:) = X(id_lfp_chan,:,:)./sflfp;
+    X(id_meg_chan,:,:)= X(id_meg_chan,:,:)./(10^6);
     
     if shuffle == 1
         rng('shuffle')
