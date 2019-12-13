@@ -13,8 +13,9 @@ idir = randi(2,1);
 D = spm_eeg_load(sprintf('redPLFP%s_off', patientID{id}));
 X = D(:,:,:);
 id_meg_chan = 1:125;
+fs = D.fsample;
 X(id_meg_chan,:,:)= X(id_meg_chan,:,:)./10^-6;
-x = squeeze(X(isens,:,:)); %random time meg series
+x = squeeze(X(isens,:,:)); %random time meg series   
 ntrials = size(x,2);
 id_meg_trials = 1:ntrials;
 
@@ -69,6 +70,8 @@ e = mean(pow_noise,2);
 f = mean(a,2);
 g = mean(pow./pow_noise,2);
 h = mean(pow - pow_noise*(pow_noise\pow),2);
+% g1 = mean(g(:,3:4),2);
+% g2 = mean(g(:,30:end),2);
 subplot(1,2,1)
 plot(f)
 hold on 

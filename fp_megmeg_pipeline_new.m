@@ -17,7 +17,7 @@ if ~exist(DIRLOG); mkdir(DIRLOG); end
 
 ndim=2;
 nit= 10; %1000
-npcs = 5;
+npcs = 3;
 fres = 75;
 
 %%
@@ -126,8 +126,15 @@ for id = 1:5 %:numel(patientID)
             %region pca
             clear CSs v v5
             CSs = squeeze(sum(CSz,1)); %covariance
-            [v, ~, ~] = eig(real(CSs));
-            V{aroi} = v(:,1:npcs); %nregionvoxels*2 x npcs
+%             [v, ~, ~] = eig(real(CSs));
+%             V{aroi} = v(:,1:npcs); %nregionvoxels*2 x npcs
+            
+            [V_, D_] = eig(real(CSs));
+            [D_, in] = sort(real(diag(D_)), 'descend');
+            % variance explained
+            vx_ = cumsum(D_)./sum(D_);
+            varex{aroi} = vx_;
+            
             
             
             %concatenate filters

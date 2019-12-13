@@ -17,18 +17,23 @@ D = spm_eeg_load(sprintf('redPLFP%s_off', patientID{id}));
 X = D(:,:,:);
 id_meg_chan = 1:125;
 X(id_meg_chan,:,:)= X(id_meg_chan,:,:)./10^-6;
+fs = D.fsample; 
  
 %correlated nodes 
 x1 = squeeze(X(lfp_chan,:,:)); %random time meg series
-x1 = x1(delay+1:end,:); %time series with time delay
+n_trials = size(x1,2);
+x2(1,:,:) = x1(delay+1:end,:); %time series with time delay
+
+%filter signal in alpha band
+[b, a] = butter(2, [5 12]/(fs/2),'pass');
+x = squeeze(reshape(filtfilt(b, a, reshape(x2, 1, [])')',1,[],n_trials));
+x1=x;
 
 %uncorrelated nodes
 % for ii =1:n_rand_nodes
 %     ind = randperm(70);
 %     xx(ii+2,:,:) = squeeze(X(isens,delay:end,ind));
 % end
-
-n_trials = size(x1,2);
 
 %leadfield
 load(sprintf('BF_Patient%s.mat',patientID{id}));
@@ -110,10 +115,17 @@ flip_coh(:,:,4:6) = coh(:,flip_id,4:6);
 abs_coh = abs(imag(flip_coh));
 
 %%
-a = squeeze(mean(mean(abs_coh,3),1));
+a = squeeze(mean(abs_coh,3));
 
-outname = sprintf('lfpmeg_sim_dics_%d.nii',inode);
-fp_data2nii(a,commonvox_pos,[],outname,id)
+a1 = squeeze(mean(a(3:6,:),1));
+a2 = squeeze(mean(a(10:end,:),1));
+
+outname = sprintf('1.nii');
+% outname = sprintf('lfpmeg_sim_dics_%d.nii',inode);
+fp_data2nii(a1,commonvox_pos,[],outname,id)
+
+outname = sprintf('2.nii');
+fp_data2nii(a2,commonvox_pos,[],outname,id)
 
 
 

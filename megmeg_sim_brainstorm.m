@@ -3,14 +3,17 @@ clear all
 %% signal generation
 %parameters
 
+load('./processed_bs/bs_results.mat')
+smooth_cortex = 0.35;
+
 patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
 id = 2;
 % nfreq = 46;
 delay = 30; %in samples, is equal to 100 ms
-inode1 = 2100; %randi(size(A,2),1);
-inode2 = 1000;
+inode1 = 56; %randi(size(A,2),1);
+inode2 = 949;
 n_rand_nodes = 100;
-rand_nodes = randi(2400,1,n_rand_nodes); %generate 100 nodes with random signals
+rand_nodes = randi(950,1,n_rand_nodes); %generate 100 nodes with random signals
 isens = randi(125,1);
 idir = randi(2,1);
 alph = 0.5;
@@ -37,9 +40,26 @@ end
 n_trials = size(x1,2);
 id_meg_trials = 1:n_trials;
 
+% Atlas
+% number of ROIs in the Desikan-Kiliany Atlas
+nroi = length(cortex.Atlas(3).Scouts);
+% ROI labels
+labels = {cortex.Atlas(3).Scouts.Label};
+%roi inds 
+ind_cortex = [];
+ind_roi = {};
+for iROI = 1:nroi
+  ind_roi{iROI} = cortex.Atlas(3).Scouts(iROI).Vertices;
+  ind_cortex = cat(1, ind_cortex, ind_roi{iROI});
+  [~, ind_roi_cortex{iROI}, ~] = intersect(ind_cortex, ind_roi{iROI});
+end
+nvox = length(ind_cortex);
+leadfield = leadfield(:, ind_cortex, :);
+
 %leadfield
-load(sprintf('BF_Patient%s.mat',patientID{id}));
-L = fp_get_lf(inverse);
+% load(sprintf('BF_Patient%s.mat',patientID{id}));
+% L = fp_get_lf(inverse);
+L = leadfield;
 L1 = squeeze(L(:,[inode1 inode2],idir));
 L_noise = squeeze(L(:,[rand_nodes],idir));
 nmeg = size(L1,1);
@@ -53,6 +73,7 @@ for itrial = 1:n_trials
     noise = L_noise * xx_noise(:,:,itrial);
     noise = noise ./ norm(noise, 'fro');    
     sig = alph * sig1 + (1-alph)* noise;
+%     sig=sig1;
     
     %add white noise
     whitenoise = randn(size(sig));
@@ -61,15 +82,15 @@ for itrial = 1:n_trials
     signal(:,:,itrial) = sig ./ norm(sig, 'fro');
 end
 
-clear x1 x2 xx whitenoise sig X L L1 noise
+clear x1 x2 xx whitenoise sig X L1 noise
 
 %% megmeg pipeline start
 %parameters
 
-filtertype= 'd';
+filtertype= 'e';
 imethod = 'sum';
-ndim = 2;
-npcs = 5;
+ndim = 3;
+npcs = 2;
 fres = 75;
 
 id_trials_1 = 1:n_trials;
@@ -78,19 +99,13 @@ CS = fp_tsdata_to_cpsd(signal,fres,'MT',[id_meg_chan], [id_meg_chan], id_trials_
 CS(:,:,[1 47:end])=[];
 nfreq = size(CS,3);
 
-%leadfield
-clear L
-load(sprintf('BF_Patient%s.mat',patientID{id}));
-L = fp_get_lf(inverse);
-ns_org = size(L,2);
-
-clear mni_pos label code roi_id u_roi_id csroi
-mni_pos = fp_getMNIpos(patientID{id});
-for ii = 1: ns_org
-    [~,~,roi_id(ii)]=fp_get_mni_anatomy_new(mni_pos(ii,:));
-end
-u_roi_id = sort(unique(roi_id));
-nroi = numel(u_roi_id)-1; %because white voxels are not counted
+% clear mni_pos label code roi_id u_roi_id csroi
+% mni_pos = fp_getMNIpos(patientID{id});
+% for ii = 1: ns_org
+%     [~,~,roi_id(ii)]=fp_get_mni_anatomy_new(mni_pos(ii,:));
+% end
+% u_roi_id = sort(unique(roi_id));
+% nroi = numel(u_roi_id)-1; %because white voxels are not counted
 
 %construct source filter
 if strcmp(filtertype,'e')
@@ -100,7 +115,7 @@ if strcmp(filtertype,'e')
     nfqA = 1;
     
 elseif strcmp(filtertype,'d')
-    A=zeros(nmeg,ndim,ns_org,nfreq);
+    A=zeros(nmeg,ndim,nvox,nfreq);
     
     for ifrq = 1:nfreq
         cCS = CS(:,:,ifrq);
@@ -108,7 +123,7 @@ elseif strcmp(filtertype,'d')
         
         CSinv=pinv(real(cCS)+lambda * eye(size(cCS)));
         
-        for is=1:ns_org %iterate across nodes
+        for is=1:nvox %iterate across nodes
             Lloc=squeeze(L(:,is,:));
             A(:,:,is,ifrq) = (pinv(Lloc'*CSinv*Lloc)*Lloc'*CSinv)'; %create filter
         end
@@ -123,12 +138,16 @@ for aroi = 1:nroi
     
     %project to source level
     clear A_ CSv
-    A_ = A(:, :,roi_id == aroi,:);
+    A_ = A(:, :,ind_roi_cortex{aroi},:);
     nsroi = size(A_,3);
     A_ = reshape(A_, [nmeg, ndim*nsroi, nfqA]);
     
     for ifq = 1:nfreq
-        CSv(ifq,:,:) = A_(:,:,fqA(ifq))' * CS(:,:,ifq) * A_(:,:,fqA(ifq));
+        clear csv
+        csv = A_(:,:,fqA(ifq))' * CS(:,:,ifq) * A_(:,:,fqA(ifq));
+        n = size(csv,2);
+        csv(1:n+1:end) = real(diag(squeeze(csv)));
+        CSv(ifq,:,:)=csv;
     end
     
     %zscoring
@@ -139,13 +158,18 @@ for aroi = 1:nroi
     end
     
     %region pca
-    clear CSs v v5
+    clear CSs v v5 in V_ D_
     CSs = squeeze(sum(CSz,1)); %covariance
-    [v, ~, ~] = eig(real(CSs));
-    V{aroi} = v(:,1:npcs); %nregionvoxels*2 x npcs
+    [V_, D_] = eig(real(CSs));
+    [D_, in] = sort(real(diag(D_)), 'descend');
+    % variance explained
+%     vx_ = cumsum(D_)./sum(D_);
+%     varex{aroi} = vx_;
+    
+    V{aroi} = V_(:,in(1:npcs)); %nregionvoxels*2 x npcs
     
     
-    %concatenate filters
+    %     %concatenate filters
     for ifq = 1:nfqA
         P(:, :, aroi,ifq) = A_(:,:,fqA(ifq)) * ZS * real(V{aroi});
     end
@@ -216,37 +240,43 @@ else
     error('Unknown imethod')
 end
 
-%% plot result
-mim=mim.*10^3;
-mic=mic.*10^3;
-%%
-x_mim = zeros(ns_org,ns_org,nfreq);
-x_mic = zeros(ns_org,ns_org,nfreq);
 
-tic
-for ifreq = 1:nfreq
-    
-    for ii = 1:ns_org
-        for jj=1:ns_org
-            
-            if roi_id(ii)> 0 && roi_id(jj)>0
-                x_mim(ii,jj,ifreq) = true_coh(roi_id(ii),roi_id(jj),ifreq);
-%                 x_mim(ii,jj,ifreq) = mim(roi_id(ii),roi_id(jj),ifreq);
-%                 x_mic(ii,jj,ifreq) = mic(roi_id(ii),roi_id(jj),ifreq);
-            end
-            
-        end
+%find rois that belong to inode1 and inode2
+clear iroi1 iroi2
+for iroi = 1:nroi 
+    if any(ind_roi{iroi}==inode1)
+        iroi1 = iroi;
+    elseif any(ind_roi{iroi}==inode2)
+        iroi2 = iroi;
     end
-    
+    if exist('iroi1','var')& exist('iroi2','var')
+        break
+    end
 end
-toc
 
-a = mean(x_mim(inode1,:,:),3);
-b = mean(x_mim(inode2,:,:),3);
+load cm17
 
-outname = sprintf('1megmeg_sim_%s_trueandrand_mim_to_%d.nii',filtertype,inode2);
-fp_data2nii(abs(imag(a)),sources.pos,[],outname,id)
+data_in = abs(imag(squeeze(mean(true_coh(:,iroi1,:),3))));
+allplots_cortex_BS(cortex_highres, data_in, [min(data_in) max(data_in)],...
+    cm17a,'.', smooth_cortex,['megmeg_sim_brainstorm_meanroi' num2str(iroi1)]);
 
-outname = sprintf('1megmeg_sim_%s_trueandrand_mim_to_%d.nii',filtertype,inode1);
-fp_data2nii(abs(imag(b)),sources.pos,[],outname,id)
+data_in2 = zeros(size(data_in));
+data_in2(iroi1)=1;
+allplots_cortex_BS(cortex_highres, data_in2, [min(data_in2) max(data_in2)],...
+    cm17a,'.', smooth_cortex,['megmeg_sim_brainstorm_roi' num2str(iroi1)]);
 
+data_in = abs(imag(squeeze(mean(true_coh(:,iroi2,:),3))));
+allplots_cortex_BS(cortex_highres, data_in, [min(data_in) max(data_in)],...
+    cm17a,'.', smooth_cortex,['megmeg_sim_brainstorm_meanroi' num2str(iroi2)]);
+
+data_in2 = zeros(size(data_in));
+data_in2(iroi2)=1;
+allplots_cortex_BS(cortex_highres, data_in2, [min(data_in2) max(data_in2)],...
+    cm17a,'.', smooth_cortex,['megmeg_sim_brainstorm_roi' num2str(iroi2)]);
+
+% 
+% 
+% data_in3 = zeros(size(data_in));
+% data_in3=1:numel(data_in);
+% allplots_cortex_BS(cortex_highres, data_in3, [min(data_in3) max(data_in3)],...
+%     cm17a,'.', smooth_cortex,['test' num2str(iroi2)]);

@@ -6,11 +6,25 @@ patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
 [commonvox_pos, voxID] = fp_find_commonvox;
 pow = nan(numel(patientID),numel(voxID{1}),45);
 pow_noise = nan(numel(patientID),numel(voxID{1}),45);
+fres = 75;
+
 
 for id = 1:numel(patientID)
-    clearvars -except id patientID pow voxID pow_noise commonvox_pos pow_eloreta
+    clearvars -except id patientID pow voxID pow_noise commonvox_pos pow_eloreta fres
     
-    load(sprintf('Filter_Patient%s.mat',patientID{id}))  
+    load(sprintf('Filter_Patient%s_e.mat',patientID{id})) 
+    clear CS 
+    
+    D = spm_eeg_load(sprintf('redPLFP%s_off', patientID{id}));
+    X = D(:,:,:);
+    id_meg_chan = 1:125;
+    id_meg_chan(D.badchannels)=[];
+    X(id_meg_chan,:,:)= X(id_meg_chan,:,:)./10^-6;
+    id_trials = 1:size(X,3);
+    nfreq = size(A,3);
+    
+    CS = fp_tsdata_to_cpsd(X,fres,'MT',id_meg_chan, id_meg_chan, id_trials, id_trials);
+    CS(:,:,nfreq+1:end) = [];
     
     mni_pos = fp_getMNIpos(patientID{id});
     [~, noEq] = fp_symmetric_vol(mni_pos);
@@ -18,8 +32,7 @@ for id = 1:numel(patientID)
     filter = A(:,voxID{id},:);
     filter(:,:,1)=[];
     
-    [nmeg, ns, nfreq] = size(filter); 
-    CS = CS(1:nmeg,1:nmeg,:);  
+    [nmeg, ns, nfreq] = size(filter);  
 
     for ifreq = 1: nfreq    
 
@@ -33,7 +46,7 @@ for id = 1:numel(patientID)
 end
 
 %%
-pow = pow./pow_noise;
+% pow = pow./pow_noise;
 
 % %%
 % ae = squeeze(sum(pow_eloreta,1));
@@ -47,9 +60,13 @@ pow = pow./pow_noise;
 % figure
 % scatter3(commonvox_pos(:,1),commonvox_pos(:,2),commonvox_pos(:,3),10,As__)
 
+h = squeeze(mean(pow(:,:,4:6),3));
+% h1 = squeeze(mean(h,1));
 
-outname = 'real_pow_alpha_eloreta.nii';
-fp_data2nii(h./10^-8,commonvox_pos,[],outname,[])
+for id = 1:numel(patientID)
+    outname = sprintf('real_pow_alpha_eloreta_patient%s.nii',patientID{id});
+    fp_data2nii(squeeze(h(id,:))./std(h(id,:)),commonvox_pos,[],outname,[])
+end
 
 % outname = 'pow2_e.nii';
 % fp_data2nii(c,nan,[],outname)
