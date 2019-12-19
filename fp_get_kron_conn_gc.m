@@ -1,4 +1,4 @@
-function kron_conn = fp_get_kron_conn_gc(nfreq)
+function kron_conn = fp_get_kron_conn_gc(nfreq, voxID)
 
 freq_conn = fp_get_freq_conn(nfreq);
 freq_conn_s = sparse(freq_conn);
