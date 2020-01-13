@@ -17,6 +17,14 @@ nit=10; %%%%
 nlags = 20;
 ndim = 2;
 
+nsub = 3;
+nvox = 10; 
+nfreq= 46; 
+
+GC= nan(nsub,nvox,4,nfreq);
+TRGC= nan(nsub,nvox,4,nfreq);
+DIFFGC= nan(nsub,nvox,2,nfreq);
+
 
 %%
 
@@ -49,6 +57,7 @@ for id = 1:3 %numel(patientID)
     frqs(frqs>maxfreq) = [];
     nfreq = numel(frqs);
     z = exp(-i*pi*frqs)';
+%     z = (-i*pi*frqs)';
     
     %construct filters
     
@@ -112,10 +121,10 @@ for id = 1:3 %numel(patientID)
         %indices of required channel combinations
         clear inds
         inds = {}; ninds = 0;
-        inds{1} = {[1,2], [3,4,5]}; %left vs right
-        inds{2} = {[3,4,5],[1,2]};
-        inds{3} = {[1,2], [6,7,8]};
-        inds{4} = {[6,7,8],[1,2]};
+        inds{1} = {[1,2], [3,4,5]}; %two dimensions of the voxel x 3 left lfp channels 
+        inds{2} = {[3,4,5],[1,2]}; % 3 left lfp channels x two dimensions of the voxel 
+        inds{3} = {[1,2], [6,7,8]}; %two dimensions of the voxel x 3 right lfp channels 
+        inds{4} = {[6,7,8],[1,2]}; % 3 right lfp channels x two dimensions of the voxel
         ninds=4;
         
         %%
@@ -140,15 +149,15 @@ for id = 1:3 %numel(patientID)
             [eAR, eCR, eKR, eVR, ~] = varma2iss(reshape(AR, nsubsetvars, []), [], SIGR, eye(nsubsetvars));
             
             % GC and TRGC computation
-            GC(iind,:) = iss_SGC(eA, eC, eK, eV, z, subinds{2}, subinds{1});
+            GC(id, ivox,iind,:) = iss_SGC(eA, eC, eK, eV, z, subinds{2}, subinds{1});
             GCR = iss_SGC(eAR, eCR, eKR, eVR, z, subinds{2}, subinds{1});
-            TRGC(iind,:) = GC(iind,:) - GCR;
+            TRGC(id,ivox,iind,:) = squeeze(GC(id, ivox,iind,:)) - GCR';
         end
         
         %diff meg-lfp to lfp-meg trgc
         o=1;
         for iind = 1:2:ninds-1
-            DIFFGC(id,ivox,o,:) = TRGC(iind+1,:)-TRGC(iind,:);
+            DIFFGC(id,ivox,o,:) = TRGC(id,ivox,iind+1,:)-TRGC(id,ivox,iind,:);
             o=o+1;
         end
         
