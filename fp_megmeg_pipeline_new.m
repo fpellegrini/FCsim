@@ -143,7 +143,7 @@ for id = 1:5 %:numel(patientID)
             end
         end
         
-        %apply all filters
+        %apply all filters 
         CSroi = [];
         for ifreq = 1:nfreq
             CSroi(:, :, ifreq) = reshape(P, nmeg, [])'*CS(:, :, ifreq)*reshape(P, nmeg, []);

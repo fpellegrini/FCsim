@@ -65,7 +65,7 @@ kron_conn = fp_get_kron_conn_gc(nfreq, voxID);
 for iside = 1:nside
     clear c_onoff
     c_onoff = squeeze(onoff(:,:,iside,:));
-    [true_clu(:,:,iside), true_total(iside)] = fp_get_cluster_components_megmeg(c_onoff,kron_conn);
+    [true_clu(:,:,iside), true_total(iside)] = fp_get_cluster_components_gc(c_onoff,kron_conn);
 end
 
 %% shuffled

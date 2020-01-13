@@ -160,195 +160,195 @@ outname = sprintf('%sDIFFGC',DIROUT);
 save(outname,'GC','TRGC','DIFFGC','-v7.3')
 
       %%
-clearvars -except DIFFGC nfreq voxID ns
-
-% neighbourhood
-
-
-%%%%check whether kron_conn matches onoff! 
-
-% true clusters
-
-onoff_pos = DIFFGC_true>0;
-onoff_neg = DIFFGC_true<0;
-
-%positive
-
-clear u ind A
-u = onoff_pos(:); %should be the same indexing like in kron_conn now; nkron x 1
-
-ind = find(u==1); %remember indeces of super-threshold coherences
-A = kron_conn;
-A(u==0,:)=[]; %pass the neighbourhood structure only for the super-threshold voxels
-A(:,u==0)=[];
-
-%components assigns every voxel to a cluster, even if this means that every voxel is its own cluster
-clear ci x clu
-[ci, x] = components(A); %x is the histogram of the clusters
-clu = zeros(size(kron_conn,1),1);%refill with sub-threshold voxels
-clu(ind)= ci; %nkron x 1
-clu = reshape(clu,[nfreq ns]); %nfreq x ns
-
-% if numel(x)>0
-%     big_clu_id = find(x==max(x));
-%     big_clu_id=big_clu_id(1); %in case there are two clusters with the same size, take the first one
-%     clusters_pos_true = (clu == big_clu_id);
+% clearvars -except DIFFGC nfreq voxID ns
+% 
+% % neighbourhood
+% 
+% 
+% %%%%check whether kron_conn matches onoff! 
+% 
+% % true clusters
+% 
+% onoff_pos = DIFFGC_true>0;
+% onoff_neg = DIFFGC_true<0;
+% 
+% %positive
+% 
+% clear u ind A
+% u = onoff_pos(:); %should be the same indexing like in kron_conn now; nkron x 1
+% 
+% ind = find(u==1); %remember indeces of super-threshold coherences
+% A = kron_conn;
+% A(u==0,:)=[]; %pass the neighbourhood structure only for the super-threshold voxels
+% A(:,u==0)=[];
+% 
+% %components assigns every voxel to a cluster, even if this means that every voxel is its own cluster
+% clear ci x clu
+% [ci, x] = components(A); %x is the histogram of the clusters
+% clu = zeros(size(kron_conn,1),1);%refill with sub-threshold voxels
+% clu(ind)= ci; %nkron x 1
+% clu = reshape(clu,[nfreq ns]); %nfreq x ns
+% 
+% % if numel(x)>0
+% %     big_clu_id = find(x==max(x));
+% %     big_clu_id=big_clu_id(1); %in case there are two clusters with the same size, take the first one
+% %     clusters_pos_true = (clu == big_clu_id);
+% % end
+% 
+% %save true cluster for later
+% clear true_clu_pos true_total_pos true_sizes_pos
+% true_clu_pos = clu;
+% true_total_pos = numel(x);
+% true_sizes_pos = x;
+% 
+% 
+% %% negative
+% 
+% clear u ind A
+% u = onoff_neg(:); %should be the same indexing like in kron_conn now; nkron x 1
+% 
+% ind = find(u==1); %remember indeces of super-threshold coherences
+% A = kron_conn;
+% A(u==0,:)=[]; %pass the neighbourhood structure only for the super-threshold voxels
+% A(:,u==0)=[];
+% 
+% %components assigns every voxel to a cluster, even if this means that every voxel is its own cluster
+% clear ci x clu
+% [ci, x] = components(A); %x is the histogram of the clusters
+% clu = zeros(size(kron_conn,1),1);%refill with sub-threshold voxels
+% clu(ind)= ci; %nkron x 1
+% clu = reshape(clu,[nfreq ns]); %nfreq x ns
+% 
+% % if numel(x)>0
+% %     big_clu_id = find(x==max(x));
+% %     big_clu_id=big_clu_id(1); %in case there are two clusters with the same size, take the first one
+% %     clusters_neg_true = (clu == big_clu_id);
+% % end
+% 
+% %save true cluster for later
+% clear true_clu_neg true_total_neg true_sizes_neg
+% true_clu_neg = clu;
+% true_total_neg = numel(x);
+% true_sizes_neg = x;
+% 
+% clear onoff_pos onoff_neg
+% 
+% 
+% 
+% %% shuffled clusters
+% 
+% onoff_pos = DIFFGC>0;
+% onoff_neg = DIFFGC<0;
+% 
+% clusters_pos = zeros(size(onoff_pos));
+% clusters_neg = zeros(size(onoff_neg));
+% 
+% 
+% for iit = 1: size(onoff_pos,1)
+%     
+%     %find the positive clusters
+%     
+%     clear onoff_temp u ind A big_clu_id
+%     onoff_temp = squeeze(onoff_pos(iit,:,:));
+%     u = onoff_temp(:); %should be the same indexing like in kron_conn now; nkron x 1
+%     
+%     ind = find(u==1); %remember indeces of super-threshold coherences
+%     A = kron_conn;
+%     A(u==0,:)=[]; %pass the neighbourhood structure only for the super-threshold voxels
+%     A(:,u==0)=[];
+%     
+%     %components assigns every voxel to a cluster, even if this means that every voxel is its own cluster
+%     clear ci x clu
+%     [ci, x] = components(A); %x is the histogram of the clusters
+%     clu = zeros(size(kron_conn,1),1);%refill with sub-threshold voxels
+%     clu(ind)= ci; %nkron x 1
+%     clu = reshape(clu,[nfreq ns]); %nfreq x ns
+%     
+%     if numel(x)>0
+%         big_clu_id = find(x==max(x));
+%         big_clu_id=big_clu_id(1); %in case there are two clusters with the same size, take the first one
+%         clusters_pos(iit,:,:) = (clu == big_clu_id);
+%     end
+%     
+%     
+%     %find the negative clusters
+%     
+%     clear onoff_temp u ind A big_clu_id
+%     onoff_temp = squeeze(onoff_neg(iit,:,:));
+%     u = onoff_temp(:); %should be the same indexing like in kron_conn now; nkron x 1
+%     
+%     ind = find(u==1); %remember indeces of super-threshold coherences
+%     A = kron_conn;
+%     A(u==0,:)=[]; %pass the neighbourhood structure only for the super-threshold voxels
+%     A(:,u==0)=[];
+%     
+%     %components assigns every voxel to a cluster, even if this means that every voxel is its own cluster
+%     clear ci x clu
+%     [ci, x] = components(A); %x is the histogram of the clusters
+%     clu = zeros(size(kron_conn,1),1);%refill with sub-threshold voxels
+%     clu(ind)= ci; %nkron x 1
+%     clu = reshape(clu,[nfreq ns]); %nfreq x ns
+%     
+%     if numel(x)>0
+%         big_clu_id = find(x==max(x));
+%         big_clu_id=big_clu_id(1); %in case there are two clusters with the same size, take the first one
+%         clusters_neg(iit,:,:) = (clu == big_clu_id);
+%     end
+%     
 % end
-
-%save true cluster for later
-clear true_clu_pos true_total_pos true_sizes_pos
-true_clu_pos = clu;
-true_total_pos = numel(x);
-true_sizes_pos = x;
-
-
-%% negative
-
-clear u ind A
-u = onoff_neg(:); %should be the same indexing like in kron_conn now; nkron x 1
-
-ind = find(u==1); %remember indeces of super-threshold coherences
-A = kron_conn;
-A(u==0,:)=[]; %pass the neighbourhood structure only for the super-threshold voxels
-A(:,u==0)=[];
-
-%components assigns every voxel to a cluster, even if this means that every voxel is its own cluster
-clear ci x clu
-[ci, x] = components(A); %x is the histogram of the clusters
-clu = zeros(size(kron_conn,1),1);%refill with sub-threshold voxels
-clu(ind)= ci; %nkron x 1
-clu = reshape(clu,[nfreq ns]); %nfreq x ns
-
-% if numel(x)>0
-%     big_clu_id = find(x==max(x));
-%     big_clu_id=big_clu_id(1); %in case there are two clusters with the same size, take the first one
-%     clusters_neg_true = (clu == big_clu_id);
+% 
+% %% compare clusters
+% 
+% %compare not only cluster size but also magnitude of GC within
+% %the relevant cluster
+% 
+% %positive
+% clear a
+% a = zeros(size(clusters_pos)); %only shuffled clusters
+% a(clusters_pos==1) = DIFFGC(clusters_pos==1);
+% shufGC = squeeze(sum(sum(a,2),3));
+% 
+% if true_total_pos>0 %when at least one true cluster exists
+%     for iclus = 1:true_total_pos
+%         clear trueGC temp
+%         trueGC = sum(sum(DIFFGC_true(true_clu_pos==iclus))); %scalar
+%         p_pos(iclus) = sum(shufGC>trueGC)/numel(shufGC);
+%     end
+%     
+% elseif sum(shufGC)== 0  %when no cluster was found it any iteration
+%     p_pos= nan;
+%     
+% else %when only in shuffled conditions clusters were found
+%     clear trueGC
+%     trueGC = 0;
+%     p_pos = sum(shufGC>trueGC)/numel(shufGC);
 % end
-
-%save true cluster for later
-clear true_clu_neg true_total_neg true_sizes_neg
-true_clu_neg = clu;
-true_total_neg = numel(x);
-true_sizes_neg = x;
-
-clear onoff_pos onoff_neg
-
-
-
-%% shuffled clusters
-
-onoff_pos = DIFFGC>0;
-onoff_neg = DIFFGC<0;
-
-clusters_pos = zeros(size(onoff_pos));
-clusters_neg = zeros(size(onoff_neg));
-
-
-for iit = 1: size(onoff_pos,1)
-    
-    %find the positive clusters
-    
-    clear onoff_temp u ind A big_clu_id
-    onoff_temp = squeeze(onoff_pos(iit,:,:));
-    u = onoff_temp(:); %should be the same indexing like in kron_conn now; nkron x 1
-    
-    ind = find(u==1); %remember indeces of super-threshold coherences
-    A = kron_conn;
-    A(u==0,:)=[]; %pass the neighbourhood structure only for the super-threshold voxels
-    A(:,u==0)=[];
-    
-    %components assigns every voxel to a cluster, even if this means that every voxel is its own cluster
-    clear ci x clu
-    [ci, x] = components(A); %x is the histogram of the clusters
-    clu = zeros(size(kron_conn,1),1);%refill with sub-threshold voxels
-    clu(ind)= ci; %nkron x 1
-    clu = reshape(clu,[nfreq ns]); %nfreq x ns
-    
-    if numel(x)>0
-        big_clu_id = find(x==max(x));
-        big_clu_id=big_clu_id(1); %in case there are two clusters with the same size, take the first one
-        clusters_pos(iit,:,:) = (clu == big_clu_id);
-    end
-    
-    
-    %find the negative clusters
-    
-    clear onoff_temp u ind A big_clu_id
-    onoff_temp = squeeze(onoff_neg(iit,:,:));
-    u = onoff_temp(:); %should be the same indexing like in kron_conn now; nkron x 1
-    
-    ind = find(u==1); %remember indeces of super-threshold coherences
-    A = kron_conn;
-    A(u==0,:)=[]; %pass the neighbourhood structure only for the super-threshold voxels
-    A(:,u==0)=[];
-    
-    %components assigns every voxel to a cluster, even if this means that every voxel is its own cluster
-    clear ci x clu
-    [ci, x] = components(A); %x is the histogram of the clusters
-    clu = zeros(size(kron_conn,1),1);%refill with sub-threshold voxels
-    clu(ind)= ci; %nkron x 1
-    clu = reshape(clu,[nfreq ns]); %nfreq x ns
-    
-    if numel(x)>0
-        big_clu_id = find(x==max(x));
-        big_clu_id=big_clu_id(1); %in case there are two clusters with the same size, take the first one
-        clusters_neg(iit,:,:) = (clu == big_clu_id);
-    end
-    
-end
-
-%% compare clusters
-
-%compare not only cluster size but also magnitude of GC within
-%the relevant cluster
-
-%positive
-clear a
-a = zeros(size(clusters_pos)); %only shuffled clusters
-a(clusters_pos==1) = DIFFGC(clusters_pos==1);
-shufGC = squeeze(sum(sum(a,2),3));
-
-if true_total_pos>0 %when at least one true cluster exists
-    for iclus = 1:true_total_pos
-        clear trueGC temp
-        trueGC = sum(sum(DIFFGC_true(true_clu_pos==iclus))); %scalar
-        p_pos(iclus) = sum(shufGC>trueGC)/numel(shufGC);
-    end
-    
-elseif sum(shufGC)== 0  %when no cluster was found it any iteration
-    p_pos= nan;
-    
-else %when only in shuffled conditions clusters were found
-    clear trueGC
-    trueGC = 0;
-    p_pos = sum(shufGC>trueGC)/numel(shufGC);
-end
-
-
-%negative
-clear a
-a = zeros(size(clusters_neg)); %only shuffled clusters
-a(clusters_neg==1) = DIFFGC(clusters_neg==1);
-shufGC = squeeze(sum(sum(a,2),3));
-
-if true_total_neg>0 %when at least one true cluster exists
-    for iclus = 1:true_total_neg
-        clear trueGC temp
-        trueGC = sum(sum(DIFFGC_true(true_clu_neg==iclus))); %scalar
-        p_neg(iclus) = sum(shufGC>trueGC)/numel(shufGC);
-    end
-    
-elseif sum(shufGC)== 0  %when no cluster was found it any iteration
-    p_neg= nan;
-    
-else %when only in shuffled conditions clusters were found
-    clear trueGC
-    trueGC = 0;
-    p_neg = sum(shufGC>trueGC)/numel(shufGC);
-end
-
-%%
-outname = sprintf('%sp_gc',DIROUT);
-save(outname,'p_pos','p_neg','true_clu_pos','true_clu_neg','true_sizes_pos','true_sizes_neg','-v7.3')
-
-end
+% 
+% 
+% %negative
+% clear a
+% a = zeros(size(clusters_neg)); %only shuffled clusters
+% a(clusters_neg==1) = DIFFGC(clusters_neg==1);
+% shufGC = squeeze(sum(sum(a,2),3));
+% 
+% if true_total_neg>0 %when at least one true cluster exists
+%     for iclus = 1:true_total_neg
+%         clear trueGC temp
+%         trueGC = sum(sum(DIFFGC_true(true_clu_neg==iclus))); %scalar
+%         p_neg(iclus) = sum(shufGC>trueGC)/numel(shufGC);
+%     end
+%     
+% elseif sum(shufGC)== 0  %when no cluster was found it any iteration
+%     p_neg= nan;
+%     
+% else %when only in shuffled conditions clusters were found
+%     clear trueGC
+%     trueGC = 0;
+%     p_neg = sum(shufGC>trueGC)/numel(shufGC);
+% end
+% 
+% %%
+% outname = sprintf('%sp_gc',DIROUT);
+% save(outname,'p_pos','p_neg','true_clu_pos','true_clu_neg','true_sizes_pos','true_sizes_neg','-v7.3')
+% 
+% end
