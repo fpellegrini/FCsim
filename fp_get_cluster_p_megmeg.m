@@ -3,7 +3,7 @@ function p = fp_get_cluster_p_megmeg(true_total, shuf_total, true_val, shuf_val,
 %first, second with second etc. Otherwise clusters are always compared
 %against the largest shuffled cluster. 
 
-if (~exist(fwf,'var'))|(fwf~=1)
+if (~exist('fwf','var'))|(fwf~=1)
     fwf = 0;
 end 
 

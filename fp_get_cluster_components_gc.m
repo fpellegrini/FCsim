@@ -1,5 +1,6 @@
 function [clu, total] = fp_get_cluster_components_gc(onoff,kron_conn)
 
+
 [nvox,nfreq] = size(onoff);
 
 u = onoff(:); %should be the same indexing like in kron_conn now; nkron x 1

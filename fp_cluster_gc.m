@@ -47,11 +47,9 @@ else
 end
 
 
-nsubs = numel(patientID);
-minnbchan = 2;
-
 load(sprintf('%sDIFFGC',DIROUT));
 [nsubs,nvox,nside,nfreq] = size(DIFFGC);
+nit = 1000;
 
 %% true
 fprintf('Testing...\n')
@@ -64,7 +62,7 @@ kron_conn = fp_get_kron_conn_gc(nfreq, voxID);
 
 for iside = 1:nside
     clear c_onoff
-    c_onoff = squeeze(onoff(:,:,iside,:));
+    c_onoff = squeeze(onoff(:,iside,:));
     [true_clu(:,:,iside), true_total(iside)] = fp_get_cluster_components_gc(c_onoff,kron_conn);
 end
 
@@ -79,11 +77,11 @@ for iit = 1:nit
     c_DIFFGC = DIFFGC .* reshape(sign(DIFFGC(randperm(numel(DIFFGC)))),size(DIFFGC));
     
     fprintf('Testing...\n')
-    [~,onoff,shuf_val(iit)] = fp_get_signrank_results_gc(c_DIFFGC,alpha);
+    [~,onoff,shuf_val(iit,:,:,:)] = fp_get_signrank_results_gc(c_DIFFGC,alpha);
     
     for iside=1:nside
         clear c_onoff
-        c_onoff = squeeze(onoff(:,:,iside,:));
+        c_onoff = squeeze(onoff(:,iside,:));
         [shuf_clu(iit,:,:,iside), shuf_total(iit,iside)] = fp_get_cluster_components_gc(c_onoff,kron_conn);
     end
     
@@ -91,7 +89,8 @@ end
 %%
 %%%%%%% test this with data, not ready yet! 
 for iside=1:nside
-    p(iside) = fp_get_cluster_p_megmeg(true_total, shuf_total, true_val, shuf_val, true_clu, shuf_clu, fwf);
+    p{iside} = fp_get_cluster_p_megmeg(true_total(iside), shuf_total(:,iside), squeeze(true_val(:,iside,:)),...
+        squeeze(shuf_val(:,:,iside,:)), true_clu(:,:,iside), shuf_clu(:,:,:,iside), fwf);
 end
 
 %%

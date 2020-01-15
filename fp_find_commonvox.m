@@ -2,7 +2,7 @@ function [cp, voxID] = fp_find_commonvox
 %finds voxels that exist in all subjects 
 %index according to sym_pos, not according to original mni_pos! 
 
-cd ~/Dropbox/Franziska/Data_MEG_Project/
+% cd ~/Dropbox/Franziska/Data_MEG_Project/
 
 patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
 

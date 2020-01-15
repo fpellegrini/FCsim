@@ -1,6 +1,6 @@
 function clu_sorted = fp_order_clusters(clu,total) 
 
-x = hist(clu(:),0:true_total);
+x = hist(clu(:),0:total);
 [~, order] = sort(x(2:end),'descend');
 
 clu_sorted = zeros(size(clu)); 
