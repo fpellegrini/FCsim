@@ -43,6 +43,8 @@ id_meg_trials = 1:n_trials;
 %leadfield
 load(sprintf('BF_Patient%s.mat',patientID{id}));
 L = fp_get_lf(inverse);
+p = randn(2, 1); 
+p = p / norm(p);
 L1 = squeeze(L(:,[inode1 inode2],idir));
 L_noise = squeeze(L(:,[rand_nodes],idir));
 nmeg = size(L1,1);
@@ -77,7 +79,7 @@ fres = 75;
 frqs = sfreqs(fres, fs);
 frqs(frqs>90) = [];
 nfreq = numel(frqs);
-filtertype= 'd';
+filtertype= 'e';
 
 id_meg_chan = 1:size(signal,1)-1;
 nmeg = numel(id_meg_chan);
@@ -157,9 +159,9 @@ end
 %     Cohroi(:,:,ifreq) = CSroi(:,:,ifreq)./ sqrt(pow*pow');
 % end
 
-coh = squeeze(sum(coh,2));
+coh1 = squeeze(sum(abs((coh)),2));
 
-a = abs(imag(squeeze(sum(coh,1)))); 
+a = squeeze(sum(coh1,1)); 
 
 %%
 
@@ -168,7 +170,7 @@ true = zeros(size(a'));
 true(inode2)=1;
 fp_data2nii(true,sources.pos,[],outname,id)
 
-outname = sprintf('map_megmeg_dics.nii');
+outname = sprintf('map_megmeg_eloreta.nii');
 fp_data2nii(a',sources.pos,[],outname,id)
 
 

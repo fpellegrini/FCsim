@@ -5,7 +5,6 @@ clear all
 
 patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
 id = 2;
-% nfreq = 46;
 delay = 30; %in samples, is equal to 100 ms
 inode1 = 2100; %randi(size(A,2),1);
 inode2 = 1000;
@@ -190,9 +189,9 @@ elseif strcmp(imethod,'mim')
             for ifq = 1: nfreq
                 
                 cs_red=[];
-                cs_red{1} = Cohroi(ic:ic+npcs-1,ic:ic+npcs-1,ifq);
-                cs_red{2} = Cohroi(ic:ic+npcs-1,jc:jc+npcs-1,ifq);
-                cs_red{3} = Cohroi(jc:jc+npcs-1,jc:jc+npcs-1,ifq);
+                cs_red{1} = Cohroi(ic:ic+npcs-1,ic:ic+npcs-1,ifq); %Caa
+                cs_red{2} = Cohroi(ic:ic+npcs-1,jc:jc+npcs-1,ifq); %Cab
+                cs_red{3} = Cohroi(jc:jc+npcs-1,jc:jc+npcs-1,ifq); %Cbb
                 
                 caainv=inv(real(cs_red{1})+regu*eye(npcs)*mean(diag(real(cs_red{1}))));
                 cab=imag(cs_red{2});
@@ -220,33 +219,55 @@ end
 mim=mim.*10^3;
 mic=mic.*10^3;
 %%
-x_mim = zeros(ns_org,ns_org,nfreq);
-x_mic = zeros(ns_org,ns_org,nfreq);
 
-tic
-for ifreq = 1:nfreq
-    
-    for ii = 1:ns_org
-        for jj=1:ns_org
-            
-            if roi_id(ii)> 0 && roi_id(jj)>0
-                x_mim(ii,jj,ifreq) = true_coh(roi_id(ii),roi_id(jj),ifreq);
-%                 x_mim(ii,jj,ifreq) = mim(roi_id(ii),roi_id(jj),ifreq);
-%                 x_mic(ii,jj,ifreq) = mic(roi_id(ii),roi_id(jj),ifreq);
-            end
-            
-        end
-    end
-    
+tc1 = mean(abs(imag(true_coh(30,:,:))),3);
+tc2 = mean(abs(imag(true_coh(18,:,:))),3);
+x1 = zeros(ns_org,1);
+x2 = zeros(ns_org,1);
+
+for ii = 1:ns_org   
+    if roi_id(ii)> 0
+        x1(ii) = tc1(roi_id(ii));
+        x2(ii) = tc2(roi_id(ii));
+    end   
 end
-toc
 
-a = mean(x_mim(inode1,:,:),3);
-b = mean(x_mim(inode2,:,:),3);
 
-outname = sprintf('1megmeg_sim_%s_trueandrand_mim_to_%d.nii',filtertype,inode2);
-fp_data2nii(abs(imag(a)),sources.pos,[],outname,id)
 
-outname = sprintf('1megmeg_sim_%s_trueandrand_mim_to_%d.nii',filtertype,inode1);
-fp_data2nii(abs(imag(b)),sources.pos,[],outname,id)
+outname = sprintf('megmeg_sim_%s_to_%d_new.nii',filtertype,inode1);
+fp_data2nii(x1,sources.pos,[],outname,id)
+
+outname = sprintf('megmeg_sim_%s_to_%d_new.nii',filtertype,inode2);
+fp_data2nii(x2,sources.pos,[],outname,id)
+
+
+% x_mim = zeros(ns_org,ns_org,nfreq);
+% x_mic = zeros(ns_org,ns_org,nfreq);
+% 
+% tic
+% for ifreq = 1:nfreq
+%     
+%     for ii = 1:ns_org
+%         for jj=1:ns_org
+%             
+%             if roi_id(ii)> 0 && roi_id(jj)>0
+%                 x_mim(ii,jj,ifreq) = true_coh(roi_id(ii),roi_id(jj),ifreq);
+% %                 x_mim(ii,jj,ifreq) = mim(roi_id(ii),roi_id(jj),ifreq);
+% %                 x_mic(ii,jj,ifreq) = mic(roi_id(ii),roi_id(jj),ifreq);
+%             end
+%             
+%         end
+%     end
+%     
+% end
+% toc
+% 
+% a = mean(x_mim(inode1,:,:),3);
+% b = mean(x_mim(inode2,:,:),3);
+
+% outname = sprintf('1megmeg_sim_%s_trueandrand_mim_to_%d.nii',filtertype,inode2);
+% fp_data2nii(abs(imag(a)),sources.pos,[],outname,id)
+% 
+% outname = sprintf('1megmeg_sim_%s_trueandrand_mim_to_%d.nii',filtertype,inode1);
+% fp_data2nii(abs(imag(b)),sources.pos,[],outname,id)
 

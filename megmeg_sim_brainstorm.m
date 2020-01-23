@@ -87,7 +87,7 @@ clear x1 x2 xx whitenoise sig X L1 noise
 %% megmeg pipeline start
 %parameters
 
-filtertype= 'e';
+filtertype= 'd';
 imethod = 'sum';
 ndim = 3;
 npcs = 2;

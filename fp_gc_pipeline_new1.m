@@ -56,7 +56,7 @@ for id = 1:numel(patientID)
     maxfreq = 90;
     frqs(frqs>maxfreq) = [];
     nfreq = numel(frqs);
-    z = exp(-i*pi*frqs)';
+    z = exp(-i*pi*(frqs./(fs/2)))';
 %     z = (-i*pi*frqs)';
     
     %construct filters
@@ -86,7 +86,7 @@ for id = 1:numel(patientID)
     A = squeeze(mkfilt_eloreta_v2(L));
     A = permute(A,[1, 3, 2]);
     
-    for ivox=1:ns
+    for ivox=1:10
         tic
         A_ = squeeze(A(:,:,ivox));
         
