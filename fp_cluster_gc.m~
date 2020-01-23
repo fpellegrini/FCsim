@@ -114,12 +114,14 @@ for iit = 1:nit
         clear c_onoff
         c_onoff = squeeze(n_onoff(:,iside,:));
         
-        [shuf_clu(iit,:,:,iside,2), shuf_total(iit,iside,2)] = fp_get_cluster_components_gc(c_onoff,kron_conn);
-    end   
+        [shuf_clu(iit,:,:,iside,), shuf_total(iit,iside,1)] = fp_get_cluster_components_gc(c_onoff,kron_conn);
+    end
+
+    
     
 end
 %%
-
+%%%%%%% test this with data, not ready yet! 
 for iside=1:nside
     p{iside} = fp_get_cluster_p_megmeg(true_total(iside), shuf_total(:,iside), squeeze(true_val(:,iside,:)),...
         squeeze(shuf_val(:,:,iside,:)), true_clu(:,:,iside), shuf_clu(:,:,:,iside), fwf);
