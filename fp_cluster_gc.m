@@ -66,8 +66,7 @@ p_onoff(effectdir<0)=0;
 
 for iside = 1:nside
     clear c_onoff
-    c_onoff = squeeze(p_onoff(:,iside,:));
-    
+    c_onoff = squeeze(p_onoff(:,iside,:));    
     [true_clu(:,:,iside,1), true_total(iside,1)] = fp_get_cluster_components_gc(c_onoff,kron_conn);
 end
 
@@ -90,7 +89,7 @@ for iit = 1:nit
     clear onoff c_DIFFGC effectdir p_onoff n_onoff
     
     %shuffle signs of DIFFGC
-    c_DIFFGC = DIFFGC .* reshape(sign(DIFFGC(randperm(numel(DIFFGC)))),size(DIFFGC));
+    c_DIFFGC = DIFFGC .* (sign(randn(size(DIFFGC))));
     
     fprintf('Testing...\n')
     [~,onoff,shuf_val(iit,:,:,:), effectdir] = fp_get_signrank_results_gc(c_DIFFGC,alpha);
@@ -119,10 +118,13 @@ for iit = 1:nit
     
 end
 %%
-
 for iside=1:nside
-    p{iside} = fp_get_cluster_p_megmeg(true_total(iside), shuf_total(:,iside), squeeze(true_val(:,iside,:)),...
-        squeeze(shuf_val(:,:,iside,:)), true_clu(:,:,iside), shuf_clu(:,:,:,iside), fwf);
+    %pos
+    p{iside,1} = fp_get_cluster_p_gc_new(true_total(iside,1), shuf_total(:,iside,:), squeeze(true_val(:,iside,:)),...
+        squeeze(shuf_val(:,:,iside,:)), true_clu(:,:,iside,1), shuf_clu(:,:,:,iside,:), fwf);
+    %neg
+    p{iside,2} = fp_get_cluster_p_gc_new(true_total(iside,2), shuf_total(:,iside,:), squeeze(true_val(:,iside,:)),...
+        squeeze(shuf_val(:,:,iside,:)), true_clu(:,:,iside,2), shuf_clu(:,:,:,iside,:), fwf);
 end
 
 %%
