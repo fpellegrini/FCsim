@@ -256,7 +256,7 @@ end
 
 load cm17
 
-data_in = abs(imag(squeeze(mean(true_coh(:,iroi1,:),3))));
+data_in = squeeze(mean(abs(imag(true_coh(:,iroi1,:),3))));
 allplots_cortex_BS(cortex_highres, data_in, [min(data_in) max(data_in)],...
     cm17a,'.', smooth_cortex,['megmeg_sim_brainstorm_meanroi' num2str(iroi1)]);
 
@@ -265,7 +265,7 @@ data_in2(iroi1)=1;
 allplots_cortex_BS(cortex_highres, data_in2, [min(data_in2) max(data_in2)],...
     cm17a,'.', smooth_cortex,['megmeg_sim_brainstorm_roi' num2str(iroi1)]);
 
-data_in = abs(imag(squeeze(mean(true_coh(:,iroi2,:),3))));
+data_in = squeeze(mean(abs(imag(true_coh(:,iroi2,:),3))));
 allplots_cortex_BS(cortex_highres, data_in, [min(data_in) max(data_in)],...
     cm17a,'.', smooth_cortex,['megmeg_sim_brainstorm_meanroi' num2str(iroi2)]);
 
