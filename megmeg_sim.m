@@ -172,7 +172,7 @@ if strcmp(imethod,'sum')
     for iroi = 1:nroi
         jc = 1;
         for jroi = 1:nroi
-            true_coh(iroi,jroi,:) = squeeze(sum(sum(Cohroi(ic:ic+npcs-1,jc:jc+npcs-1,:),1),2));
+            true_coh(iroi,jroi,:) = squeeze(sum(sum(abs(imag(Cohroi(ic:ic+npcs-1,jc:jc+npcs-1,:))),1),2));
             jc = jc+npcs;
         end
         ic=ic+npcs;
@@ -220,8 +220,8 @@ mim=mim.*10^3;
 mic=mic.*10^3;
 %%
 
-tc1 = mean(abs(imag(true_coh(30,:,:))),3);
-tc2 = mean(abs(imag(true_coh(18,:,:))),3);
+tc1 = mean(true_coh(30,:,:),3);
+tc2 = mean(true_coh(18,:,:),3);
 x1 = zeros(ns_org,1);
 x2 = zeros(ns_org,1);
 

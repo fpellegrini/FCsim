@@ -166,7 +166,7 @@ for id = 1:5 %:numel(patientID)
             for iroi = 1:nroi
                 jc = 1;
                 for jroi = 1:nroi
-                    coh(iroi,jroi,:) = squeeze(sum(sum(Cohroi(ic:ic+npcs-1,jc:jc+npcs-1,:),1),2));
+                    coh(iroi,jroi,:) = squeeze(sum(sum(abs(imag(Cohroi(ic:ic+npcs-1,jc:jc+npcs-1,:))),1),2));
                     jc = jc+npcs;
                 end
                 ic=ic+npcs;
@@ -237,7 +237,7 @@ for id = 1:5 %:numel(patientID)
                 for iroi = 1:nroi
                     jc = 1;
                     for jroi = 1:nroi
-                        coh(iroi,jroi,:) = squeeze(sum(sum(Cohroi(ic:ic+npcs-1,jc:jc+npcs-1,:),1),2));
+                        coh(iroi,jroi,:) = squeeze(sum(sum(abs(imag(Cohroi(ic:ic+npcs-1,jc:jc+npcs-1,:))),1),2));
                         jc = jc+npcs;
                     end
                     ic=ic+npcs;

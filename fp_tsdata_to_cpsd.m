@@ -1,5 +1,5 @@
 function S = fp_tsdata_to_cpsd(X,fres,method,ind_1, ind_2, id_trials_1, id_trials_2, window,noverlap,nw,ntapers)
-
+% keyboard
 % Estimate cross-power spectral density from time series data between
 % channels ind_1 and channels ind_2.
 % Shuffle id_lfp_trials for surrogate images. 

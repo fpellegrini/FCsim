@@ -5,7 +5,7 @@ D = spm_eeg_load(sprintf('redPLFP%s_off', '07'));
 X = D(:,:,:);
 fres= 75; 
 nchan = 5;
-npcs = 5;
+
  
 A = zeros(nchan,1024);
 B = zeros(nchan,1024-delay+1);
@@ -65,7 +65,8 @@ end
 %%
 iroi = 1; 
 jroi = 2; 
-ifq = 10;
+ifq = 5;
+npcs = 2;
 
 ic = 1+ (iroi-1)*npcs;
 jc = 1+ (jroi-1)*npcs; 
@@ -86,7 +87,7 @@ caainvsqrt=sqrtm(caainv);
 Y=caainvsqrt*X*caainvsqrt; %Eq. 23
 [~,s,~]=svd(Y);
 % MIC
-mic=sqrt(s(1,1));
+mic=sqrt(s(1,1))
 
 
 %%
@@ -112,12 +113,10 @@ E = imag(D(1:size(Caa,1), size(Caa,1)+1:end));
 [~, in] = sort(diag(d1), 'descend');
 alpha = v1(:,in(1));
 beta = v2(:,in(1));
-
-%%
-
-Coh_max = (alpha'* E * beta)/ (norm(alpha)*norm(beta)); %Eq 7; same result as mic(but inverted sign?)
+Coh_max = (alpha'* E * beta)/ (norm(alpha)*norm(beta)) %Eq 7; same result as mic(but inverted sign?)
 Coh_allcomps = v1'*E* v2; % abs(diag) increases on diag
 
+%%
 ediag = diag(E);
 e=sum((ediag))
 abs(mic)> sum(ediag) %yes
