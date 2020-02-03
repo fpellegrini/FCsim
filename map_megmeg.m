@@ -17,7 +17,7 @@ load(sprintf('BF_Patient%s.mat',patientID{id}));
 L = fp_get_lf(inverse);
 ni = size(L,3);
 
-for iit = 1:41
+for iit = 2:41
     
     clearvars -except d patientID id seed tar iit L ni delay_ mix time_series
     
@@ -237,6 +237,7 @@ for iit = 1:41
     
     inode_rslt = find(a == max(a));
     
+    pos = sources.pos; 
     tar_pos = pos(inode_tar,:);
     rslt_pos = pos(inode_rslt,:);
     
@@ -247,10 +248,10 @@ for iit = 1:41
     mix(:,iit) = p; 
     time_series(iit) = isens;
     
-    save('./location_error_mapmegmeg.mat','d','seed','tar','delay_','mix','time_series','-v7.3')
+    
     
 end
-
+save('./location_error_mapmegmeg.mat','d','seed','tar','delay_','mix','time_series','-v7.3')
 
 
 
