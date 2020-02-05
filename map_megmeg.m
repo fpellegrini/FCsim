@@ -17,7 +17,7 @@ load(sprintf('BF_Patient%s.mat',patientID{id}));
 L = fp_get_lf(inverse);
 ni = size(L,3);
 
-for iit = 2:41
+for iit = 1:41
     
     clearvars -except d patientID id seed tar iit L ni delay_ mix time_series
     
