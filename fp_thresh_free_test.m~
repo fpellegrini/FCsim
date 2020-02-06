@@ -14,9 +14,7 @@ nsubs = numel(patientID);
 nchunk = 1;
 minnbchan = 2;
 
-alphs = [0.001, 0.002, 0.003, 0.005, 0.007, 0.009, 0.0125, 0.016, 0.021,...
-    0.027, 0.034, 0.042, 0.051];
-tcrits = [64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52];
+
 %%
 
 for id = 1:nsubs   
@@ -55,6 +53,7 @@ sCoh = COH(:,2:end,:,:);
 
 %% true 
    
+alphs = [0.0001:0.005:0.05];
 kron_conn = fp_get_kron_conn(patientID{id}, voxID{id}, nfreq); %same for every id
 conn = fp_find_neighbours(patientID{id});
 match_conn = conn(voxID{id},voxID{id});
@@ -62,12 +61,11 @@ match_conn = conn(voxID{id},voxID{id});
 o = 1;
 for ia = alphs    
     clear onoff
-    if o ==1 % get the test statistics
-        [~,onoff,true_val] = fp_get_signrank_results(tCoh,sCoh,ia);    
+    if o ==1 
+        [true_p(:,:,o),onoff,true_val] = fp_get_signrank_results(tCoh,sCoh,ia);    
     else 
-       onoff = true_val>= tcrits(o);
+        
     end
-    
     [true_clu, ~] = fp_get_cluster_findclusters(onoff, match_conn,minnbchan);    
     for iclus = 1:10
         icc = sum(sum(true_clu==iclus));
@@ -101,13 +99,8 @@ for iit = 2:nit
         o = 1;
         for ia = alphs
             clear onoff
-            if o ==1 % get the test statistics
-                [~,onoff,shuf_val] = fp_get_signrank_results(tCoh,sCoh,ia);
-            else
-                onoff = shuf_val>= tcrits(o);
-            end
-
-            [shuf_clu, ~] = fp_get_cluster_findclusters(onoff, match_conn,minnbchan);
+            [~ ,onoff,shuf_val] = fp_get_signrank_results(cCoh,csCoh,ia);
+            [shuf_clu, ~] = fp_get_cluster_findclusters(onoff, match_conn,minnbchan);           
             for iclus = 1:10
                 icc = sum(sum(shuf_clu==iclus));
                 ict = sum(shuf_val(shuf_clu==iclus));
