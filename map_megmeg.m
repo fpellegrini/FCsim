@@ -17,7 +17,7 @@ load(sprintf('BF_Patient%s.mat',patientID{id}));
 L = fp_get_lf(inverse);
 ni = size(L,3);
 
-for iit = 1:41
+for iit = 22:30
     
     clearvars -except d patientID id seed tar iit L ni delay_ mix time_series
     
@@ -34,8 +34,9 @@ for iit = 1:41
             L1 = squeeze(L(:,inodes(in),:));
             L_mix(:,in) = L1*p;
         end
+        filtertype= 'e';
         
-    elseif iit > 1 && iit < 21 %varying delays
+    elseif iit > 1 && iit < 6 %varying delays
         
         delay = randi(90);
         inode_seed = 2100;
@@ -49,8 +50,9 @@ for iit = 1:41
             L1 = squeeze(L(:,inodes(in),:));
             L_mix(:,in) = L1*p;
         end
+        filtertype= 'e';
         
-    elseif iit >11 && iit <22 %varying nodes
+    elseif iit >5 && iit <12 %varying nodes
         delay = 30;
         inode_seed = randi(size(L,2),1);
         inode_tar = randi(size(L,2),1);
@@ -63,8 +65,9 @@ for iit = 1:41
             L1 = squeeze(L(:,inodes(in),:));
             L_mix(:,in) = L1*p;
         end
+        filtertype= 'e';
         
-    elseif iit >21 && iit <32 %varying time series
+    elseif iit >11 && iit <17 %varying time series
         delay = 30;
         inode_seed = 2100;
         inode_tar = 1000;
@@ -77,8 +80,9 @@ for iit = 1:41
             L1 = squeeze(L(:,inodes(in),:));
             L_mix(:,in) = L1*p;
         end
+        filtertype= 'e';
         
-    else %varying mixing of leadfield 
+    elseif iit >16 && iit < 21 %varying mixing of leadfield 
         delay = 30;
         inode_seed = 2100;
         inode_tar = 1000;
@@ -92,6 +96,38 @@ for iit = 1:41
             L1 = squeeze(L(:,inodes(in),:));
             L_mix(:,in) = L1*p;
         end
+        filtertype= 'e';
+        
+    elseif iit == 21
+        
+        delay = 30; %in samples, is equal to 100 ms
+        inode_seed = 2100;
+        inode_tar = 1000;
+        inodes = [inode_seed inode_tar];
+        isens = 120;
+        
+        p = [0.5; 0.5];
+        p = p/norm(p);
+        for in = 1:2
+            L1 = squeeze(L(:,inodes(in),:));
+            L_mix(:,in) = L1*p;
+        end
+        filtertype= 'd';
+    else %varying nodes, but with dics
+        
+        delay = 30;
+        inode_seed = randi(size(L,2),1);
+        inode_tar = randi(size(L,2),1);
+        inodes = [inode_seed inode_tar];
+        isens = 120;
+        
+        p = [0.5; 0.5];
+        p = p/norm(p);
+        for in = 1:2
+            L1 = squeeze(L(:,inodes(in),:));
+            L_mix(:,in) = L1*p;
+        end
+        filtertype= 'd';
     end
 
        
@@ -146,7 +182,7 @@ for iit = 1:41
     frqs = sfreqs(fres, fs);
     frqs(frqs>90) = [];
     nfreq = numel(frqs);
-    filtertype= 'e';
+    
     
     id_meg_chan = 1:size(signal,1);
     nmeg = numel(id_meg_chan);
@@ -174,7 +210,7 @@ for iit = 1:41
         A=zeros(nmeg,ndim,ns_org,nfreq);
         
         for ifrq = 1:nfreq
-            cCS = CS(1:end-nlfp,1:end-nlfp,ifrq);
+            cCS = CS(:,:,ifrq);
             lambda = mean(diag(real(cCS)))/100;
             
             CSinv=pinv(real(cCS)+lambda * eye(size(cCS)));
@@ -186,6 +222,9 @@ for iit = 1:41
         end
         fqA = 1:nfreq; %This filter is frequency specific.
         nfqA = nfreq;
+    elseif strcmp(filtertype,'l')
+        
+        
     end
     
     A = permute(A,[1 3 2 4]);
@@ -228,6 +267,11 @@ for iit = 1:41
     outname = sprintf('true_target_%d.nii',iit);
     true = zeros(size(a'));
     true(inode_tar)=1;
+    fp_data2nii(true,sources.pos,[],outname,id)    
+        
+    outname = sprintf('seed_%d.nii',iit);
+    true = zeros(size(a'));
+    true(inode_seed)=1;
     fp_data2nii(true,sources.pos,[],outname,id)
     
     outname = sprintf('map_megmeg_%d.nii',iit);
@@ -237,7 +281,7 @@ for iit = 1:41
     
     inode_rslt = find(a == max(a));
     
-    pos = sources.pos; 
+    pos = fp_getMNIpos(patientID{id}); 
     tar_pos = pos(inode_tar,:);
     rslt_pos = pos(inode_rslt,:);
     
@@ -247,11 +291,12 @@ for iit = 1:41
     delay_(iit) = delay;
     mix(:,iit) = p; 
     time_series(iit) = isens;
+    distribution(:,iit) = a; 
     
     
     
 end
-save('./location_error_mapmegmeg.mat','d','seed','tar','delay_','mix','time_series','-v7.3')
+save('./location_error_mapmegmeg_dics.mat','d','distribution','seed','tar','delay_','mix','time_series','-v7.3')
 
 
 

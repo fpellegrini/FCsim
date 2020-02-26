@@ -134,8 +134,7 @@ for id = 1:5 %:numel(patientID)
             % variance explained
             vx_ = cumsum(D_)./sum(D_);
             varex{aroi} = vx_;
-            
-            
+                      
             
             %concatenate filters
             for ifq = 1:nfqA

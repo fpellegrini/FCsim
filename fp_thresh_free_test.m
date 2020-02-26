@@ -14,9 +14,10 @@ nsubs = numel(patientID);
 nchunk = 1;
 minnbchan = 2;
 
+%from Gibbons, J. D., and S. Chakraborti. Nonparametric Statistical Inference, 2011.
 alphs = [0.001, 0.002, 0.003, 0.005, 0.007, 0.009, 0.0125, 0.016, 0.021,...
     0.027, 0.034, 0.042, 0.051];
-tcrits = [64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52];
+tcrits = [64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52]; 
 %%
 
 for id = 1:nsubs   
