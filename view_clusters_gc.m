@@ -1,6 +1,6 @@
 clear all
 
-load('p_gc_01__allsubs.mat')
+load('TWSTRS.mat')
 [pos, ~] = fp_find_commonvox;
 sides = containers.Map([1 2], {'r', 'l'});
 vals = containers.Map([1 2], {'pos', 'neg'});
