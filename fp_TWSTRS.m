@@ -90,12 +90,12 @@ for iit = 1:nit
     
     %pos 
     onoff1 = onoff;
-    onoff1(rho_shuf(iit,:,:,:)<0)=0;
+    onoff1(squeeze(rho_shuf(iit,:,:))<0)=0;
     [shuf_clu(iit,:,:,1), shuf_total(iit,1)] = fp_get_cluster_components(onoff1,kron_conn);
     
     %neg
     onoff1 = onoff;
-    onoff1(rho_shuf(iit,:,:,:)>0)=0;
+    onoff1(squeeze(rho_shuf(iit,:,:))>0)=0;
     [shuf_clu(iit,:,:,2), shuf_total(iit,2)] = fp_get_cluster_components(onoff1,kron_conn);
 end
 

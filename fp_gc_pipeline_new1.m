@@ -1,6 +1,6 @@
 function fp_gc_pipeline_new1(patientNumber, DIROUT)
 
-% fp_addpath_sabzi
+fp_addpath_sabzi
 
 if isempty(patientNumber)
     patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
@@ -90,7 +90,7 @@ for id = 1:numel(patientID)
         A = permute(A,[1, 3, 2]);
     elseif strcmp(filtertype, 'l')
         
-        cCS = sum(CS(id_meg_chan,id_meg_chan,:),3);
+        cCS = sum(CS(1:(end-nlfp),1:(end-nlfp),:),3);
         reg = 0.05*trace(cCS)/length(cCS);
         Cr = cCS + reg*eye(size(cCS,1));
         
@@ -98,7 +98,7 @@ for id = 1:numel(patientID)
         A = permute(A,[1, 3, 2]);
     end
     
-    for ivox=1:10
+    for ivox=1:ns
         tic
         A_ = squeeze(A(:,:,ivox));
         

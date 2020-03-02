@@ -6,6 +6,7 @@ patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
 
 scores = db_twstrs();
 alpha = 0.05;
+nit = 1000;
 %%
 load(sprintf('%sDIFFGC.mat',DIROUT));
 [nsubs,nvox,nside,nfreq] = size(DIFFGC);
@@ -41,12 +42,12 @@ for iside = 1:2
     %pos
     onoff1 = onoff;
     onoff1(true_rho(:,:,iside)<0)=0;
-    [true_clu_pos(:,:,iside), true_total_pos(:,iside)] = fp_get_cluster_components(onoff1,kron_conn);
+    [true_clu_pos(:,:,iside), true_total_pos(iside)] = fp_get_cluster_components(onoff1,kron_conn);
 
     %neg
     onoff1 = onoff;
     onoff1(true_rho(:,:,iside)>0)=0;
-    [true_clu_neg(:,:,iside), true_total_neg(:,:,iside)] = fp_get_cluster_components(onoff1,kron_conn);
+    [true_clu_neg(:,:,iside), true_total_neg(iside)] = fp_get_cluster_components(onoff1,kron_conn);
 end
 
 %% shuffled
@@ -55,30 +56,39 @@ for iit = 1:nit
     fprintf('Working on iteration %d \n',iit);
     clear pval_shuf onoff onoff1 
     
-    for ifreq = 1:nfreq
-        for ivox = 1:ns           
-            [rho_shuf(iit,ivox,ifreq), pval_shuf(ivox, ifreq)] = corr(t_score', sCoh(:,iit,ifreq,ivox), 'Type','Spearman');
+    diffgc_s = diffgc_t .* (sign(randn(size(diffgc_t)))); 
+    
+    for iside = 1:2
+        clear onoff pval_shuf 
+        for ifreq = 1:nfreq
+            for ivox = 1:nvox
+                [rho_shuf(iit,ivox,ifreq,iside), pval_shuf(ivox, ifreq)] = corr(t_score', diffgc_s(:,ivox,iside,ifreq), 'Type','Spearman');
+            end
         end
-    end    
-    onoff = pval_shuf < alpha;
-    
-    %pos 
-    onoff1 = onoff;
-    onoff1(rho_shuf(iit,:,:,:)<0)=0;
-    [shuf_clu(iit,:,:,1), shuf_total(iit,1)] = fp_get_cluster_components(onoff1,kron_conn);
-    
-    %neg
-    onoff1 = onoff;
-    onoff1(rho_shuf(iit,:,:,:)>0)=0;
-    [shuf_clu(iit,:,:,2), shuf_total(iit,2)] = fp_get_cluster_components(onoff1,kron_conn);
+        onoff = pval_shuf < alpha;
+        
+        %pos
+        onoff1 = onoff;
+        onoff1(squeeze(rho_shuf(iit,:,:,iside))<0)=0;
+        [shuf_clu(iit,:,:,1, iside), shuf_total(iit,1,iside)] = fp_get_cluster_components(onoff1,kron_conn);
+        
+        %neg
+        onoff1 = onoff;
+        onoff1(squeeze(rho_shuf(iit,:,:,iside))>0)=0;
+        [shuf_clu(iit,:,:,2, iside), shuf_total(iit,2,iside)] = fp_get_cluster_components(onoff1,kron_conn);
+    end
 end
-
+    
 
 
 %%
 
-p_pos = fp_get_cluster_p_gc_new(true_total_pos, shuf_total, true_rho, rho_shuf, true_clu_pos, shuf_clu, 0);
-p_neg = fp_get_cluster_p_gc_new(true_total_neg, shuf_total, true_rho, rho_shuf, true_clu_neg, shuf_clu, 0);
+for iside = 1:2
+    p_pos{iside} = fp_get_cluster_p_gc_new(true_total_pos(iside), shuf_total(:,:,iside),...
+        true_rho(:,:,iside), rho_shuf(:,:,:,iside), true_clu_pos(:,:,iside), shuf_clu(:,:,:,:,iside), 0);
+    p_neg{iside} = fp_get_cluster_p_gc_new(true_total_neg(iside), shuf_total(:,:,iside),...
+        true_rho(:,:,iside), rho_shuf(:,:,:,iside), true_clu_neg(:,:,iside), shuf_clu(:,:,:,:,iside), 0);
+end
 
-outname = './TWSTRS.mat';
+outname = './TWSTRS_gc.mat';
 save(outname,'p_pos','p_neg','true_total_pos','true_total_neg','true_clu_pos','true_clu_neg','true_pval','true_rho','-v7.3')

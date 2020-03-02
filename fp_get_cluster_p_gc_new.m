@@ -22,7 +22,7 @@ if true_total>0 %when at least one true cluster exists
             shuf_clu_val = max(abs(squeeze(sum(sum(shuf_val.*(b1==1),2),3)))', squeeze(abs(sum(sum(shuf_val.*(b2==1),2),3)))');
         end
         
-        true_clu_val = sum(sum(sum(true_val(true_clu==iclus)))); %scalar
+        true_clu_val = abs(sum(sum(sum(true_val(true_clu==iclus))))); %scalar
         p(iclus) = sum(shuf_clu_val>=true_clu_val)/numel(shuf_clu_val);
         if p(iclus) > 0.01
             break
