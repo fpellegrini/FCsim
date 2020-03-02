@@ -177,6 +177,6 @@ for id = 1:numel(patientID)
     end
 end
 
-outname = sprintf('%sDIFFGC',DIROUT);
+outname = sprintf('%sDIFFGC_lcmv',DIROUT);
 save(outname,'GC','TRGC','DIFFGC','-v7.3')
 

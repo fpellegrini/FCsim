@@ -151,17 +151,22 @@ end
 
 %%
 
+load('DIFFGC_lcmv.mat')
+[nsubs, nvox, nsides, nfreqs] = size(DIFFGC); 
+patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
+[pos, ~] = fp_find_commonvox;
 
-ii=1;
-figure
-for isub = 1:nsubs 
-    for iside = 1:2
+
+for iside = 1:2
+    figure
+    ii=1;
+    for isub = 1:nsubs
         clear cf cv
         
-        cv = squeeze(sum(DIFFGC(isub,:,iside,:),4));   
-        cv = cv + abs(min(cv(:)));
-        outname = sprintf('diffgc_%s_%d.nii',patientID{isub},iside);
-        fp_data2nii(cv,pos,[],outname)
+        %         cv = squeeze(sum(DIFFGC(isub,:,iside,:),4));
+        %         cv = cv + abs(min(cv(:)));
+%         outname = sprintf('diffgc_%s_%d.nii',patientID{isub},iside);
+%         fp_data2nii(cv,pos,[],outname)
         
         cf = squeeze(sum(DIFFGC(isub,:,iside,:),2));
         subplot(3,4,ii)
@@ -170,15 +175,17 @@ for isub = 1:nsubs
         xticklabels = 0:5:92;
         xticks = linspace(1,length(cf), numel(xticklabels));
         set(gca,'XTick', xticks,'XTickLabel',xticklabels)
+        ylim([-0.5 0.5])
 %         ylim([-100 100])
         grid on
-       
+        
         ii = ii +1;
         
     end
     
+%     outname1 = sprintf('diffgc_subplot_%d.png',iside);
+%     print(outname1,'-dpng');
+%     close all
+    
 end
 
-% outname1 = sprintf('diffgc_subplot_%d.png',iside);
-% print(outname1,'-dpng');
-% close all
