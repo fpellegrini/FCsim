@@ -12,6 +12,8 @@ if ~exist('DIROUT','var')
     error('Please indicate where the results should be saved.')
 end
 
+filtertype = 'l';
+
 nit=10; %%%%
 [~, voxID] = fp_find_commonvox;
 nlags = 20;
@@ -83,8 +85,18 @@ for id = 1:numel(patientID)
     %     CS = fp_tsdata_to_cpsd(X,fres,'MT',[id_meg_chan id_lfp_chan], [id_meg_chan id_lfp_chan], id_trials_1, id_trials_2);
     
     %construct filter
-    A = squeeze(mkfilt_eloreta_v2(L));
-    A = permute(A,[1, 3, 2]);
+    if strcmp(filtertype, 'e')
+        A = squeeze(mkfilt_eloreta_v2(L));
+        A = permute(A,[1, 3, 2]);
+    elseif strcmp(filtertype, 'l')
+        
+        cCS = sum(CS(id_meg_chan,id_meg_chan,:),3);
+        reg = 0.05*trace(cCS)/length(cCS);
+        Cr = cCS + reg*eye(size(cCS,1));
+        
+        [~, A] = lcmv_meg(Cr, L, struct('alpha', 0, 'onedim', 0));
+        A = permute(A,[1, 3, 2]);
+    end
     
     for ivox=1:10
         tic
