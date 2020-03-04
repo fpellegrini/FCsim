@@ -23,7 +23,7 @@ for iclus = 1:numel(p_pos)
         xticks = linspace(1,length(c), numel(xticklabels));
         set(gca,'XTick', xticks,'XTickLabel',xticklabels)
         
-        outname1 = sprintf('TFCE_d_comp_%d.png',iclus);
+        outname1 = sprintf('TWSTRS_d_comp_%d.png',iclus);
         print(outname1,'-dpng');
         close all
         
