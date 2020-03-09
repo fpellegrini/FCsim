@@ -13,7 +13,7 @@ patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
 
 nsubs = numel(patientID);
 nchunk = 50;
-minnbchan = 3;
+minnbchan = 4;
 
 alphs = [0.001, 0.002, 0.003, 0.005, 0.007, 0.009, 0.0125, 0.016, 0.021,...
     0.027, 0.034, 0.042, 0.051];
@@ -135,11 +135,12 @@ s_max_blobb = squeeze(max(max(sblobb1,[],2),[],3));
 
 %%
 
-p = sum(s_max_blobb>max_blobb)/nit;
-
+for iclus = 1:10
+    p(iclus) = sum(sTFCE(:,1)>tTFCE(iclus))/nit;
+end
 
 %%
-outname = sprintf('./TFCE_%s_3minnbchan',filtertype);
+outname = sprintf('./TFCE_%s_4minnbchan',filtertype);
 
 save(outname,'p','true_clu','true_val','-v7.3')
 
