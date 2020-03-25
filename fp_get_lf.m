@@ -10,6 +10,8 @@ for is=1:ns
     %remove radial orientation
     clear u s
     [u, s, v] = svd(squeeze(L2));
-    L(:,is,:) = u(:,1:2)*s(1:2,1:2);
+    %     L(:,is,:) = u(:,1:2)*s(1:2,1:2);
+    %     L(:,is) = u(:,:)*s(:,1);
+    L(:,is,:) = u(:,:)*s(:,1:2);
     
 end

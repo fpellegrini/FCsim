@@ -1,7 +1,7 @@
 %% group
 
 clear all
-load('TFCE_d_comp.mat')
+load('TFCE_d_3minnbchan.mat')
 [pos, ~] = fp_find_commonvox;
 
 for iclus = 1:numel(p)
@@ -12,22 +12,22 @@ for iclus = 1:numel(p)
         a(true_clu~=iclus) = 0;
         
         %spatial localization
-        b = squeeze(mean(a(4:7,:),1));
-        outname = sprintf('TFCE_d_comp_%d_alpha.nii',iclus);
+        b = squeeze(mean(a(:,:),1));
+        outname = sprintf('TFCE_d_3minnbchan_%d.nii',iclus);
         fp_data2nii(b,pos,[],outname)
         
-%         %spectral localization
-%         c = sum(a,2);
-%         figure
-%         bar(c)
-%         xlabel('freqs')
-%         xticklabels = 0:5:92;
-%         xticks = linspace(1,length(c), numel(xticklabels));
-%         set(gca,'XTick', xticks,'XTickLabel',xticklabels)
-%         
-%         outname1 = sprintf('TFCE_d_comp_%d.png',iclus);
-%         print(outname1,'-dpng');
-%         close all
+        %spectral localization
+        c = sum(a,2);
+        figure
+        bar(c)
+        xlabel('freqs')
+        xticklabels = 0:5:92;
+        xticks = linspace(1,length(c), numel(xticklabels));
+        set(gca,'XTick', xticks,'XTickLabel',xticklabels)
+        
+        outname1 = sprintf('TFCE_d_comp_%d.png',iclus);
+        print(outname1,'-dpng');
+        close all
         
     end
     

@@ -135,7 +135,7 @@ for iside = 1:2
                 
                 clear cv start floor
                 start = floor(a(iside,isub,fband,1)/2);
-                to = floor(a(iside,isub,fband,1)/2);
+                to = floor(a(iside,isub,fband,2)/2);
                 cv = squeeze(sum(DIFFGC(isub,:,iside,[start to]),4));   
 
 %                 cv = cv + abs(min(cv(:)));

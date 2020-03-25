@@ -129,7 +129,7 @@ for iside = 1:2
                 
                 clear cv start floor
                 start = floor(a(iside,isub,fband,1)/2);
-                to = floor(a(iside,isub,fband,1)/2);
+                to = floor(a(iside,isub,fband,2)/2);
                 cv = squeeze(sum(DIFFGC(isub,:,iside,[start to]),4));   
 
 %                 cv = cv + abs(min(cv(:)));
@@ -182,3 +182,47 @@ for iside = 1:2
     
 end
 
+%% fix bands 
+
+DIROUT = './';
+
+patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
+[pos, ~] = fp_find_commonvox;
+load(sprintf('%sDIFFGC_lcmv',DIROUT));
+nit = 1000;
+
+[nsubs, nvox, nsides, nfreqs] = size(DIFFGC); 
+
+a(1,1) = 5; 
+a(1,2) = 20; 
+a(2,1) = 30; 
+a(2,2) = 50;
+
+
+for iside = 1:2
+    for isub = 1:nsubs
+        for fband = 1:2
+  
+            clear cv start floor
+            start = floor(a(fband,1)/2);
+            to = floor(a(fband,2)/2);
+            cv = squeeze(sum(DIFFGC(isub,:,iside,[start to]),4));
+            
+            %                 cv = cv + abs(min(cv(:)));
+            outname = sprintf('diffgc_lcmv_%s_%d_fband%d.nii',patientID{isub},iside,fband);
+            fp_data2nii(abs(cv),pos,[],outname)
+        end
+    end
+    
+end
+
+%%
+
+for iside = 1:2 
+    for isub = 1:nsubs
+        figure
+        imagesc(squeeze(DIFFGC(isub, :,iside,:)))
+        colorbar 
+        
+    end 
+end 

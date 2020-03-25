@@ -1,7 +1,7 @@
 function [P, W, S, out] = lcmv(data, L, para)
 
 % 2017 Stefan Haufe
-
+% keyboard
 data = data';
 [M_ N NDUM]=size(L);
 

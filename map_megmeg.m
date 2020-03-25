@@ -17,7 +17,7 @@ load(sprintf('BF_Patient%s.mat',patientID{id}));
 L = fp_get_lf(inverse);
 ni = size(L,3);
 
-for iit = 22:30
+for iit = 32
     
     clearvars -except d patientID id seed tar iit L ni delay_ mix time_series
     
@@ -113,7 +113,7 @@ for iit = 22:30
             L_mix(:,in) = L1*p;
         end
         filtertype= 'd';
-    else %varying nodes, but with dics
+    elseif iit >21 && iit < 31 %varying nodes, but with dics
         
         delay = 30;
         inode_seed = randi(size(L,2),1);
@@ -128,6 +128,39 @@ for iit = 22:30
             L_mix(:,in) = L1*p;
         end
         filtertype= 'd';
+    elseif iit ==31
+        
+        delay = 0;
+        inode_seed = 2100;
+        inode_tar = 1000;
+        inodes = [inode_seed inode_tar];
+        isens = 120;
+        
+        p = [0.5; 0.5];
+        p = p/norm(p);
+        for in = 1:2
+            L1 = squeeze(L(:,inodes(in),:));
+            L_mix(:,in) = L1*p;
+        end
+        filtertype= 'd';
+        
+    else 
+        
+        delay = 0;
+        inode_seed = 2100;
+        inode_tar = 1000;
+        inodes = [inode_seed inode_tar];
+        isens = 120;
+        
+        p = [0.5; 0.5];
+        p = p/norm(p);
+        for in = 1:2
+            L1 = squeeze(L(:,inodes(in),:));
+            L_mix(:,in) = L1*p;
+        end
+        filtertype= 'e';
+        
+        
     end
 
        

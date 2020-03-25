@@ -141,5 +141,5 @@ p = sum(s_max_blobb>max_blobb)/nit;
 %%
 outname = sprintf('./TFCE_%s_3minnbchan',filtertype);
 
-save(outname,'p','true_clu','true_val','-v7.3')
+save(outname,'p','true_clu','true_val','blobb1', '-v7.3')
 

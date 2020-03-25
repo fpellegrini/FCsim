@@ -12,7 +12,7 @@ for iside = 1:2
             if p{iside,ival}(iclus) < 0.05
                 clear a b c
                 a = squeeze(true_clu(:,:,iside,ival))';
-        %         a = true_testval';
+%                 a = squeeze(true_val(:,iside,:))';
                 a(a~=iclus) = 0;
 
                 %spatial localization
@@ -41,7 +41,7 @@ end
 
 %% clear all
 
-load('TWSTRS_gc.mat')
+load('TWSTRS_gc_lcmv.mat')
 [pos, ~] = fp_find_commonvox;
 sides = containers.Map([1 2], {'r', 'l'});
 vals = containers.Map([1 2], {'pos', 'neg'});
@@ -55,7 +55,7 @@ for iside = 1:2
                 a(true_clu_neg(:,:,iside)~=iclus) = 0;
 
                 %spatial localization
-                b = squeeze(sum(a,2));
+                b = abs(squeeze(sum(a,2)));
                 outname = sprintf('TWSTRS_gc_neg_%s_%d.nii',sides(iside),iclus);
                 fp_data2nii(b,pos,[],outname)
 
