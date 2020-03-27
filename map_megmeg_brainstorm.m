@@ -188,10 +188,10 @@ pos = cortex.Vertices;
 d = eucl(pos,pos(inode_tar,:));
 xx = exp(-10^-1.5*d);
 
-% data_in=xx;
-% allplots_cortex_BS(cortex, data_in, [min(data_in) max(data_in)],...
-%     cm17a,'.', smooth_cortex,['true_target_brainstorm']);
-% clear data_in
+data_in=xx;
+allplots_cortex_BS(cortex, data_in, [min(data_in) max(data_in)],...
+    cm17a,'.', smooth_cortex,['true_target_brainstorm']);
+clear data_in
 
 data_in = a';
 allplots_cortex_BS(cortex, data_in, [min(data_in) max(data_in)],...

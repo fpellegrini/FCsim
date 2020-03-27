@@ -1,6 +1,6 @@
 
-%% first case 
-clear all
+%% second case 
+% clear all
 
 load('./processed_bs/bs_results.mat')
 smooth_cortex = 0.35;
@@ -48,29 +48,31 @@ for iROI = 1:nroi
   [~,sub_ind_roi_cortex{iROI},~] =  intersect(sub_ind_cortex, sub_ind_roi{iROI});%only one voxel per region 
   
 end
-nvox = length(sub_ind_cortex);
-leadfield = leadfield(:, sub_ind_cortex, :);
-L = leadfield;
-L1 = L;
-clear L
+nroi = length(sub_ind_cortex);
+nvox = length(ind_cortex); 
+
+L_save = leadfield;
+
+%leadfield for forward model
+L3 = L_save(:, sub_ind_cortex, :);
 for is=1:nroi
     clear L2
-    L2 = L1(:,is,:);
+    L2 = L3(:,is,:);
     
     %remove radial orientation
     clear u s
     [u, s, v] = svd(squeeze(L2));
-    L(:,is,:) = u(:,:)*s(:,1:2);
+    L_forward(:,is,:) = u(:,:)*s(:,1:2);
 end
 
-ni = size(L,3);
+ni = size(L_forward,3);
 
 % p = randn(ni,1);
 p=[0.5; 0.5];
 p = p/norm(p);
 
 for in = 1:nroi
-    L1 = squeeze(L(:,in,:));
+    L1 = squeeze(L_forward(:,in,:));
     L_mix(:,in) = L1*p;
 end
 
@@ -87,9 +89,9 @@ for itrial = 1:n_trials
     signal_sensor(:,:,itrial) = sig ./ norm(sig, 'fro');
 end
 
-% clear x1 x2 xx whitenoise sig X L1 noise
+clear L1 L2 L_forward L_mix L3
 
-% megmeg pipeline start
+%% megmeg pipeline start
 %parameters
 
 id_meg_chan = 1:size(signal_sensor,1);
@@ -101,16 +103,28 @@ CS = fp_tsdata_to_cpsd(signal_sensor,fres,'MT',[id_meg_chan], [id_meg_chan], id_
 CS(:,:,[1 47:end])=[];
 nfreq = size(CS,3);
 
+%leadfield backward model 
+L3 = L_save(:, ind_cortex, :);
+for is=1:nvox
+    clear L2
+    L2 = L3(:,is,:);
+    
+    %remove radial orientation
+    clear u s
+    [u, s, v] = svd(squeeze(L2));
+    L_backward(:,is,:) = u(:,:)*s(:,1:2);
+end
+
 %construct source filter
 if strcmp(filtertype,'e')
-    A = squeeze(mkfilt_eloreta_v2(L));
+    A = squeeze(mkfilt_eloreta_v2(L_backward));
     A = permute(A,[1, 3, 2]);
     fqA = ones(1,nfreq);%only one filter for all freqs.
     nfqA = 1;
     
 elseif strcmp(filtertype,'d')
 
-    A=zeros(nmeg,ni,nroi,nfreq);
+    A=zeros(nmeg,ni,nvox,nfreq);
     
     for ifrq = 1:nfreq
         cCS = CS(:,:,ifrq);
@@ -118,8 +132,8 @@ elseif strcmp(filtertype,'d')
         
         CSinv=pinv(real(cCS)+lambda * eye(size(cCS)));
         
-        for is=1:nroi %iterate across nodes
-            Lloc=squeeze(L(:,is,:));
+        for is=1:nvox %iterate across nodes
+            Lloc=squeeze(L_backward(:,is,:));
             A(:,:,is,ifrq) = (pinv(Lloc'*CSinv*Lloc)*Lloc'*CSinv)'; %create filter
         end
     end
@@ -132,7 +146,7 @@ elseif strcmp(filtertype,'l')
     
 end
 
-A2 = reshape(A,nmeg,ni*nroi,nfreq);
+A2 = reshape(A,nmeg,ni*nvox,nfreq);
 
 for ifq = 1: nfreq
     CSv(:,:,ifq) = squeeze(A2(:,:,fqA(ifq)))' * CS(:,:,ifq)...
@@ -175,14 +189,14 @@ for ifreq = 1: fres
 end
    
 
-%
+%%
 chan = ni; 
 
 for iroi = 1:nroi 
     
-    ic = ((iroi-1)*2)+1:((iroi-1)*2)+2;
+    ic = ((iroi-1)*2)+1:((ivox-1)*2)+2;
     for jroi = 1:nroi
-        jc = ((jroi-1)*2)+1:((jroi-1)*2)+2;
+        jc = ((jvox-1)*2)+1:((jvox-1)*2)+2;
     
         for ifq = 1:nfqA
             cs_red=[];
@@ -221,3 +235,31 @@ plot((mm - mean(mm))./std(mm(:)))
 legend('mic','mim')
 grid on 
 
+%%
+
+a1 = zeros(size(cortex.Vertices,1),1); 
+a1(ind_cortex) = mc; 
+
+load cm17
+pos = cortex.Vertices;
+
+d = eucl(pos,pos(ind_cortex(ind_roi_cortex{iroi_seed}(1)),:));
+xx = exp(-10^-1.5*d);
+data_in=xx;
+allplots_cortex_BS(cortex, data_in, [min(data_in) max(data_in)],...
+    cm17a,'.', smooth_cortex,['test']);
+clear data_in
+
+
+d1 = eucl(pos,pos(ind_cortex(ind_roi_cortex{iroi_tar}(1)),:));
+xx1 = exp(-10^-1.5*d1);
+data_in=xx1;
+allplots_cortex_BS(cortex, data_in, [min(data_in) max(data_in)],...
+    cm17a,'.', smooth_cortex,['test']);
+clear data_in
+
+a2 = zeros(size(cortex.Vertices,1),1); 
+a2(ind_cortex) = mm; 
+data_in = a2;
+allplots_cortex_BS(cortex, data_in, [min(data_in) max(data_in)],...
+    cm17a,'.', smooth_cortex,['test']);
