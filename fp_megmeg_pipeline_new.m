@@ -194,7 +194,7 @@ for id = 1:5 %:numel(patientID)
                 
                 %project CS to source level
                 clear A_ CSv
-                A_ = A(:, :,roi_id == aroi);
+                A_ = A(:, :,roi_id == aroi,:);
                 nsroi = size(A_,3);
                 A_ = reshape(A_, [nmeg, ndim*nsroi]);
                 

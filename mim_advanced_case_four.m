@@ -163,9 +163,6 @@ for aroi = 1:nroi
     for ifq = 1: nfreq
         CSv(:,:,ifq) = squeeze(A2(:,:,fqA(ifq)))' * CS(:,:,ifq)...
             * squeeze(A2(:,:,fqA(ifq)));
-%         n = size(csv,2);
-%         csv(1:n+1:end) = real(diag(squeeze(csv)));
-%         CSv(ifq,:,:)=csv;
     end
     
     %zscoring
@@ -206,7 +203,6 @@ end
    
 
 %%
-a = [];
 
 ic=1;
 for iroi = 1:nroi 
