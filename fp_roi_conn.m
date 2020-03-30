@@ -18,7 +18,7 @@ for ii = 1: ns
 end 
 
 u_roi_id = sort(unique(roi_id));
-load('ROI_new.mat')
+load('ROI_new_j.mat')
 
 nroi =length(ROI_new.label);
 roi_conn = zeros(nroi,nroi);

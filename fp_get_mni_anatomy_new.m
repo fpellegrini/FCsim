@@ -3,7 +3,7 @@ function [label,code,id_new]=fp_get_mni_anatomy_new(coord)
 coord=round(coord);
 load('ROI_MNI_V5_List.mat')
 t1=wjn_read_nii('ROI_MNI_V5.nii');
-load('ROI_new.mat')
+load('ROI_new_j.mat')
 
 [d,xyz]=spm_read_vols(t1);
 
@@ -22,6 +22,9 @@ else
                 id_new = ROI_new.id_new(ii);
                 break
             end
+        end
+        if ~exist('id_new')
+            id_new = 0;
         end
     end
     
