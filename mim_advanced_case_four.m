@@ -16,8 +16,8 @@ Lepo = 100;
 N = n_trials*Lepo;
 lag = 5;
 fres = 40;
-iroi_seed = 61;
-iroi_tar = 45;
+iroi_seed = 11;
+iroi_tar = 65;
 filtertype= 'd';
 regu=.000001;
 

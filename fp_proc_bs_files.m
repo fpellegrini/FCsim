@@ -22,7 +22,7 @@ cortex = load([bs_folder '/Attempt1/anat/@default_subject/tess_cortex_mid_low_10
 nvox = size(cortex.Vertices, 1);
 
 % load a very high resolution version of the same surface for plotting
-cortex_highres = load([bs_folder '/Attempt1/anat/@default_subject/tess_cortex_mid_low_5000V.mat']);
+cortex_highres = load([bs_folder '/Attempt1/anat/@default_subject/tess_cortex_mid_high.mat']);
 
 % lowres version
 cortex_lowres = load([bs_folder '/Attempt1/anat/@default_subject/tess_cortex_mid_low_2000V.mat']);
