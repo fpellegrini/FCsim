@@ -16,8 +16,8 @@ Lepo = 100;
 N = n_trials*Lepo;
 lag = 5;
 fres = 40;
-iroi_seed = 11;
-iroi_tar = 65;
+iroi_seed = 61;
+iroi_tar = 45;
 filtertype= 'd';
 regu=.000001;
 
@@ -149,9 +149,21 @@ end
 
 
 %%
-npcs = 2;
 
-for aroi = 1:nroi 
+npcs=2;
+
+clear V P
+
+if npcs == 2 
+    roi_selection =1:nroi;
+    small_rois = [];
+else
+    roi_selection = [1:2 4:10 12:nroi];
+    small_rois = [3 11]; 
+end 
+
+
+for aroi = roi_selection 
 
     %project to source level
     clear A_ CSv
@@ -185,7 +197,9 @@ for aroi = 1:nroi
     end
 end
 
+P(:,:,small_rois,:) = [];
 
+%%
 %apply all filters
 CSroi = [];
 for ifreq = 1:nfreq
@@ -204,12 +218,12 @@ end
 
 %%
 
+clear mim1 mic1 
 ic=1;
-for iroi = 1:nroi 
-    
+for iroi = 1:nroi-numel(small_rois)
     
     jc=1;
-    for jroi = 1:nroi
+    for jroi = 1:nroi-numel(small_rois)
         
         for ifq = 1:nfqA
             cs_red=[];
@@ -229,12 +243,14 @@ for iroi = 1:nroi
             % MIC
             mic1(iroi,jroi,ifq)=sqrt(s(1,1));
         end
+        
         jc = jc+npcs;
     end
+    
     ic=ic+npcs;
 end
 
-%%
+%
 mic = sum(mic1,3);
 mim = sum(mim1,3);
 
@@ -251,10 +267,16 @@ plot((mm - mean(mm))./std(mm(:)))
 legend('mic','mim')
 grid on 
 
-%%
+%
 a1 = zeros(size(cortex.Vertices,1),1); 
-for ir = 1:nroi 
-    a1(ind_roi{ir}) = mm(ir);
+ir1 = 1; 
+for ir = 1:nroi
+    if ismember(ir,small_rois)
+        a1(ind_roi{ir}) = 0;
+    else
+        a1(ind_roi{ir}) = mm(ir1);
+        ir1=ir1+1; 
+    end
 end 
 load cm17
 pos = cortex.Vertices;
@@ -264,9 +286,11 @@ xx([ind_roi{iroi_seed}; ind_roi{iroi_tar}])=0.2;
 
 data_in=xx;
 allplots_cortex_BS(cortex, data_in, [min(data_in) max(data_in)],...
-    cm17a,'.', smooth_cortex,['test']);
+    cm17a,'.', smooth_cortex,['ground_thruth_61_45']);
 clear data_in
 
 data_in = a1;
 allplots_cortex_BS(cortex, data_in, [min(data_in) max(data_in)],...
-    cm17a,'.', smooth_cortex,['test1']);
+    cm17a,'.', smooth_cortex,['mim_advanced_' num2str(npcs) '_pcs_61_45']);
+
+% close all

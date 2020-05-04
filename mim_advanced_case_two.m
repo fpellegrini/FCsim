@@ -1,6 +1,6 @@
 
 %% second case 
-% clear all
+clear all
 
 load('./processed_bs/bs_results.mat')
 smooth_cortex = 0.35;
@@ -16,8 +16,8 @@ Lepo = 100;
 N = n_trials*Lepo;
 lag = 5;
 fres = 40;
-iroi_seed = 10;
-iroi_tar = 50;
+iroi_seed = 11;
+iroi_tar = 65;
 filtertype= 'd';
 regu=.000001;
 
@@ -154,29 +154,6 @@ for ifq = 1: nfreq
 end
 
 %%
-% CSs = sum(CSv,3); 
-% [v,d,~] = eig(real(CSs));
-% [~, in] = sort(diag(d),'descend'); 
-% 
-% V = v(:, in(1:nroi));
-
-% clear CSroi V
-% npcs = 5; 
-% V= zeros(ns_org*2, npcs*2);
-% CSs1 = squeeze(sum(CSv(1:(inode_tar-1)*2,1:(inode_tar-1)*2,:),3)); %covariance
-% CSs2 = squeeze(sum(CSv((inode_tar*2)-1:end,(inode_tar*2)-1:end,:),3)); %covariance
-% [v1, d1, ~] = eig(real(CSs1));
-% [v2, d2, ~] = eig(real(CSs2));
-% [~, in1] = sort(diag(d1), 'descend');
-% [~, in2] = sort(diag(d2), 'descend');
-% 
-% V(1:(inode_tar-1)*2,1:npcs) = v1(:,in1(1:npcs)); 
-% V((inode_tar*2)-1:end,npcs+1:end) = v2(:,in2(1:npcs)); 
-
-% CSroi = [];
-% for ifreq = 1:fres
-%     CSroi(:, :, ifreq) = V'*CSv(:, :, ifreq)*V;
-% end
 
 CSroi = CSv;
 clear Cohroi
@@ -192,10 +169,10 @@ end
 %%
 chan = ni; 
 
-for iroi = 1:nroi 
+for ivox = 1:nvox 
     
-    ic = ((iroi-1)*2)+1:((ivox-1)*2)+2;
-    for jroi = 1:nroi
+    ic = ((ivox-1)*2)+1:((ivox-1)*2)+2;
+    for jvox = 1:nvox
         jc = ((jvox-1)*2)+1:((jvox-1)*2)+2;
     
         for ifq = 1:nfqA
@@ -209,12 +186,12 @@ for iroi = 1:nroi
             cbbinv=inv(real(cs_red{3})+regu*eye(chan)*mean(diag(real(cs_red{3}))));
             X=cab*cbbinv*cab';
             % MIM Ewald Eq. 14
-            mim1(iroi,jroi,ifq)=(trace(caainv*X));
+            mim1(ivox,jvox,ifq)=(trace(caainv*X));
             caainvsqrt=sqrtm(caainv);
             Y=caainvsqrt*X*caainvsqrt; %Eq. 23
             [~,s,~]=svd(Y);
             % MIC
-            mic1(iroi,jroi,ifq)=sqrt(s(1,1));
+            mic1(ivox,jvox,ifq)=sqrt(s(1,1));
         end
     end
 end
@@ -243,23 +220,16 @@ a1(ind_cortex) = mc;
 load cm17
 pos = cortex.Vertices;
 
-d = eucl(pos,pos(ind_cortex(ind_roi_cortex{iroi_seed}(1)),:));
-xx = exp(-10^-1.5*d);
+xx = zeros(size(a1));
+xx([ind_roi{iroi_seed}; ind_roi{iroi_tar}])=0.2;
+
 data_in=xx;
 allplots_cortex_BS(cortex, data_in, [min(data_in) max(data_in)],...
-    cm17a,'.', smooth_cortex,['test']);
-clear data_in
-
-
-d1 = eucl(pos,pos(ind_cortex(ind_roi_cortex{iroi_tar}(1)),:));
-xx1 = exp(-10^-1.5*d1);
-data_in=xx1;
-allplots_cortex_BS(cortex, data_in, [min(data_in) max(data_in)],...
-    cm17a,'.', smooth_cortex,['test']);
+    cm17a,'.', smooth_cortex,['ground_thruth_' num2str(iroi_seed) '_' num2str(iroi_tar)]);
 clear data_in
 
 a2 = zeros(size(cortex.Vertices,1),1); 
 a2(ind_cortex) = mm; 
 data_in = a2;
 allplots_cortex_BS(cortex, data_in, [min(data_in) max(data_in)],...
-    cm17a,'.', smooth_cortex,['test']);
+    cm17a,'.', smooth_cortex,['mim_advanced_case_two_' num2str(iroi_seed) '_' num2str(iroi_tar)]);

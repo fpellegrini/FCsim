@@ -226,3 +226,41 @@ for iside = 1:2
         
     end 
 end 
+
+%% Julians bands 
+
+load('./DIFFGC_lcmv');
+[pos, ~] = fp_find_commonvox;
+
+thetaband = 2:4; %same as 4 to 8 Hz
+alphaband = 4:6; % 8 to 12 Hz
+beta_low = 6:10; % 12 to 20 Hz
+beta_high = 10:15; %20 to 30 Hz 
+gammaband = 16:45; %32 to 90 Hz;
+
+band = {'theta','alpha','betalow','betahigh','gamma'};
+a1 = squeeze(sum(DIFFGC(:,:,1,:),1));
+a2 = squeeze(sum(DIFFGC(:,:,2,:),1));
+
+b(:,1,1) = sum(a1(:,thetaband),2);
+b(:,1,2) = sum(a1(:,alphaband),2);
+b(:,1,3) = sum(a1(:,beta_low),2);
+b(:,1,4) = sum(a1(:,beta_high),2);
+b(:,1,5) = sum(a1(:,gammaband),2);
+
+b(:,2,1) = sum(a2(:,thetaband),2);
+b(:,2,2) = sum(a2(:,alphaband),2);
+b(:,2,3) = sum(a2(:,beta_low),2);
+b(:,2,4) = sum(a2(:,beta_high),2);
+b(:,2,5) = sum(a2(:,gammaband),2);
+
+for iside = 1:2
+    for iband = 1:5
+        
+        c = -squeeze(b(:,iside,iband));
+%         figure; plot(c(:))
+        outname = sprintf('GC_side%d_%s_neg.nii',iside,band{iband});
+        fp_data2nii(c,pos,[],outname)
+        
+    end
+end 
