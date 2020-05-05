@@ -11,9 +11,9 @@ for ifreq = 1:nfreq
     for iroi = 1:nroi
         for jroi = 1:nroi
 
-            [ps(ifreq,iroi,jroi), hs(ifreq,iroi,jroi),stats] = signrank(dbCoh(:,iroi,jroi,ifreq),...
+            [ps(iroi,jroi,ifreq), hs(iroi,jroi,ifreq),stats] = signrank(dbCoh(:,iroi,jroi,ifreq),...
                 0,'tail','right','alpha',alpha);
-            testval(ifreq,iroi,jroi) = stats.signedrank;
+            testval(iroi,jroi,ifreq) = stats.signedrank;
         end
     end
 end
