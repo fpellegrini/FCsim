@@ -1,9 +1,10 @@
-function fp_megmeg_pipeline_mim(patientNumber,DIROUT,DIRLOG)
+function fp_megmeg_pipeline_mim(patientNumber,DIROUT)
 
 fp_addpath_sabzi
 
 if ~exist(DIROUT); mkdir(DIROUT); end
 
+DIRLOG = '~/log/mim/';
 if ~exist(DIRLOG); mkdir(DIRLOG); end
 
 if isempty(patientNumber)
@@ -16,11 +17,10 @@ if ~exist('DIROUT','var')
     error('Please indicate where the results should be saved.')
 end
 
-nit= 2;
+nit= 1000;
 npcs = 2;
 COH = zeros(nit,117,117,46);
 TRUE_COH = zeros(117,117,46);
-regu=.000001;
 
 thetaband = 2:4; %same as 4 to 8 Hz
 alphaband = 4:6; % 8 to 12 Hz
@@ -102,7 +102,7 @@ for id = 1:numel(patientID)
             end
         end
         
-        %% true coherence
+        % true coherence
         clear P
         
         for aroi = 1:nroi
@@ -157,7 +157,7 @@ for id = 1:numel(patientID)
         
         %mim and mic
         clear mim1 mic1 mic mim
-        [mic1,mim1] =  fp_mim(Cohroi);
+        [mic1,mim1] =  fp_mim(Cohroi,npcs);
         
         mic(:,:,1) = mean(mic1(:,:,thetaband),3);
         mic(:,:,2) = mean(mic1(:,:,alphaband),3);
@@ -171,7 +171,7 @@ for id = 1:numel(patientID)
         MIC_TRUE(id,:,:,:) = mic;
         MIM_TRUE(id,:,:,:) = mim;
         
-        %% permutations
+        % permutations
         
         for iit = 1:nit
             
@@ -228,7 +228,7 @@ for id = 1:numel(patientID)
             
             %mim and mic
             clear mim1 mic1 mic mim
-            [mic1,mim1] =  fp_mim(Cohroi);
+            [mic1,mim1] =  fp_mim(Cohroi,npcs);
             
             mic(:,:,1) = mean(mic1(:,:,thetaband),3);
             mic(:,:,2) = mean(mic1(:,:,alphaband),3);
