@@ -1,5 +1,5 @@
 function [clu, total] = fp_get_cluster_components_megmeg(onoff,kron_conn)
-
+% keyboard
 [nroi,nroi,nfreq] = size(onoff);
 
 u = onoff(:); %should be the same indexing like in kron_conn now; nkron x 1
