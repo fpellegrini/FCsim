@@ -4,7 +4,7 @@ function fp_data2nii(data, pos, nit, outname, id)
 %nit is number of iterations (default: 500)
 %outname example: 'test.nii'
 % keyboard
-% keyboard
+
 sf = 1;%scaling factor 
 
 if isempty(nit)
