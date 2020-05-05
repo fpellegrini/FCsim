@@ -5,6 +5,8 @@ clearvars -except mm_gt mc_gt bmm_gt bmc_gt
 for iroi_seed = 1:68
     for iroi_tar = 1:68
         
+        fprintf(['seed ' num2str(iroi_seed) ', tar ' num2str(iroi_tar) '\n'])
+        tic
         load('./processed_bs/bs_results.mat')
         smooth_cortex = 0.35;
         
@@ -276,45 +278,47 @@ for iroi_seed = 1:68
         bmm_gt(iroi_seed,iroi_tar) = corr(bmm,gt);
         bmc_gt(iroi_seed,iroi_tar) = corr(bmc,gt);
         
+        toc
+        
     end
 end
 
 %%
 % 
-imagesc(mic)
-figure
-imagesc(mim)
-figure;
-plot((mc- mean(mc))./std(mc(:)))
-hold on 
-plot((mm - mean(mm))./std(mm(:)))
-legend('mic','mim')
-grid on 
+% imagesc(mic)
+% figure
+% imagesc(mim)
+% figure;
+% plot((mc- mean(mc))./std(mc(:)))
+% hold on 
+% plot((mm - mean(mm))./std(mm(:)))
+% legend('mic','mim')
+% grid on 
 
+%
 
-
-load cm17
-
-xx = zeros(1,nroi);
-xx([iroi_seed, iroi_tar])=0.2;
-
-xx1 = gt;
-pos = cortex_highres.Vertices;
-
-data_in=zeros(1,length(cortex_highres.Curvature));
-allplots_cortex_BS(cortex_highres, data_in, [min(data_in) max(data_in)],...
-    cm17a,'.', smooth_cortex,['ground_thruth_61_45'],  ...
-    {pos(5,:), ...
-    pos(100, :), ...
-    pos(1000, :)});
-clear data_in
-
-data_in = mm;
-allplots_cortex_BS(cortex, data_in, [min(data_in) max(data_in)],...
-    cm17a,'.', smooth_cortex,['mim_advanced_' num2str(npcs) '_pcs_61_45']);
-
-data_in = mc;
-allplots_cortex_BS(cortex, data_in, [min(data_in) max(data_in)],...
-    cm17a,'.', smooth_cortex,['mim_advanced_' num2str(npcs) '_pcs_61_45']);
-
-% close all
+% load cm17
+% 
+% xx = zeros(1,nroi);
+% xx([iroi_seed, iroi_tar])=0.2;
+% 
+% xx1 = gt;
+% pos = cortex_highres.Vertices;
+% 
+% data_in=zeros(1,length(cortex_highres.Curvature));
+% allplots_cortex_BS(cortex_highres, data_in, [min(data_in) max(data_in)],...
+%     cm17a,'.', smooth_cortex,['ground_thruth_61_45'],  ...
+%     {pos(5,:), ...
+%     pos(100, :), ...
+%     pos(1000, :)});
+% clear data_in
+% 
+% data_in = mm;
+% allplots_cortex_BS(cortex, data_in, [min(data_in) max(data_in)],...
+%     cm17a,'.', smooth_cortex,['mim_advanced_' num2str(npcs) '_pcs_61_45']);
+% 
+% data_in = mc;
+% allplots_cortex_BS(cortex, data_in, [min(data_in) max(data_in)],...
+%     cm17a,'.', smooth_cortex,['mim_advanced_' num2str(npcs) '_pcs_61_45']);
+% 
+% % close all
