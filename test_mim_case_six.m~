@@ -1,0 +1,48 @@
+
+load('mim_advanced_case_six_results.mat')
+
+for iroi = 1:68
+    for jroi = 1:68
+        clear mc amc imc bmc
+        mc = sum(sum(MIC{iroi,jroi},3),2); 
+        [amc, imc] = sort(mc,'descend');
+        bmc(imc(1:5))= mc(imc(1:5));
+        
+        mm = sum(sum(MIM{iroi,jroi},3),2); 
+        [amm, imm] = sort(mm,'descend');
+        bmm(imm(1:5))= mm(imm(1:5));
+
+        for ii = 1:68
+            for jj= 1:68
+
+                corrs_mc{iroi,jroi}(ii,jj) = corr(mc,GT{ii,jj});
+                corrs_bmc{iroi,jroi}(ii,jj) = corr(bmc,GT{ii,jj});
+                
+                corrs_mm{iroi,jroi}(ii,jj) = corr(mm,GT{ii,jj});
+                corrs_bmm{iroi,jroi}(ii,jj) = corr(bmm,GT{ii,jj});
+            end
+        end
+
+        figure;
+        subplot(2,1,1)
+        hist(corrs_mc{iroi,jroi}(:),100)
+        hold on 
+        plot(mc_gt(iroi,jroi),10,'r+')
+        subplot(2,1,2)
+        hist(corrs_bmc{iroi,jroi}(:),100)
+        title(['MC region ' num2str(iroi) ' to region ' num2str(jroi)])
+        
+        figure;
+        subplot(2,1,1)
+        hist(corrs_mc{iroi,jroi}(:),100)
+        hold on 
+        plot(mc_gt(iroi,jroi),10,'r+')
+        subplot(2,1,2)
+        hist(corrs_bmc{iroi,jroi}(:),100)
+        title(['region ' num2str(iroi) ' to region ' num2str(jroi)])
+
+        p_mc(iroi,jroi) = sum(corr_mc{iroi,jroi}(:)>mc_gt(iroi,jroi))/numel(corr_mc{iroi,jroi});
+        p_bmc(iroi,jroi) = sum(corr_mc{iroi,jroi}(:)>mc_gt(iroi,jroi))/numel(corr_mc{iroi,jroi});
+        
+    end 
+end
