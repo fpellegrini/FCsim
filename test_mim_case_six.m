@@ -56,3 +56,6 @@ for iroi = 2:68
         
     end 
 end
+
+outname = './test_mim_results.mat';
+save(outname,'p_mc','p_bmc','p_mm','p_bmm','-v7.3')
