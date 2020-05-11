@@ -5,21 +5,18 @@ clear all
 for iroi_seed = 1:68 
     for iroi_tar = 1:68
         clearvars -except mm_gt mc_gt bmm_gt bmc_gt GT MIM MIC iroi_seed iroi_tar
-        tic
         
         % ROI labels
-        [nroi,nvox,ind_cortex,ind_roi_cortex, sub_ind_cortex, roi2vox,leadfield] = fp_get_Desikan;
+        [nroi,nvox,ind_cortex,ind_roi_cortex, sub_ind_cortex, leadfield] = fp_get_Desikan;
         
         %signal generation
         fres = 40;
         n_trials = 200;
         [signal_sensor,gt,L_save] = fp_generate_mim_signal(iroi_seed,iroi_tar,fres,n_trials, sub_ind_cortex, leadfield);
-        gt = gt(roi2vox);
 
         %% megmeg pipeline start
         %parameters
-        id_trials_1 = 1:n_trials;
-        id_trials_2 = 1:n_trials;
+
         id_meg_chan = 1:size(signal_sensor,1);
         nmeg = numel(id_meg_chan);
         filtertype= 'd';
@@ -40,7 +37,6 @@ for iroi_seed = 1:68
             [u, s, v] = svd(squeeze(L2));
             L_backward(:,is,:) = u(:,:)*s(:,1:2);
         end
-        ni = size(L_backward,3);
 
         %construct source filter
         if strcmp(filtertype,'e')
@@ -91,8 +87,7 @@ for iroi_seed = 1:68
         end
 
 
-        %% MIM only to aggegate 2 dimensions 
-        
+        %%
         chan = ni; 
 
         for ivox = 1:nvox 
@@ -145,8 +140,6 @@ for iroi_seed = 1:68
         GT{iroi_seed,iroi_tar} = gt; 
         MIC{iroi_seed,iroi_tar} = mic1;
         MIM{iroi_seed,iroi_tar} = mim1;
-        
-        toc
     end 
 end
 
