@@ -142,9 +142,6 @@ for iroi_seed = 1:68
         bmm_gt(iroi_seed,iroi_tar) = corr(bmm,gt);
         bmc_gt(iroi_seed,iroi_tar) = corr(bmc,gt);
         
-        GT{iroi_seed,iroi_tar} = gt; 
-        MIC{iroi_seed,iroi_tar} = mic1;
-        MIM{iroi_seed,iroi_tar} = mim1;
         
         toc
     end 
@@ -152,7 +149,7 @@ end
 
 
 outname = sprintf('./mim_advanced_case_two_results.mat');
-save(outname,'mm_gt','mc_gt','bmm_gt','bmc_gt','GT','MIM','MIC','-v7.3')    
+save(outname,'mm_gt','mc_gt','bmm_gt','bmc_gt','-v7.3')    
         
 
 %         imagesc(mic)
