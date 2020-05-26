@@ -1,8 +1,6 @@
 function [nroi,nvox,ind_cortex,ind_roi_cortex, sub_ind_cortex, roi2vox, leadfield] = fp_get_Desikan
 
 load('./processed_bs/bs_results.mat')
-smooth_cortex = 0.35;
-labels = {cortex.Atlas(3).Scouts.Label};
 % number of ROIs in the Desikan-Kiliany Atlas
 nroi = length(cortex.Atlas(3).Scouts);
 %roi inds

@@ -170,7 +170,7 @@ for id = 1:numel(patientID)
         id_trials_1 = 1:n_trials;
         rng('shuffle')
         id_trials_2 = randperm(n_trials);
-        CS = fp_tsdata_to_cpsd(X,fres,'MT',id_meg_chan, id_meg_chan, id_trials_1, id_trials_2);      
+        CS = fp_tsdata_to_cpsd(X,fres,'WELCH',id_meg_chan, id_meg_chan, id_trials_1, id_trials_2);      
         
         csroi = nan(nroi-1,nroi-1,npcs,npcs,nfreq);
         
