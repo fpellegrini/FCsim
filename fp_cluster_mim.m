@@ -1,4 +1,4 @@
-function fp_cluster_mim(DIROUT, abs_imag,testmethod,alpha,fwf,j)
+efunction fp_cluster_mim(DIROUT, abs_imag,testmethod,alpha,fwf,j)
 
 %Group statistics on megmeg data.
 %Clustering group statistics across space and frequencies.
@@ -121,6 +121,7 @@ for iit = 1:nit
         
     
 end
+
 
 %%
 p = fp_get_cluster_p_megmeg(true_total, shuf_total, true_val, shuf_val, true_clu, shuf_clu, fwf);
