@@ -66,7 +66,7 @@ fp_data2nii(e./10^-8,commonvox_pos,[],outname)
 % 
 % id_trials_1 = 1: size(X,3);
 % id_trials_2 = id_trials_1;
-% CS = fp_tsdata_to_cpsd(X,fres,'MT',id_meg_chan, id_meg_chan, id_trials_1, id_trials_2);
+% CS = fp_tsdata_to_cpsd(X,fres,'WELCH',id_meg_chan, id_meg_chan, id_trials_1, id_trials_2);
 % 
 % %%%%%up to this point, the power still consists of doubles
 % 

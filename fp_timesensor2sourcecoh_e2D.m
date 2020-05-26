@@ -53,7 +53,7 @@ for id = 1:numel(patientID)
         %when trials are shuffled, the CS between meg and lfp must be
         %re-calculated
         tic
-        cCS = fp_tsdata_to_cpsd(X,fres,'MT',id_meg_chan, id_lfp_chan, id_meg_trials, id_lfp_trials);
+        cCS = fp_tsdata_to_cpsd(X,fres,'WELCH',id_meg_chan, id_lfp_chan, id_meg_trials, id_lfp_trials);
         toc
     else 
         cCS = CS(1:(end-nlfp),end-nlfp+1:end,:);

@@ -50,7 +50,7 @@ for id = 1:numel(patientID)
         %channels are already sorted out.
         
         %cross spectrum        
-        CS = fp_tsdata_to_cpsd(X,fres,'MT',[id_meg_chan,id_lfp_chan], [id_meg_chan,id_lfp_chan], id_meg_trials, id_lfp_trials);
+        CS = fp_tsdata_to_cpsd(X,fres,'WELCH',[id_meg_chan,id_lfp_chan], [id_meg_chan,id_lfp_chan], id_meg_trials, id_lfp_trials);
         
         %leadfield
         clear L

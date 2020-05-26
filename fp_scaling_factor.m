@@ -28,7 +28,7 @@ for id = 1:numel(patientID)
     clear id_trials_1 id_trials_2 CS A_
     id_trials_1 = 1:n_trials;
     id_trials_2 = 1:n_trials;
-    CS = fp_tsdata_to_cpsd(X,fres,'MT',[id_meg_chan id_lfp_chan], [id_meg_chan id_lfp_chan], id_trials_1, id_trials_2);
+    CS = fp_tsdata_to_cpsd(X,fres,'WELCH',[id_meg_chan id_lfp_chan], [id_meg_chan id_lfp_chan], id_trials_1, id_trials_2);
 
     csvmeg(id_meg_chan) = csvmeg(id_meg_chan) + diag(sum(real(CS(1:end-nlfp,1:end-nlfp,:)),3)); 
     csvlfp = csvlfp + diag(sum(real(CS(end-nlfp+1:end,end-nlfp+1:end,:)),3));

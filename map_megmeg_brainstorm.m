@@ -90,7 +90,7 @@ nmeg = numel(id_meg_chan);
 
 id_trials_1 = 1:n_trials;
 id_trials_2 = 1:n_trials;
-CS = fp_tsdata_to_cpsd(signal,fres,'MT',[id_meg_chan], [id_meg_chan], id_trials_1, id_trials_2);
+CS = fp_tsdata_to_cpsd(signal,fres,'WELCH',[id_meg_chan], [id_meg_chan], id_trials_1, id_trials_2);
 CS(:,:,[1 47:end])=[];
 nfreq = size(CS,3);
 ns = size(L,2);

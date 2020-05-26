@@ -32,7 +32,7 @@ end
 % 
 % id_trials_1 = 1:ntrial;
 % id_trials_2 = 1:ntrial;
-% CS = fp_tsdata_to_cpsd(signal,150,'MT',[id_meg_chan], [id_meg_chan], id_trials_1, id_trials_2);
+% CS = fp_tsdata_to_cpsd(signal,150,'WELCH',[id_meg_chan], [id_meg_chan], id_trials_1, id_trials_2);
 % 
 % ns_org = size(L,2);
 % nfreq = size(CS, 3); 

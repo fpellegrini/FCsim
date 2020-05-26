@@ -22,8 +22,8 @@ regu=.000001;
 
 signal = [s1; s2];
 % signal_epo = reshape(signal, 2*chan, Lepo, Nepo);
-% CS = fp_tsdata_to_cpsd(signal_epo, fres,'MT',1:2*chan, 1:2*chan,1:Nepo, 1:Nepo);
-S = tsdata_to_cpsd(signal,fres,'MT');
+% CS = fp_tsdata_to_cpsd(signal_epo, fres,'WELCH',1:2*chan, 1:2*chan,1:Nepo, 1:Nepo);
+S = tsdata_to_cpsd(signal,fres,'WELCH');
 S(:,:,1) = [];
 % CS(:,:,1) = [];
 CSroi = S;
@@ -66,9 +66,9 @@ s11 = p1 * s1;
 s22 = p2 * s2;
 signal = [s11; s22];
 % signal_epo = reshape(signal, 2*chan, Lepo, Nepo);
-% CS = fp_tsdata_to_cpsd(signal_epo, fres,'MT',1:2*chan, 1:2*chan,1:Nepo, 1:Nepo);
+% CS = fp_tsdata_to_cpsd(signal_epo, fres,'WELCH',1:2*chan, 1:2*chan,1:Nepo, 1:Nepo);
 
-S11 = tsdata_to_cpsd(signal,fres,'MT');
+S11 = tsdata_to_cpsd(signal,fres,'WELCH');
 S11(:,:,1) = [];
 % CS(:,:,1) = [];
 CSroi = S11;
@@ -108,9 +108,9 @@ whitenoise = whitenoise ./ norm(whitenoise, 'fro');
 signal1 = 0.95 *signal + 0.05 * whitenoise;
 signal1 = signal1 ./ norm(signal1, 'fro');
 % signal_epo = reshape(signal1, 2*chan, Lepo, Nepo);
-% CS = fp_tsdata_to_cpsd(signal_epo, fres,'MT',1:2*chan, 1:2*chan,1:Nepo, 1:Nepo);
+% CS = fp_tsdata_to_cpsd(signal_epo, fres,'WELCH',1:2*chan, 1:2*chan,1:Nepo, 1:Nepo);
 
-S2 = tsdata_to_cpsd(signal,fres,'MT');
+S2 = tsdata_to_cpsd(signal,fres,'WELCH');
 S2(:,:,1) = [];
 % CS(:,:,1) = [];
 CSroi = S2;
@@ -152,7 +152,7 @@ signal4 = [s1; s2];
 signal4([ic jc],:) = signal4([ic jc],:)./ norm(signal4([ic jc],:),'fro');
 signal4([(ic+1):(jc-1),(jc+1):end],:) = signal4([(ic+1):(jc-1),(jc+1):end],:)./ ...
     norm(signal4([(ic+1):(jc-1),(jc+1):end],:),'fro');
-S4 = tsdata_to_cpsd(signal4,fres,'MT');
+S4 = tsdata_to_cpsd(signal4,fres,'WELCH');
 S4(:,:,1) = [];
 
 

@@ -23,7 +23,7 @@ for id = 1:numel(patientID)
     id_trials = 1:size(X,3);
     nfreq = size(A,3);
     
-    CS = fp_tsdata_to_cpsd(X,fres,'MT',id_meg_chan, id_meg_chan, id_trials, id_trials);
+    CS = fp_tsdata_to_cpsd(X,fres,'WELCH',id_meg_chan, id_meg_chan, id_trials, id_trials);
     CS(:,:,nfreq+1:end) = [];
     
     mni_pos = fp_getMNIpos(patientID{id});
@@ -94,7 +94,7 @@ end
 % 
 % id_trials_1 = 1: size(X,3);
 % id_trials_2 = id_trials_1;
-% CS = fp_tsdata_to_cpsd(X,fres,'MT',id_meg_chan, id_meg_chan, id_trials_1, id_trials_2);
+% CS = fp_tsdata_to_cpsd(X,fres,'WELCH',id_meg_chan, id_meg_chan, id_trials_1, id_trials_2);
 % 
 % %%%%%up to this point, the power still consists of doubles
 % 

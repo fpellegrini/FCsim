@@ -70,7 +70,7 @@ nfreq = 46;
 [commonvox_pos, voxID] = fp_find_commonvox;
 
 %CS
-CS = fp_tsdata_to_cpsd(signal,fres,'MT',[id_meg_chan id_lfp_chan], [id_meg_chan id_lfp_chan],...
+CS = fp_tsdata_to_cpsd(signal,fres,'WELCH',[id_meg_chan id_lfp_chan], [id_meg_chan id_lfp_chan],...
     id_meg_trials, id_lfp_trials);
 CS(:,:,nfreq+1:end)=[];
 

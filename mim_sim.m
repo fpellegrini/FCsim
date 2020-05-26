@@ -33,7 +33,7 @@ signal = sig ./ norm(sig, 'fro');
 % sig([1, nchan+1],:) =  0.9*sig([1, nchan+1],:) + 0.1 *whitenoise([1, nchan+1],:);
 % signal = sig ./ norm(sig, 'fro');
 
-CS = fp_tsdata_to_cpsd(signal,fres,'MT',[1:nchan*2], [1:nchan*2], 1, 1);
+CS = fp_tsdata_to_cpsd(signal,fres,'WELCH',[1:nchan*2], [1:nchan*2], 1, 1);
 CS(:,:,[1 47:end])=[];
 nfreq = size(CS,3);
 

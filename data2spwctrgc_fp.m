@@ -103,13 +103,13 @@ function [conn, nlags] = data2spwctrgc_fp(data, fres, nlags, cond, nboot, maxfre
     
     % crossspectrum using multitapers
     if ~isempty(intersect(output, {'wPLI'}))      
-      [CS wPLI] = tsdata_to_cpsdwpli(data, fres, 'MT', ndat);
+      [CS wPLI] = tsdata_to_cpsdwpli(data, fres, 'WELCH', ndat);
       
       wPLI = wPLI(:, :, 1:maxfreq);
       wPLI = permute(wPLI, [3, 1, 2]);
       wPLI(isnan(wPLI)) = 0;
     else
-      CS = tsdata_to_cpsd(data, fres, 'MT', ndat);
+      CS = tsdata_to_cpsd(data, fres, 'WELCH', ndat);
     end
     
     G = cpsd_to_autocov(CS, nlags);
@@ -282,13 +282,13 @@ function [conn, nlags] = data2spwctrgc_fp(data, fres, nlags, cond, nboot, maxfre
             if verbose; disp(['bootstrap run ' num2str(iboot) '/' num2str(nboot) ', computing cross-spectrum']); end
             
             if ~isempty(intersect(output, {'wPLI'}))
-                [CS_, wPLI_] = tsdata_to_cpsdwpli(data(:, :, bootinds), fres, 'MT', ndat);
+                [CS_, wPLI_] = tsdata_to_cpsdwpli(data(:, :, bootinds), fres, 'WELCH', ndat);
                 
                 wPLI_(isnan(wPLI_)) = 0;
                 wPLI_ = permute(wPLI_, [3, 1, 2]);
                 wPLI(:, :, :, iboot) = wPLI_(1:maxfreq, :, :);
             else                
-                CS_ = tsdata_to_cpsd(data(:, :, bootinds), fres, 'MT', ndat);
+                CS_ = tsdata_to_cpsd(data(:, :, bootinds), fres, 'WELCH', ndat);
             end
             
         else %permutation (wPLI case not included yet)
@@ -297,7 +297,7 @@ function [conn, nlags] = data2spwctrgc_fp(data, fres, nlags, cond, nboot, maxfre
             id_trials1 = 1:nepo;
             id_trials2 = randperm(nepo);
             
-            CS_ = fp_tsdata_to_cpsd(data, fres, 'MT',1:nchan, 1:nchan, id_trials1, id_trials2, ndat);
+            CS_ = fp_tsdata_to_cpsd(data, fres, 'WELCH',1:nchan, 1:nchan, id_trials1, id_trials2, ndat);
         end
         
         G = cpsd_to_autocov(CS_, nlags);

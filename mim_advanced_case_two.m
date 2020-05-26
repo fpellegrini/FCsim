@@ -25,7 +25,7 @@ for iroi_seed = 1:68
         filtertype= 'd';
         regu=.000001;
 
-        CS = fp_tsdata_to_cpsd(signal_sensor,fres,'MT',[id_meg_chan], [id_meg_chan], id_trials_1, id_trials_2);
+        CS = fp_tsdata_to_cpsd(signal_sensor,fres,'WELCH',[id_meg_chan], [id_meg_chan], id_trials_1, id_trials_2);
         CS(:,:,[1 47:end])=[];
         nfreq = size(CS,3);
 

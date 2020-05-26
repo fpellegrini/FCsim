@@ -69,7 +69,7 @@ for id = 1:numel(patientID)
     clear id_trials_1 id_trials_2 CS A_
     id_trials_1 = 1:n_trials;
     id_trials_2 = 1:n_trials;
-    CS = fp_tsdata_to_cpsd(X,fres,'MT',[id_meg_chan id_lfp_chan], [id_meg_chan id_lfp_chan], id_trials_1, id_trials_2);
+    CS = fp_tsdata_to_cpsd(X,fres,'WELCH',[id_meg_chan id_lfp_chan], [id_meg_chan id_lfp_chan], id_trials_1, id_trials_2);
     
     %construct beamformer
     A = squeeze(mkfilt_eloreta_v2(L));
@@ -394,7 +394,7 @@ try
     id_trials_1 = 1:n_trials;
     rng('shuffle')
     id_trials_2 = randperm(n_trials);
-    CS = fp_tsdata_to_cpsd(X,fres,'MT',[id_meg_chan id_lfp_chan], [id_meg_chan id_lfp_chan], id_trials_1, id_trials_2);
+    CS = fp_tsdata_to_cpsd(X,fres,'WELCH',[id_meg_chan id_lfp_chan], [id_meg_chan id_lfp_chan], id_trials_1, id_trials_2);
     
     %project cross spectrum to voxel space
     clear CSv

@@ -27,7 +27,7 @@ s1([(1:iroi_low-1), (iroi_low+1):(iroi_high-1),(iroi_high+1):end],:)...
 
 %generate ground truth imaginary coherence
 signal_gt = reshape(s1, nroi, Lepo, n_trials);
-CS_gt = fp_tsdata_to_cpsd(signal_gt,fres,'MT',1:nroi, 1:nroi, id_trials_1, id_trials_2);
+CS_gt = fp_tsdata_to_cpsd(signal_gt,fres,'WELCH',1:nroi, 1:nroi, id_trials_1, id_trials_2);
 CS_gt(:,:,[1 47:end])=[];
 for ifreq = 1: fres
     clear pow

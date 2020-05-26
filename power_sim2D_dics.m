@@ -39,7 +39,7 @@ for itrial = 1:ntrials
 end
 
 %meg-meg CS
-CS = fp_tsdata_to_cpsd(signal,fres,'MT',id_meg_chan, id_meg_chan, id_meg_trials, id_meg_trials);
+CS = fp_tsdata_to_cpsd(signal,fres,'WELCH',id_meg_chan, id_meg_chan, id_meg_trials, id_meg_trials);
 CS(:,:,nfreq+1:end) = [];
 
 ns = size(L,2);
