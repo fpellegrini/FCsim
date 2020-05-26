@@ -206,41 +206,19 @@ outname = sprintf('./mim_advanced_case_six_results.mat');
 save(outname,'mm_gt','mc_gt','bmm_gt','bmc_gt','GT','MIM','MIC','-v7.3')
 
 %%
-% 
-% imagesc(mic)
-% figure
-% imagesc(mim)
-% figure;
-% plot((mc- mean(mc))./std(mc(:)))
-% hold on 
-% plot((mm - mean(mm))./std(mm(:)))
-% legend('mic','mim')
-% grid on 
 
-%
+load cm17
+pos = cortex_highres.Vertices;
 
-% load cm17
-% 
-% xx = zeros(1,nroi);
-% xx([iroi_seed, iroi_tar])=0.2;
-% 
-% xx1 = gt;
-% pos = cortex_highres.Vertices;
-% 
-% data_in=zeros(1,length(cortex_highres.Curvature));
-% allplots_cortex_BS(cortex_highres, data_in, [min(data_in) max(data_in)],...
-%     cm17a,'.', smooth_cortex,['ground_thruth_61_45'],  ...
-%     {pos(5,:), ...
-%     pos(100, :), ...
-%     pos(1000, :)});
-% clear data_in
-% 
-% data_in = mm;
-% allplots_cortex_BS(cortex, data_in, [min(data_in) max(data_in)],...
-%     cm17a,'.', smooth_cortex,['mim_advanced_' num2str(npcs) '_pcs_61_45']);
-% 
-% data_in = mc;
-% allplots_cortex_BS(cortex, data_in, [min(data_in) max(data_in)],...
-%     cm17a,'.', smooth_cortex,['mim_advanced_' num2str(npcs) '_pcs_61_45']);
-% 
-% % close all
+pos1 = pos(cortex_highres.Atlas(3).Scouts(iroi_seed).Vertices(1,1),:);
+pos2 = pos(cortex_highres.Atlas(3).Scouts(iroi_tar).Vertices(1,1),:);
+
+SurfSmoothIterations = ceil(300 * smooth_cortex * length(cortex_highres.Vertices) / 100000);
+vc = tess_smooth(cortex_highres.Vertices, 1, SurfSmoothIterations, ...
+    tess_vertconn(cortex_highres.Vertices, cortex_highres.Faces), 1);
+
+data_in= gt; %zeros(1,length(cortex_highres.Curvature));
+allplots_cortex_BS(cortex_highres1, data_in, [min(data_in) max(data_in)],...
+    cm17a,'.', 0,['ground_thruth'],  ...
+    {pos1, ...
+    pos2});
