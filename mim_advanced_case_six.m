@@ -80,7 +80,7 @@ for iroi_seed = 1:68
         for aroi = 1:nroi
             
             %project to source level
-            clear A_ CSv
+            clear A_ CSv A2
             A_ = A(:, :,ind_roi_cortex{aroi},:);
             nvoxroi = size(A_,3);
             A2 = reshape(A_, [nmeg, ni*nvoxroi, nfqA]);
@@ -109,11 +109,6 @@ for iroi_seed = 1:68
             
             V{aroi} = V_(:,in(1:npcs(aroi))); %nregionvoxels*2 x npcs
             
-            %     %concatenate filters
-            %     for ifq = 1:nfqA
-            %         P(:, :, aroi,ifq) = A2(:,:,fqA(ifq)) * ZS * real(V{aroi});
-            %     end
-            
             for ifq = 1:nfqA
                 P(:, croi:croi+npcs(aroi)-1,ifq) = A2(:,:,fqA(ifq)) * ZS * real(V{aroi});
             end
@@ -140,37 +135,9 @@ for iroi_seed = 1:68
         %%
         
         clear mim1 mic1
-        ic=1;
-        for iroi = 1:nroi
-            
-            jc=1;
-            for jroi = 1:nroi
-                
-                for ifq = 1:nfqA
-                    cs_red=[];
-                    cs_red{1} = Cohroi(ic:ic+npcs(iroi)-1,ic:ic+npcs(iroi)-1,ifq);
-                    cs_red{2} = Cohroi(ic:ic+npcs(iroi)-1,jc:jc+npcs(jroi)-1,ifq);
-                    cs_red{3} = Cohroi(jc:jc+npcs(jroi)-1,jc:jc+npcs(jroi)-1,ifq);
-                    
-                    caainv=inv(real(cs_red{1})+regu*eye(npcs(iroi))*mean(diag(real(cs_red{1}))));
-                    cab=imag(cs_red{2});
-                    cbbinv=inv(real(cs_red{3})+regu*eye(npcs(jroi))*mean(diag(real(cs_red{3}))));
-                    X=cab*cbbinv*cab';
-                    % MIM Ewald Eq. 14
-                    mim1(iroi,jroi,ifq)=(trace(caainv*X));
-                    caainvsqrt=sqrtm(caainv);
-                    Y=caainvsqrt*X*caainvsqrt; %Eq. 23
-                    [~,s,~]=svd(Y);
-                    % MIC
-                    mic1(iroi,jroi,ifq)=sqrt(s(1,1));
-                end
-                
-                jc = jc+npcs(jroi);
-            end
-            
-            ic=ic+npcs(iroi);
-        end
+        [mic1,mim1]= fp_mim(Cohroi,npcs);
         
+        %%
         %
         mic = sum(mic1,3);
         mim = sum(mim1,3);
