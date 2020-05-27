@@ -4,7 +4,7 @@ fp_addpath_sabzi
 
 if ~exist(DIROUT); mkdir(DIROUT); end
 
-DIRLOG = '~/log/mim/';
+DIRLOG = '~/log/mim90/';
 if ~exist(DIRLOG); mkdir(DIRLOG); end
 
 if isempty(patientNumber)
@@ -18,14 +18,6 @@ if ~exist('DIROUT','var')
 end
 
 nit= 1000;
-npcs = 2;
-COH = zeros(nit,117,117,46);
-TRUE_COH = zeros(117,117,46);
-
-thetaband = 2:4; %same as 4 to 8 Hz
-alphaband = 4:6; % 8 to 12 Hz
-betaband = 6:15; % 12 to 30 Hz
-gammaband = 16:45; %32 to 90 Hz;
 
 %%
 for id = 1:numel(patientID)
@@ -41,6 +33,7 @@ for id = 1:numel(patientID)
         X = D(:,:,:);
         D_ft = ftraw(D);
         n_trials = length(D_ft.trial);
+        id_trials = 1:n_trials;
         
         %channel IDs
         clear id_meg_chan id_lfp_chan
@@ -62,10 +55,10 @@ for id = 1:numel(patientID)
         
         %construct filters
         
-        %load true CS
-        load(sprintf('Filter_Patient%s_e.mat',patientID{id}));% 1D-A and true CS
-        clear A
-        CS = CS(1:(end-nlfp),1:(end-nlfp),:); %throw away lfp channels
+        %CS
+        CS = fp_tsdata_to_cpsd(X,fres,'WELCH',[id_meg_chan], [id_meg_chan], id_trials, id_trials);
+        CS(:,:,[1 47:end])=[];
+        nfreq = size(CS,3);
         
         %leadfield
         clear L
@@ -77,7 +70,7 @@ for id = 1:numel(patientID)
         clear mni_pos label code roi_id u_roi_id csroi
         mni_pos = fp_getMNIpos(patientID{id});
         for ii = 1: ns_org
-            [label{ii},code{ii},roi_id(ii)]=fp_get_mni_anatomy_new(mni_pos(ii,:));
+            [label{ii},code{ii},roi_id(ii),partner_rois]=fp_get_mni_anatomy_new(mni_pos(ii,:));
         end
         u_roi_id = sort(unique(roi_id));
         nroi = numel(u_roi_id)-1;
@@ -103,48 +96,60 @@ for id = 1:numel(patientID)
         end
         
         % true coherence
-        clear P
-        
+        clear P V A2 
         for aroi = 1:nroi
             
             %project to source level
-            clear A_ CSv A2
+            clear A_ CSv
             A_ = A(:, :,roi_id == aroi,:);
             nvoxroi = size(A_,3);
-            A2 = reshape(A_, [nmeg, ni*nvoxroi, nfreq]);
+            A2{aroi} = reshape(A_, [nmeg, ni*nvoxroi, nfreq]);
             
             for ifq = 1:nfreq
-                CSv(:,:,ifq) = squeeze(A2(:,:,ifq))' * CS(:,:,ifq)...
-                    * squeeze(A2(:,:,ifq));
+                CSv(:,:,ifq) = squeeze(A2{aroi}(:,:,ifq))' * CS(:,:,ifq)...
+                    * squeeze(A2{aroi}(:,:,ifq));
             end
             
             %zscoring
-            clear ZS CSz
-            ZS = diag(sqrt(mean(diag(squeeze(sum(real(CSv), 3))))./diag(squeeze(sum(real(CSv), 3)))));
+            clear CSz
+            ZS{aroi} = diag(sqrt(mean(diag(squeeze(sum(real(CSv), 3))))./diag(squeeze(sum(real(CSv), 3)))));
             for ifreq = 1:nfreq
-                CSz(ifreq,:, :) = ZS'*squeeze(CSv(:,:, ifreq))*ZS;
+                CSz(ifreq,:, :) = ZS{aroi}'*squeeze(CSv(:,:, ifreq))*ZS{aroi};
             end
             
             %region pca
             clear CSs v v5 in V_ D_
-            CSs = squeeze(sum(CSz,1)); %covariance
-            
+            CSs = squeeze(sum(CSz,1)); %covariance           
             [V_, D_] = eig(real(CSs));
             [D_, in] = sort(real(diag(D_)), 'descend');
+            % variance explained
+            vx_ = cumsum(D_)./sum(D_);
+            invx = 1:min(length(vx_), nmeg);
+            npcs(aroi) = min(find(vx_>0.9));
             
-            V{aroi} = V_(:,in(1:npcs)); %nregionvoxels*2 x npcs
-            
-            %     %concatenate filters
-            for ifq = 1:nfreq
-                P(:, :, aroi,ifq) = A2(:,:,ifq) * ZS * real(V{aroi});
-            end
+            V{aroi} = V_(:,in);
+
         end
         
+        %makes sure that rois have the same npcs in both hemispheres 
+        croi = 1;
+        for aroi = 1:nroi 
+            if ~isnan(partner_rois(2,aroi))
+                npcs(aroi) = max(npcs(aroi),npcs(partner_rois(2,aroi)));
+            end
+            V{aroi} = V{aroi}(:, 1:npcs(aroi));
+            for ifq = 1:nfreq
+                P(:, croi:croi+npcs(aroi)-1,ifq) = A2{aroi}(:,:,ifq) * ZS{aroi} * real(V{aroi});
+            end
+            croi = croi +npcs(aroi);
+        end
+        clear ZS
+                
         %apply all filters
         CSroi = [];
         for ifreq = 1:nfreq
-            CSroi(:, :, ifreq) = reshape(P(:,:,:,ifreq), nmeg, [])'*CS(:, :, ifreq)...
-                *reshape(P(:,:,:,ifreq), nmeg, []);
+            CSroi(:, :, ifreq) = reshape(P(:,:,ifreq), nmeg, [])'*CS(:, :, ifreq)...
+                *reshape(P(:,:,ifreq), nmeg, []);
         end
         
         %divide by power to obtain coherence
@@ -155,67 +160,56 @@ for id = 1:numel(patientID)
             Cohroi(:,:,ifreq) = CSroi(:,:,ifreq)./ sqrt(pow*pow');
         end
         
-        %mim and mic
-        clear mim1 mic1 mic mim
-        [mic1,mim1] =  fp_mim(Cohroi,npcs);
         
-        mic(:,:,1) = mean(mic1(:,:,thetaband),3);
-        mic(:,:,2) = mean(mic1(:,:,alphaband),3);
-        mic(:,:,3) = mean(mic1(:,:,betaband),3);
-        mic(:,:,4) = mean(mic1(:,:,gammaband),3);
-        mim(:,:,1) = mean(mim1(:,:,thetaband),3);
-        mim(:,:,2) = mean(mim1(:,:,alphaband),3);
-        mim(:,:,3) = mean(mim1(:,:,betaband),3);
-        mim(:,:,4) = mean(mim1(:,:,gammaband),3);
+        %
+        %mim and mic
+        clear mic mim
+        [mic,mim] =  fp_mim(Cohroi,npcs);
         
         MIC_TRUE(id,:,:,:) = mic;
         MIM_TRUE(id,:,:,:) = mim;
-        
+    %%    
         % permutations
         
         for iit = 1:nit
+            fprintf('Working on iteration %d. \n',iit)
             
+            tic
             %cross spectrum
             clear CS coh
             id_trials_1 = 1:n_trials;
-            rng('shuffle')
             id_trials_2 = randperm(n_trials);
-            CS = fp_tsdata_to_cpsd(X,fres,'MT',id_meg_chan, id_meg_chan, id_trials_1, id_trials_2);
+            CS = fp_tsdata_to_cpsd(X,fres,'WELCH',id_meg_chan, id_meg_chan, id_trials_1, id_trials_2);
             
             clear P_shuf
-            
+            croi = 1; 
             for aroi = 1:nroi
                 
-                %project to source level
-                clear A_ CSv A2
-                A_ = A(:, :,roi_id == aroi,:);
-                nvoxroi = size(A_,3);
-                A2 = reshape(A_, [nmeg, ni*nvoxroi, nfreq]);
-                
-                for ifq = 1:nfreq
-                    CSv(:,:,ifq) = squeeze(A2(:,:,ifq))' * CS(:,:,ifq)...
-                        * squeeze(A2(:,:,ifq));
+               %project to source level
+               for ifq = 1:nfreq
+                    CSv(:,:,ifq) = squeeze(A2{aroi}(:,:,ifq))' * CS(:,:,ifq)...
+                        * squeeze(A2{aroi}(:,:,ifq));
                 end
                 
                 %zscoring
-                clear ZS CSz
-                ZS = diag(sqrt(mean(diag(squeeze(sum(real(CSv), 3))))./diag(squeeze(sum(real(CSv), 3)))));
+                clear CSz ZS
+                ZS = diag(sqrt(mean(diag(squeeze(sum(real(CSv), 3))))...
+                    ./diag(squeeze(sum(real(CSv), 3)))));
                 for ifreq = 1:nfreq
                     CSz(ifreq,:, :) = ZS'*squeeze(CSv(:,:, ifreq))*ZS;
                 end
                 
-                
-                %     %concatenate filters
                 for ifq = 1:nfreq
-                    P_shuf(:, :, aroi,ifq) = A2(:,:,ifq) * ZS * real(V{aroi});
+                    P_shuf(:, croi:croi+npcs(aroi)-1,ifq) = A2{aroi}(:,:,ifq) * ZS * real(V{aroi});
                 end
+                croi = croi +npcs(aroi);
             end
             
             %apply all filters
             CSroi = [];
             for ifreq = 1:nfreq
-                CSroi(:, :, ifreq) = reshape(P_shuf(:,:,:,ifreq), nmeg, [])'*CS(:, :, ifreq)...
-                    *reshape(P_shuf(:,:,:,ifreq), nmeg, []);
+                CSroi(:, :, ifreq) = reshape(P_shuf(:,:,ifreq), nmeg, [])'*CS(:, :, ifreq)...
+                    *reshape(P_shuf(:,:,ifreq), nmeg, []);
             end
             
             %divide by power to obtain coherence
@@ -227,23 +221,15 @@ for id = 1:numel(patientID)
             end
             
             %mim and mic
-            clear mim1 mic1 mic mim
-            [mic1,mim1] =  fp_mim(Cohroi,npcs);
-            
-            mic(:,:,1) = mean(mic1(:,:,thetaband),3);
-            mic(:,:,2) = mean(mic1(:,:,alphaband),3);
-            mic(:,:,3) = mean(mic1(:,:,betaband),3);
-            mic(:,:,4) = mean(mic1(:,:,gammaband),3);
-            mim(:,:,1) = mean(mim1(:,:,thetaband),3);
-            mim(:,:,2) = mean(mim1(:,:,alphaband),3);
-            mim(:,:,3) = mean(mim1(:,:,betaband),3);
-            mim(:,:,4) = mean(mim1(:,:,gammaband),3);
+            clear mic mim
+            [mic,mim] =  fp_mim(Cohroi,npcs);
             
             MIC_SHUF(iit,id,:,:,:) = mic;
             MIM_SHUF(iit,id,:,:,:) = mim;
+            toc
         end
         
-        outname = sprintf('%sroi_MIM_sub%s',DIROUT,patientID{id});
+        outname = sprintf('%sroi_MIM90_sub%s',DIROUT,patientID{id});
         save(outname,'MIC_TRUE','MIM_TRUE','MIC_SHUF','MIM_SHUF','-v7.3')
         
         eval(sprintf('!mv %s%s_work %s%s_done',DIRLOG,logname,DIRLOG,logname))
