@@ -1,9 +1,10 @@
-function [label,code,id_new]=fp_get_mni_anatomy_new(coord)
+function [label,code,id_new,partner_rois]=fp_get_mni_anatomy_new(coord)
 %keyboard
 coord=round(coord);
 load('ROI_MNI_V5_List.mat')
 t1=wjn_read_nii('ROI_MNI_V5.nii');
 load('ROI_new_j.mat')
+nroi = length(ROI_new.label);
 
 [d,xyz]=spm_read_vols(t1);
 
@@ -32,3 +33,7 @@ end
 
 label=[];
 code =[];
+
+%respective rois on the other hemisphere 
+partner_rois(1,:)= 1:nroi; 
+partner_rois(2,:) = [15:26, nan, nan,1:12, 28,27];
