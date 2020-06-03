@@ -28,7 +28,7 @@ for id = 1:numel(patientID)
         fprintf('Working on subject %d. \n',id)
         
         %load data
-        clear X
+        clear X V ZS A2
         D = spm_eeg_load(sprintf('redPLFP%s_off', patientID{id}));
         X = D(:,:,:);
         D_ft = ftraw(D);
@@ -166,8 +166,8 @@ for id = 1:numel(patientID)
         clear mic mim
         [mic,mim] =  fp_mim(Cohroi,npcs);
         
-        MIC_TRUE(id,:,:,:) = mic;
-        MIM_TRUE(id,:,:,:) = mim;
+        MIC_TRUE = mic;
+        MIM_TRUE = mim;
     %%    
         % permutations
         
@@ -180,31 +180,35 @@ for id = 1:numel(patientID)
             id_trials_1 = 1:n_trials;
             id_trials_2 = randperm(n_trials);
             CS = fp_tsdata_to_cpsd(X,fres,'WELCH',id_meg_chan, id_meg_chan, id_trials_1, id_trials_2);
-            
+            CS(:,:,[1 47:end])=[];
+             
             clear P_shuf
             croi = 1; 
             for aroi = 1:nroi
                 
                %project to source level
+               clear CSv
                for ifq = 1:nfreq
                     CSv(:,:,ifq) = squeeze(A2{aroi}(:,:,ifq))' * CS(:,:,ifq)...
                         * squeeze(A2{aroi}(:,:,ifq));
                 end
                 
                 %zscoring
-                clear CSz ZS
-                ZS = diag(sqrt(mean(diag(squeeze(sum(real(CSv), 3))))...
-                    ./diag(squeeze(sum(real(CSv), 3)))));
-                for ifreq = 1:nfreq
-                    CSz(ifreq,:, :) = ZS'*squeeze(CSv(:,:, ifreq))*ZS;
-                end
+                clear CSz ZS a
+                a = diag(squeeze(sum(real(CSv), 3)));
+%                 a(a<0) = 1e-15;                 
+                    
+                ZS = diag(sqrt(mean(a)./a));                    
+%                 for ifreq = 1:nfreq
+%                     CSz(ifreq,:, :) = ZS'*squeeze(CSv(:,:, ifreq))*ZS;
+%                 end
                 
                 for ifq = 1:nfreq
-                    P_shuf(:, croi:croi+npcs(aroi)-1,ifq) = A2{aroi}(:,:,ifq) * ZS * real(V{aroi});
+                    P_shuf(:, croi:croi+npcs(aroi)-1,ifq) = A2{aroi}(:,:,ifq)  *ZS* real(V{aroi});
                 end
                 croi = croi +npcs(aroi);
             end
-            
+
             %apply all filters
             CSroi = [];
             for ifreq = 1:nfreq
@@ -224,8 +228,8 @@ for id = 1:numel(patientID)
             clear mic mim
             [mic,mim] =  fp_mim(Cohroi,npcs);
             
-            MIC_SHUF(iit,id,:,:,:) = mic;
-            MIM_SHUF(iit,id,:,:,:) = mim;
+            MIC_SHUF(iit,:,:,:) = mic;
+            MIM_SHUF(iit,:,:,:) = mim;
             toc
         end
         

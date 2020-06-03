@@ -1,5 +1,5 @@
 function S = fp_tsdata_to_cpsd(X,fres,method,ind_1, ind_2, id_trials_1, id_trials_2, window,noverlap,nw,ntapers)
-% keyboard
+
 % Estimate cross-power spectral density from time series data between
 % channels ind_1 and channels ind_2.
 % Shuffle id_lfp_trials for surrogate images. 
@@ -26,7 +26,7 @@ end
 if ~isequal(sort(ind_1),sort(unique(ind_1))) || ~isequal(sort(ind_2), sort(unique(ind_2)))
     error('ind_1 and ind_2 must be unique')
 end
-
+% keyboard
 if strcmpi(method,'MT')    
       
     nchunks = floor(((n_times-noverlap)/(window-noverlap))); % FFT chunks per channel
@@ -66,7 +66,7 @@ elseif strcmpi(method,'WELCH')
         x_original = X(:,:,id_trials_1(r));
         x_perm = X(:,:,id_trials_2(r));
         
-        clear XX
+        clear s
         s = fp_cpsd_welch(x_original,x_perm,ind_1,ind_2,fres+1,window,noverlap);
         S = S + s; 
     end
