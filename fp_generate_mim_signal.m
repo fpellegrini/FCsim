@@ -1,33 +1,33 @@
-function [signal_sensor, gt,L_save] = fp_generate_mim_signal(iroi_seed,iroi_tar,fres, n_trials,sub_ind_cortex,leadfield)
+function [signal_sensor, gt,L_save] = fp_generate_mim_signal...
+    (params, fres,n_trials, D)
 
-fprintf(['seed ' num2str(iroi_seed) ', tar ' num2str(iroi_tar) '\n'])
-tic
+iroi_seed = randi(D.nroi,params.iInt,1);
+iroi_tar = randi(D.nroi,params.iInt,1);
 
 %set parameters
-rng(1)
 Lepo = 100;
 N = n_trials*Lepo;
-lag = 5;
+lag = randi(20,params.iInt*params.iReg,1);
 id_trials_1 = 1:n_trials;
 id_trials_2 = 1:n_trials;
-nroi = length(sub_ind_cortex);
 
-%signal generation
-s1 = randn(nroi, N);
-s1(iroi_tar, :) = circshift(s1(iroi_seed, :), lag, 2);
+%random signal generation and shifting 
+s1 = randn(D.nroi, N);
+for iint = 1:params.iInt
+    s1(iroi_tar(iint), :) = circshift(s1(iroi_seed(iint), :), lag(iint), 2);
+end
 
-iroi_low = min(iroi_seed,iroi_tar);
-iroi_high = max(iroi_seed,iroi_tar);
+iroi_s = sort(unique([iroi_seed iroi_tar]),'ascend');
+iroi_ns = 1:D.nroi; 
+iroi_ns(iroi_s)=[];
 
-%SNR = 0.5
-s1([iroi_low iroi_high],:) = s1([iroi_low iroi_high],:)./ norm(s1([iroi_low iroi_high],:),'fro');
-s1([(1:iroi_low-1), (iroi_low+1):(iroi_high-1),(iroi_high+1):end],:)...
-    = s1([(1:iroi_low-1),(iroi_low+1):(iroi_high-1),(iroi_high+1):end],:)./ ...
-    norm(s1([(1:iroi_seed-1),(iroi_seed+1):(iroi_tar-1),(iroi_tar+1):end],:),'fro');
+%normalize signal strength
+s1(iroi_s,:) = s1(iroi_s,:)./ norm(s1(iroi_s,:),'fro');
+s1(iroi_ns,:) = s1(iroi_ns,:)./ norm(s1(iroi_ns,:),'fro');
 
 %generate ground truth imaginary coherence
-signal_gt = reshape(s1, nroi, Lepo, n_trials);
-CS_gt = fp_tsdata_to_cpsd(signal_gt,fres,'WELCH',1:nroi, 1:nroi, id_trials_1, id_trials_2);
+signal_gt = reshape(s1, D.nroi, Lepo, n_trials);
+CS_gt = fp_tsdata_to_cpsd(signal_gt,fres,'WELCH',1:D.nroi, 1:D.nroi, id_trials_1, id_trials_2);
 CS_gt(:,:,[1 47:end])=[];
 for ifreq = 1: fres
     clear pow
@@ -37,13 +37,10 @@ end
 gt = sum(sum(imCoh_gt,2),3);
 
 
-nroi = length(sub_ind_cortex);
-
-L_save = leadfield;
-
 %leadfield for forward model
-L3 = L_save(:, sub_ind_cortex, :);
-for is=1:nroi
+L_save = D.leadfield;
+L3 = L_save(:, D.sub_ind_cortex, :);
+for is=1:D.nroi
     clear L2
     L2 = L3(:,is,:);
     
