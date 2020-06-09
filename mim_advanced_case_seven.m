@@ -74,9 +74,7 @@ for iroi_seed = 1:68
             
         end
         
-        
-        
-        %% case 6 specific part 
+        %% 
         
         croi = 1;
         for aroi = 1:nroi
