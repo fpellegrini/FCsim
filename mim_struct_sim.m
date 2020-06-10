@@ -124,7 +124,12 @@ for ip = varyParam
                     
                     %%
                    
-                    [mic_1, mim_1] = fp_get_mim_case2(A,CS,fqA,D);
+                    %case two pipeline: mim only to reduce dimensions to 1,
+                    %sum up mim and mic within regions
+                    [mic_2, mim_2] = fp_get_mim_case2(A,CS,fqA,D);
+                    
+                    %pca pipeline (all 7 pipelines)
+                    [mic_pca, mim_fixed_pca] = fp_get_mim_pca(A,CS,fqA,D,'all');
                     
                     croi = 1;
                     for aroi = 1:nroi
