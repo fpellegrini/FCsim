@@ -79,6 +79,8 @@ end
 
 function [mic,mim] = compute_mode_mim(mode, D, npcs, V, A2, ZS, CS,fqA)
 
+[nmeg, ~, nfreq] = size(A2{1});
+
 %makes sure that rois have the same npcs in both hemispheres
 if ~isnumeric(mode)
     
@@ -93,7 +95,7 @@ if ~isnumeric(mode)
         
     elseif strcmp(mode,'percent')
         for iroi = 1:D.nroi
-            npcs(iroi) = max(npcs(iroi),npcs_(partner_rois(2,iroi)));
+            npcs(iroi) = max(npcs(iroi),npcs(partner_rois(2,iroi)));
         end
     end
     
@@ -121,7 +123,7 @@ end
 
 %divide by power to obtain coherence
 clear Cohroi
-for ifreq = 1: fres
+for ifreq = 1: nfreq
     clear pow
     pow = real(diag(CSroi(:,:,ifreq)));
     Cohroi(:,:,ifreq) = CSroi(:,:,ifreq)./ sqrt(pow*pow');
@@ -130,6 +132,7 @@ end
 
 %MIC and MIM
 [mic,mim] =  fp_mim(Cohroi,npcs);
+
 end
 
 
