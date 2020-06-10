@@ -23,8 +23,8 @@ end
 iroi_s = sort(unique([iroi_seed iroi_tar]),'ascend');
 iroi_ns = 1:D.nroi; 
 iroi_ns(iroi_s)=[];
-s1(iroi_s,:,:) = s1(iroi_s,:,:)./ norm(reshape(s1(iroi_s,:,:),numel(iroi_s),[]),'fro');
-s1(iroi_ns,:,:) = s1(iroi_ns,:,:)./ norm(reshape(s1(iroi_ns,:,:),numel(iroi_ns),[]),'fro');
+s1(iroi_s,:,:) = params.iss*(s1(iroi_s,:,:)./ norm(reshape(s1(iroi_s,:,:),numel(iroi_s),[]),'fro'));
+s1(iroi_ns,:,:) = (1-params.iss)*(s1(iroi_ns,:,:)./ norm(reshape(s1(iroi_ns,:,:),numel(iroi_ns),[]),'fro'));
 
 %generate ground truth imaginary coherence
 signal_gt = reshape(permute(s1,[2 1 3]), params.iReg*D.nroi, Lepo, n_trials); %permute that it matches with sub_ind_cortex
@@ -34,10 +34,9 @@ CS_gt(:,:,1)=[];
 for ifreq = 1: fres
     clear pow
     pow = real(diag(CS_gt(:,:,ifreq)));
-    imCoh_gt(:,:,ifreq) = abs(imag(CS_gt(:,:,ifreq)./ sqrt(pow*pow')));
+    gt(:,:,ifreq) = abs(imag(CS_gt(:,:,ifreq)./ sqrt(pow*pow')));
 end
-gt1 = sum(sum(imCoh_gt,2),3);
-gt = squeeze(mean(reshape(gt1,2,[]),1));
+
 
 %leadfield for forward model
 L_save = D.leadfield;
@@ -67,7 +66,7 @@ for itrial = 1:n_trials
     sig = L_mix * signal_gt(:,:,itrial);
     sig = sig ./ norm(sig, 'fro');
     
-    %add white noise
+    %add white noise with snr
     whitenoise = randn(size(sig));
     whitenoise = whitenoise ./ norm(whitenoise, 'fro');
     sig = params.isnr*sig + (1-params.isnr)*whitenoise;
