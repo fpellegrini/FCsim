@@ -114,17 +114,17 @@ for id = 1:numel(patientID)
             clear CSz
             ZS{aroi} = diag(sqrt(mean(diag(squeeze(sum(real(CSv), 3))))./diag(squeeze(sum(real(CSv), 3)))));
             for ifreq = 1:nfreq
-                CSz(ifreq,:, :) = ZS{aroi}'*squeeze(CSv(:,:, ifreq))*ZS{aroi};
+                CSz(:,:, ifreq) = ZS{aroi}'*squeeze(CSv(:,:, ifreq))*ZS{aroi};
             end
             
             %region pca
             clear CSs v v5 in V_ D_
-            CSs = squeeze(sum(CSz,1)); %covariance           
+            CSs = squeeze(sum(CSz,3)); %covariance           
             [V_, D_] = eig(real(CSs));
             [D_, in] = sort(real(diag(D_)), 'descend');
             % variance explained
             vx_ = cumsum(D_)./sum(D_);
-            invx = 1:min(length(vx_), nmeg);
+%             invx = 1:min(length(vx_), nmeg);
             npcs(aroi) = min(find(vx_>0.9));
             
             V{aroi} = V_(:,in);
@@ -160,8 +160,6 @@ for id = 1:numel(patientID)
             Cohroi(:,:,ifreq) = CSroi(:,:,ifreq)./ sqrt(pow*pow');
         end
         
-        
-        %
         %mim and mic
         clear mic mim
         [mic,mim] =  fp_mim(Cohroi,npcs);
