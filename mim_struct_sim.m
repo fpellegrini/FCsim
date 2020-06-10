@@ -26,7 +26,7 @@ for ip = varyParam
     elseif ip == 3
         %vary nRegionInts
         nInteractions = 1;
-        nRegionInts = 1:3;
+        nRegionInts = 1:2; %2 is maximum or change nvoxels of region 68 in fp_Desikan somehow
         SNR = 0.5;
         
     elseif ip == 4
@@ -45,25 +45,27 @@ for ip = varyParam
                 params.iInt = iInt; 
                 params.iReg = iReg; 
                 params.isnr = isnr; 
-                
-                % ROI labels
-                %[D.nroi,D.nvox,D.ind_cortex,D.ind_roi_cortex, D.sub_ind_cortex, D.roi2vox, D.leadfield]
-                D = fp_get_Desikan(params.iReg);
                               
                 for iit = 1: nit
                     
                     %signal generation
                     
                     clearvars -except mm_gt mc_gt bmm_gt bmc_gt GT MIM MIC ...
-                        D params iit nit nInteractions nRegionInts SNR ip varyParam fres n_trials
+                        params iit nit nInteractions nRegionInts SNR ip varyParam fres n_trials
                     
-                                        
+                    
+                    % ROI labels
+                    %[D.nroi,D.nvox,D.ind_cortex,D.ind_roi_cortex, D.sub_ind_cortex, D.roi2vox, D.leadfield]
+                    D = fp_get_Desikan(params.iReg);
+                    
                     %signal generation
-                    [signal_sensor,gt,L_save] = fp_generate_mim_signal(params, ...
+                    tic
+                    [signal_sensor,gt,L,iroi_seed, iroi_tar] = fp_generate_mim_signal(params, ...
                         fres,n_trials, D);
+                    toc
                     
                     
-                    %% megmeg pipeline star
+                    %% megmeg pipeline start
                     %parameters
                     id_trials_1 = 1:n_trials;
                     id_trials_2 = 1:n_trials;
@@ -72,13 +74,13 @@ for ip = varyParam
                     filtertype= 'd';
                     regu=.000001;
                     
-                    CS = fp_tsdata_to_cpsd(signal_sensor,fres,'MT',[id_meg_chan], [id_meg_chan], id_trials_1, id_trials_2);
-                    CS(:,:,[1 47:end])=[];
+                    CS = fp_tsdata_to_cpsd(signal_sensor,fres,'WELCH',[id_meg_chan], [id_meg_chan], id_trials_1, id_trials_2);
+                    CS(:,:,1)=[];
                     nfreq = size(CS,3);
                     
-                    %leadfield backward model
-                    L3 = L_save(:, ind_cortex, :);
-                    for is=1:nvox
+                    %leadfield
+                    L3 = L(:, D.ind_cortex, :);
+                    for is=1:D.nvox
                         clear L2
                         L2 = L3(:,is,:);
                         
@@ -98,7 +100,7 @@ for ip = varyParam
                         
                     elseif strcmp(filtertype,'d')
                         
-                        A=zeros(nmeg,ni,nvox,nfreq);
+                        A=zeros(nmeg,ni,D.nvox,nfreq);
                         
                         for ifrq = 1:nfreq
                             cCS = CS(:,:,ifrq);
@@ -106,7 +108,7 @@ for ip = varyParam
                             
                             CSinv=pinv(real(cCS)+lambda * eye(size(cCS)));
                             
-                            for is=1:nvox %iterate across nodes
+                            for is=1:D.nvox %iterate across nodes
                                 Lloc=squeeze(L_backward(:,is,:));
                                 A(:,:,is,ifrq) = (pinv(Lloc'*CSinv*Lloc)*Lloc'*CSinv)'; %create filter
                             end
@@ -121,6 +123,8 @@ for ip = varyParam
                     end
                     
                     %%
+                   
+                    [mic_1, mim_1] = fp_get_mim_case2(A,CS,fqA,D);
                     
                     croi = 1;
                     for aroi = 1:nroi
@@ -166,7 +170,7 @@ for ip = varyParam
                         croi = croi +npcs(aroi);
                     end
                     
-                    %%
+                    %
                     %apply all filters
                     CSroi = [];
                     for ifreq = 1:nfreq
