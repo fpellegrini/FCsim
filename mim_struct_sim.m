@@ -65,21 +65,17 @@ for ip = varyParam
                         params.iInt = iInt;
                         params.iReg = iReg;
                         params.isnr = isnr;
-                        params.isnr = iss;
+                        params.iss = iss;
                         
                         PERFORMANCE = zeros(2,8,4,nit);
                         
-                        if snr_flag
-                            osnr = params.isnr*10;
-                        end
-                        
                         for iit = 1: nit
-                            
+                            tic
                             %% signal generation
                             
                             clearvars -except mm_gt mc_gt bmm_gt bmc_gt GT MIM MIC ...
                                 params iit nit nInteractions nRegionInts SNR ip varyParam...
-                                fres n_trials PERFORMANCE
+                                fres n_trials PERFORMANCE iss iInt iReg isnr 
                             
                             
                             % ROI labels
@@ -99,7 +95,8 @@ for ip = varyParam
                             filtertype= 'd';
                             regu=.000001;
                             
-                            CS = fp_tsdata_to_cpsd(signal_sensor,fres,'WELCH',[id_meg_chan], [id_meg_chan], id_trials_1, id_trials_2);
+                            CS = fp_tsdata_to_cpsd(signal_sensor,fres,'WELCH',...
+                                [id_meg_chan], [id_meg_chan], id_trials_1, id_trials_2);
                             CS(:,:,1)=[];
                             nfreq = size(CS,3);
                             
@@ -155,9 +152,8 @@ for ip = varyParam
                             %case two pipeline: mim only to reduce dimensions to 1,
                             %sum up mim and mic within regions
                             %TAKES A LOT OF MEMORY AND TIME!
-                            [mic_2, mim_2] = fp_get_mim_case2(A,CS,fqA,D);
+                            [mic_2, mim_2, benchmark] = fp_get_mim_case2(A,CS,fqA,D);
                             
-                            %benchmark
                             
                             
                             %% performance measures
@@ -183,6 +179,8 @@ for ip = varyParam
                             PERFORMANCE(2,7,1,iit) = cm.percent;
                             PERFORMANCE(1,8,1,iit) = cc.c2;
                             PERFORMANCE(2,8,1,iit) = cm.c2;
+                            
+                            BENCHMARK(1,iit) = corr(benchmark(:),gt(:));
                             
                             
                             
@@ -238,6 +236,12 @@ for ip = varyParam
                             m_max = fp_get_nmaxima(m,params.iInt*2);
                             cmm.c2 = corr(m_max,gt_flat);
                             
+                            %benchmark
+                            clear m m_max
+                            m = sum(sum(benchmark,3),2);
+                            m_max = fp_get_nmaxima(m,params.iInt*2);
+                            BENCHMARK(2,iit) = corr(m_max,gt_flat);
+                            
                             
                             % (mim/mic, pipeline,perfomance measure,iit)
                             PERFORMANCE(1,1:5,2,iit) = ccm.fixed;
@@ -282,7 +286,9 @@ for ip = varyParam
                             PERFORMANCE(2,7,[3 4],iit) = [mean_mim.percent std_mim.percent];
                             PERFORMANCE(1,8,[3 4],iit) = [mean_mic.c2 std_mic.c2];
                             PERFORMANCE(2,8,[3 4],iit) = [mean_mim.c2 std_mim.c2];
+                            BENCHMARK([3 4],iit) = [mean(benchmark(:)) std(benchmark(:))];
                             
+                            toc
                         end
                         
                         outname = sprintf('%smim_%dInts_%dRegs_0%dSNR_0%dSs.mat',DIROUT,...
