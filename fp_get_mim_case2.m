@@ -1,4 +1,5 @@
-function [mic, mim] = fp_get_mim_case2(A,CS,fqA,D)
+function [mic_2, mim_2, benchmark] = fp_get_mim_case2(A,CS,fqA,D)
+% case two and benchmark mim
 
 %A is Beamformer filter
 [nmeg, ni, nvox, nfreq] = size(A);
@@ -23,8 +24,14 @@ end
 toc
 clear CSroi
 
+%% benchmark
+for iroi = 1:D.nroi
+    for jroi = 1:D.nroi
+        benchmark(iroi,jroi,:) = sum(sum(abs(imag(Cohroi(D.sub_ind_roi{iroi},D.sub_ind_roi{jroi},:))),1),2);
+    end
+end
 
-%% MIM only to aggegate 2 dimensions
+%% case two: MIM only to aggegate 2 dimensions
 
 npcs = repmat(2,[nvox,1]);
 [mic_v,mim_v]= fp_mim(Cohroi,npcs);
