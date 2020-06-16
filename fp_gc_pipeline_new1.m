@@ -77,12 +77,10 @@ for id = 1:numel(patientID)
     ns = numel(voxID{id});
     
     % true CS
-    load(sprintf('Filter_Patient%s_e.mat',patientID{id}));% 1D-A and true CS
-    clear A
-    %     clear id_trials_1 id_trials_2 A_ CS
-    %     id_trials_1 = 1:n_trials;
-    %     id_trials_2 = 1:n_trials;
-    %     CS = fp_tsdata_to_cpsd(X,fres,'WELCH',[id_meg_chan id_lfp_chan], [id_meg_chan id_lfp_chan], id_trials_1, id_trials_2);
+    clear id_trials_1 id_trials_2 CS
+    id_trials_1 = 1:n_trials;
+    id_trials_2 = 1:n_trials;
+    CS = fp_tsdata_to_cpsd(X,fres,'WELCH',[id_meg_chan id_lfp_chan], [id_meg_chan id_lfp_chan], id_trials_1, id_trials_2);
     
     %construct filter
     if strcmp(filtertype, 'e')
@@ -177,6 +175,6 @@ for id = 1:numel(patientID)
     end
 end
 
-outname = sprintf('%sDIFFGC_lcmv',DIROUT);
+outname = sprintf('%sDIFFGC_lcmv_welch',DIROUT);
 save(outname,'GC','TRGC','DIFFGC','-v7.3')
 
