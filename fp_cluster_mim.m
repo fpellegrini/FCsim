@@ -120,6 +120,6 @@ end
 p = fp_get_cluster_p_megmeg(true_total, shuf_total, true_val, shuf_val, true_clu, shuf_clu, fwf);
 
 %%
-outname = sprintf('./mim_pval');
+outname = sprintf('./mim90_pval');
 
 save(outname,'p','true_total','true_clu','true_p','true_val','-v7.3')
