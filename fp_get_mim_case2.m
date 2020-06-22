@@ -1,10 +1,11 @@
-function [mic_2, mim_2, benchmark] = fp_get_mim_case2(A,CS,fqA,D)
+function [mic_2, mim_2, baseline] = fp_get_mim_case2(A,CS,fqA,D)
 % case two and benchmark mim
 
 %A is Beamformer filter
 [nmeg, ni, nvox, nfreq] = size(A);
 A2 = reshape(A,nmeg,ni*nvox,nfreq);
 
+%CS on voxel level 
 tic
 CSroi = zeros(nvox*ni,nvox*ni,nfreq);
 for ifq = 1: nfreq
@@ -24,10 +25,11 @@ end
 toc
 clear CSroi
 
-%% benchmark
+%% baseline
+%in sub_ind_roi, there are the 'true' voxels of the signal generation 
 for iroi = 1:D.nroi
     for jroi = 1:D.nroi
-        benchmark(iroi,jroi,:) = sum(sum(abs(imag(Cohroi(D.sub_ind_roi{iroi},D.sub_ind_roi{jroi},:))),1),2);
+        baseline(iroi,jroi,:) = sum(sum(abs(imag(Cohroi(D.sub_ind_roi{iroi},D.sub_ind_roi{jroi},:))),1),2);
     end
 end
 

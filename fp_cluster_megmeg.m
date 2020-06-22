@@ -11,7 +11,6 @@ function fp_cluster_megmeg(DIROUT, abs_imag,testmethod,alpha,fwf,j)
 %thresholding
 %
 %fwf: testing method (less conservative): test first cluster against
-%
 %first, second with second etc. By default, clusters are always compared
 %against the largest shuffled cluster.
 %

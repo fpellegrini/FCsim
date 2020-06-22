@@ -1,3 +1,17 @@
+%todo: 
+%1) replace tsdata with Guido's code 
+%2) Performance measure 2) with whole matrix,
+%2b)measure 1) auch noch über freqs aufsummiert 
+%3) vary lag as a separate parameter:  random zwischen 0-5 oder 5-20
+%4) Pipeline 6): rank of sum(real(CS),3) = npcs
+%5) Change symmetry of hemispheres 
+%6) calculate pipeline 8) region-wise 
+%7) Noise defaults ändern
+%8) vary eloreta 
+%9) vary hemispheres symmetric or not 
+
+%%
+
 DIROUT = [];
 DIRLOG = [];
 
@@ -54,12 +68,12 @@ for ip = varyParam
             for isnr = SNR
                 for iss = signal_strength
                     
+                    %create logfile for parallization
                     logname = sprintf('iInt%d_iReg%d_snr0%d_iss0%d',iInt,iReg,isnr*10,iss*10);
                     
                     if ~exist(sprintf('%s%s_work',DIRLOG,logname)) & ~exist(sprintf('%s%s_done',DIRLOG,logname))
                         eval(sprintf('!touch %s%s_work',DIRLOG,logname))
-                        fprintf('Working on %s. \n',logname)
-                        
+                        fprintf('Working on %s. \n',logname)                       
                         
                         clear params PERFORMANCE
                         params.iInt = iInt;
@@ -69,6 +83,8 @@ for ip = varyParam
                         
                         PERFORMANCE = zeros(2,8,4,nit);
                         
+                        %in each iteration, a new signal with new
+                        %interacting sources and voxels is generated 
                         for iit = 1: nit
                             tic
                             %% signal generation
@@ -79,6 +95,8 @@ for ip = varyParam
                             
                             
                             % ROI labels
+                            % In D.sub_ind_roi, there are the randomly
+                            % selected voxels of each region
                             D = fp_get_Desikan(params.iReg);
                             
                             %signal generation
@@ -92,9 +110,10 @@ for ip = varyParam
                             id_trials_2 = 1:n_trials;
                             id_meg_chan = 1:size(signal_sensor,1);
                             nmeg = numel(id_meg_chan);
-                            filtertype= 'd';
+                            filtertype= 'd'; %dics
                             regu=.000001;
                             
+                            %cross spectrum 
                             CS = fp_tsdata_to_cpsd(signal_sensor,fres,'WELCH',...
                                 [id_meg_chan], [id_meg_chan], id_trials_1, id_trials_2);
                             CS(:,:,1)=[];
@@ -170,7 +189,7 @@ for ip = varyParam
                             cm.percent = corr(mim_pca.percent(:),gt(:));
                             cm.c2 = corr(mim_2(:),gt(:));
                             
-                            % (mim/mic, pipeline,perfomance measure,iit)
+                            % dimensions: (mim/mic, pipeline,perfomance measure,iit)
                             PERFORMANCE(1,1:5,1,iit) = cc.fixed;
                             PERFORMANCE(2,1:5,1,iit) = cm.fixed;
                             PERFORMANCE(1,6,1,iit) = cc.max;
@@ -243,7 +262,7 @@ for ip = varyParam
                             BENCHMARK(2,iit) = corr(m_max,gt_flat);
                             
                             
-                            % (mim/mic, pipeline,perfomance measure,iit)
+                            % dimensions: (mim/mic, pipeline,perfomance measure,iit)
                             PERFORMANCE(1,1:5,2,iit) = ccm.fixed;
                             PERFORMANCE(2,1:5,2,iit) = cmm.fixed;
                             PERFORMANCE(1,6,2,iit) = ccm.max;
@@ -275,7 +294,7 @@ for ip = varyParam
                             std_mic.c2 = std(mic_2(:));
                             std_mim.c2 = std(mim_2(:));
                             
-                            % (mim/mic,pipeline,perfomance measure,iit)
+                            % dimensions: (mim/mic,pipeline,perfomance measure,iit)
                             PERFORMANCE(1,1:5,3,iit) = mean_mic.fixed;
                             PERFORMANCE(2,1:5,4,iit) = std_mic.fixed;
                             PERFORMANCE(1,1:5,3,iit) = mean_mim.fixed;

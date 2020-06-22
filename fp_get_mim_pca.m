@@ -4,6 +4,7 @@ function [mic, mim] = fp_get_mim_pca(A,CS,fqA,D,mode)
 %preserved)
 
 if isnumeric(mode)
+    %fixed number of pcs for every roi 
     npcs = repmat(mode,D.nroi,1);
 end
 
@@ -11,12 +12,13 @@ end
 
 for aroi = 1:D.nroi
     
-    %project to source level
+    %filter at current roi 
     clear A_ CSv
     A_ = A(:, :,D.ind_roi_cortex{aroi},:);
-    nvoxroi = size(A_,3);
+    nvoxroi = size(A_,3); %voxels in the current roi 
     A2{aroi} = reshape(A_, [nmeg, ni*nvoxroi, nfreq]);
     
+    %project CS to voxel space
     for ifq = 1: nfreq
         CSv(:,:,ifq) = squeeze(A2{aroi}(:,:,fqA(ifq)))' * CS(:,:,ifq)...
             * squeeze(A2{aroi}(:,:,fqA(ifq)));
@@ -38,6 +40,7 @@ for aroi = 1:D.nroi
     [D_, in] = sort(real(diag(D_)), 'descend');
     
     if strcmp(mode,'max')
+        %pipeline 6)
         clear a
         for ii = 1:nfreq
             a(ii) = rank(CSz(:,:,ii));
@@ -45,9 +48,11 @@ for aroi = 1:D.nroi
         npcs(aroi) = min(max(a),size(V_,1));
         
     elseif strcmp(mode,'percent')
+        %pipeline 7)
+        
         % variance explained
         vx_ = cumsum(D_)./sum(D_);
-        %         invx = 1:min(length(vx_), nmeg);
+        % invx = 1:min(length(vx_), nmeg);
         npcs(aroi) = min(find(vx_>0.9));
     end
     
