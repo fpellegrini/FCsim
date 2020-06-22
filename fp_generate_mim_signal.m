@@ -36,12 +36,12 @@ for ifreq = 1: fres
     pow = real(diag(CS_gt(:,:,ifreq)));
     gt(:,:,ifreq) = abs(imag(CS_gt(:,:,ifreq)./ sqrt(pow*pow')));
 end
-if params.iReg~=1 %sum two voxels of one region 
+if params.iReg~=1 %mean across two voxels of one region 
     ii=1;
     for iroi = 1: D.nroi 
         jj=1;
         for jroi = 1:D.nroi 
-            gt1(iroi,jroi,:)= squeeze(sum(sum(gt([ii ii+params.iReg-1],[jj jj+params.iReg-1],:),1),2));
+            gt1(iroi,jroi,:)= squeeze(mean(mean(gt([ii ii+params.iReg-1],[jj jj+params.iReg-1],:),1),2));
             jj = jj+params.iReg;
         end
         ii=ii+params.iReg;
@@ -65,10 +65,10 @@ for is=1:D.nroi*params.iReg
 end
 ni = size(L_forward,3);
 
-p = randn(ni,1);
-p = p/norm(p);
-
+%mixing dimensions of leadfield 
 for in = 1 : D.nroi*params.iReg
+    p = randn(ni,1);
+    p = p/norm(p);
     L1 = squeeze(L_forward(:,in,:));
     L_mix(:,in) = L1*p;
 end
