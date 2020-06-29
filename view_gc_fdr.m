@@ -60,12 +60,22 @@ ylim(o)
 xlabel('frequency in Hz')
 
 %%
+[pos, ~] = fp_find_commonvox;
 
 dh = squeeze(sum(p_masked_h,3));
 dl = squeeze(sum(p_masked_l,3)); 
 
-outname = sprintf('cluster_gc_01_%s%s_%d_lcmv_welch.nii',sides(iside), vals(ival),iclus);
-fp_data2nii(b,pos,[],outname)
+outname = 'gc_fdr_right_positive.nii';
+fp_data2nii(squeeze(dh(:,1)),pos,[],outname)
+
+outname = 'gc_fdr_left_positive.nii';
+fp_data2nii(squeeze(dh(:,2)),pos,[],outname)
+
+outname = 'gc_fdr_right_negative.nii';
+fp_data2nii(squeeze(dl(:,1)),pos,[],outname)
+
+outname = 'gc_fdr_left_negative.nii';
+fp_data2nii(squeeze(dl(:,2)),pos,[],outname)
 
 
 
