@@ -1,14 +1,14 @@
 %todo: 
-%1) replace tsdata with Guido's code 
-%2) Performance measure 2) with whole matrix,
-%2b)measure 1) auch noch über freqs aufsummiert 
+%1) evt replace tsdata with Guido's code?
 %3) vary lag as a separate parameter:  random zwischen 0-5 oder 5-20
 %4) Pipeline 6): rank of sum(real(CS),3) = npcs
-%5) Change symmetry of hemispheres 
+%5) MIM MIC auch für baseline 
 %6) calculate pipeline 8) region-wise 
-%7) Noise defaults ändern
+%7) Noise ändern
 %8) vary eloreta 
 %9) vary hemispheres symmetric or not 
+%10) ground truth mit MIM aggregieren 
+%11) mean und std raus und später 
 
 %%
 
@@ -81,7 +81,7 @@ for ip = varyParam
                         params.isnr = isnr;
                         params.iss = iss;
                         
-                        PERFORMANCE = zeros(2,8,4,nit);
+                        PERFORMANCE = zeros(2,8,2,nit);
                         
                         %in each iteration, a new signal with new
                         %interacting sources and voxels is generated 
@@ -176,18 +176,28 @@ for ip = varyParam
                             
                             
                             %% performance measures
+                            gt_save = gt; 
+                            gt = sum(gt,3);
                             
                             % (1)correlation mim/mic and ground truth
                             for ii = 1:5
-                                cc.fixed(ii) = corr(mim_pca.fixed{ii}(:),gt(:));
-                                cm.fixed(ii) = corr(mim_pca.fixed{ii}(:),gt(:));
+                                ffixed{ii} = sum(mim_pca.fixed{ii},3);
+                                fmfixed{ii} = sum(mim_pca.fixed{ii},3); 
+                                cc.fixed(ii) = corr(ffixed{ii}(:),gt(:));
+                                cm.fixed(ii) = corr(fmfixed{ii}(:),gt(:));
                             end
-                            cc.max = corr(mic_pca.max(:),gt(:));
-                            cc.percent = corr(mic_pca.percent(:),gt(:));
-                            cc.c2 = corr(mic_2(:),gt(:));
-                            cm.max = corr(mim_pca.max(:),gt(:));
-                            cm.percent = corr(mim_pca.percent(:),gt(:));
-                            cm.c2 = corr(mim_2(:),gt(:));
+                            fmax = sum(mic_pca.max,3);
+                            cc.max = corr(fmax(:),gt(:));
+                            fpercent = sum(mic_pca.percent,3);
+                            cc.percent = corr(fpercent(:),gt(:));
+                            f2 = sum(mic_2,3);
+                            cc.c2 = corr(f2(:),gt(:));
+                            fmmax = sum(mim_pca.max,3);
+                            cm.max = corr(fmmax(:),gt(:));
+                            fmpercent = sum(mim_pca.percent,3);
+                            cm.percent = corr(fmpercent(:),gt(:));
+                            fm2 = sum(mim_2,3);
+                            cm.c2 = corr(fm2(:),gt(:));
                             
                             % dimensions: (mim/mic, pipeline,perfomance measure,iit)
                             PERFORMANCE(1,1:5,1,iit) = cc.fixed;
@@ -199,67 +209,58 @@ for ip = varyParam
                             PERFORMANCE(1,8,1,iit) = cc.c2;
                             PERFORMANCE(2,8,1,iit) = cm.c2;
                             
-                            BENCHMARK(1,iit) = corr(benchmark(:),gt(:));
+                            bench_flat = sum(benchmark,3); 
+                            BENCHMARK(1,iit) = corr(bench_flat(:),gt(:));
                             
                             
                             
-                            % (2) correlation maxima of mim/mic and ground truth
-                            gt_flat = sum(sum(gt,2),3);
+                            % (2) correlation maxima of mim/mic and ground truth                           
                             for ii = 1:5
                                 %mic
-                                clear m m_max
-                                m = sum(sum(mic_pca.fixed{ii},3),2);
-                                m_max = fp_get_nmaxima(m,params.iInt*2);
-                                ccm.fixed(ii) = corr(m_max,gt_flat);
+                                clear m_max
+                                m_max = fp_get_nmaxima(ffixed{ii},params.iInt*2);
+                                ccm.fixed(ii) = corr(m_max(:),gt(:));
                                 
                                 %mim
-                                clear m m_max
-                                m = sum(sum(mim_pca.fixed{ii},3),2);
-                                m_max = fp_get_nmaxima(m,params.iInt*2);
-                                cmm.fixed(ii) = corr(m_max,gt_flat);
+                                clear m_max
+                                m_max = fp_get_nmaxima(fmfixed{ii},params.iInt*2);
+                                cmm.fixed(ii) = corr(m_max(:),gt(:));
                             end
                             
                             %max pipeline
                             %mic
-                            clear m m_max
-                            m = sum(sum(mic_pca.max,3),2);
-                            m_max = fp_get_nmaxima(m,params.iInt*2);
-                            ccm.max = corr(m_max,gt_flat);
+                            clear m_max
+                            m_max = fp_get_nmaxima(fmax,params.iInt*2);
+                            ccm.max = corr(m_max(:),gt(:));
                             %mim
-                            clear m m_max
-                            m = sum(sum(mim_pca.max,3),2);
-                            m_max = fp_get_nmaxima(m,params.iInt*2);
-                            cmm.max = corr(m_max,gt_flat);
+                            clear m_max
+                            m_max = fp_get_nmaxima(fmmax,params.iInt*2);
+                            cmm.max = corr(m_max(:),gt(:));
                             
                             %percent pipeline
                             %mic
-                            clear m m_max
-                            m = sum(sum(mic_pca.percent,3),2);
-                            m_max = fp_get_nmaxima(m,params.iInt*2);
-                            ccm.percent = corr(m_max,gt_flat);
+                            clear m_max
+                            m_max = fp_get_nmaxima(fpercent,params.iInt*2);
+                            ccm.percent = corr(m_max(:),gt(:));
                             %mim
-                            clear m m_max
-                            m = sum(sum(mim_pca.percent,3),2);
-                            m_max = fp_get_nmaxima(m,params.iInt*2);
-                            cmm.percent = corr(m_max,gt_flat);
+                            clear m_max
+                            m_max = fp_get_nmaxima(fmpercent,params.iInt*2);
+                            cmm.percent = corr(m_max(:),gt(:));
                             
                             %case2 pipeline
                             %mic
-                            clear m m_max
-                            m = sum(sum(mic_2,3),2);
-                            m_max = fp_get_nmaxima(m,params.iInt*2);
-                            ccm.c2 = corr(m_max,gt_flat);
+                            clear m_max
+                            m_max = fp_get_nmaxima(f2,params.iInt*2);
+                            ccm.c2 = corr(m_max(:),gt(:));
                             %mim
-                            clear m m_max
-                            m = sum(sum(mim_2,3),2);
-                            m_max = fp_get_nmaxima(m,params.iInt*2);
-                            cmm.c2 = corr(m_max,gt_flat);
+                            clear m_max
+                            m_max = fp_get_nmaxima(fm2,params.iInt*2);
+                            cmm.c2 = corr(m_max(:),gt(:));
                             
                             %benchmark
                             clear m m_max
-                            m = sum(sum(benchmark,3),2);
-                            m_max = fp_get_nmaxima(m,params.iInt*2);
-                            BENCHMARK(2,iit) = corr(m_max,gt_flat);
+                            m_max = fp_get_nmaxima(benchmark_flat,params.iInt*2);
+                            BENCHMARK(2,iit) = corr(m_max(:),gt(:));
                             
                             
                             % dimensions: (mim/mic, pipeline,perfomance measure,iit)
@@ -271,41 +272,6 @@ for ip = varyParam
                             PERFORMANCE(2,7,2,iit) = cmm.percent;
                             PERFORMANCE(1,8,2,iit) = ccm.c2;
                             PERFORMANCE(2,8,2,iit) = cmm.c2;
-                            
-                            
-                            
-                            % (3) mean and std
-                            for ii = 1:5
-                                mean_mic.fixed(ii) = mean(mic_pca.fixed{ii}(:));
-                                mean_mim.fixed(ii) = mean(mim_pca.fixed{ii}(:));
-                                std_mic.fixed(ii) = std(mic_pca.fixed{ii}(:));
-                                std_mim.fixed(ii) = std(mim_pca.fixed{ii}(:));
-                            end
-                            mean_mic.max = mean(mic_pca.max(:));
-                            mean_mim.max = mean(mim_pca.max(:));
-                            mean_mic.percent = mean(mic_pca.percent(:));
-                            mean_mim.percent= mean(mim_pca.percent(:));
-                            mean_mic.c2 = mean(mic_2(:));
-                            mean_mim.c2 = mean(mim_2(:));
-                            std_mic.max = std(mic_pca.max(:));
-                            std_mim.max = std(mim_pca.max(:));
-                            std_mic.percent = std(mic_pca.percent(:));
-                            std_mim.percent= std(mim_pca.percent(:));
-                            std_mic.c2 = std(mic_2(:));
-                            std_mim.c2 = std(mim_2(:));
-                            
-                            % dimensions: (mim/mic,pipeline,perfomance measure,iit)
-                            PERFORMANCE(1,1:5,3,iit) = mean_mic.fixed;
-                            PERFORMANCE(2,1:5,4,iit) = std_mic.fixed;
-                            PERFORMANCE(1,1:5,3,iit) = mean_mim.fixed;
-                            PERFORMANCE(2,1:5,4,iit) = std_mim.fixed;
-                            PERFORMANCE(1,6,[3 4],iit) = [mean_mic.max std_mic.max];
-                            PERFORMANCE(2,6,[3 4],iit) = [mean_mim.max std_mim.max];
-                            PERFORMANCE(1,7,[3 4],iit) = [mean_mic.percent std_mic.percent];
-                            PERFORMANCE(2,7,[3 4],iit) = [mean_mim.percent std_mim.percent];
-                            PERFORMANCE(1,8,[3 4],iit) = [mean_mic.c2 std_mic.c2];
-                            PERFORMANCE(2,8,[3 4],iit) = [mean_mim.c2 std_mim.c2];
-                            BENCHMARK([3 4],iit) = [mean(benchmark(:)) std(benchmark(:))];
                             
                             toc
                         end
