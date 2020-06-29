@@ -27,11 +27,18 @@ clear CSroi
 
 %% baseline
 %in sub_ind_roi, there are the 'true' voxels of the signal generation 
-for iroi = 1:D.nroi
-    for jroi = 1:D.nroi
-        baseline(iroi,jroi,:) = sum(sum(abs(imag(Cohroi(D.sub_ind_roi{iroi},D.sub_ind_roi{jroi},:))),1),2);
-    end
+
+baseline = Cohroi(D.sub_ind_cortex,D.sub_ind_cortex,:);
+iReg = length(D.sub_ind_roi{1});
+if iReg ~=1 %mim across two voxels of one region 
+    [baseline_mic,baseline_mim]= fp_mim(baseline,repmat(iReg,D.nroi,1));
+    clear baseline 
+    baseline.mic = baseline_mic; 
+    baseline.mim = baseline_mim; 
+    clear baseline_mic baseline_mim
 end
+
+
 
 %% case two: MIM only to aggegate 2 dimensions
 
