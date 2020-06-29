@@ -35,17 +35,13 @@ for aroi = 1:D.nroi
     
     %PCA
     clear CSs v v5 in V_ D_
-    CSs = squeeze(sum(CSz,3)); %covariance
-    [V_, D_] = eig(real(CSs));
+    CSs = squeeze(sum(real(CSz),3)); %covariance
+    [V_, D_] = eig(CSs);
     [D_, in] = sort(real(diag(D_)), 'descend');
     
     if strcmp(mode,'max')
         %pipeline 6)
-        clear a
-        for ii = 1:nfreq
-            a(ii) = rank(CSz(:,:,ii));
-        end
-        npcs(aroi) = min(max(a),size(V_,1));
+        npcs(aroi) = min(rank(CSs),size(V_,1));
         
     elseif strcmp(mode,'percent')
         %pipeline 7)

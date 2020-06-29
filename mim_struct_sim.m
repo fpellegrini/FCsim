@@ -1,14 +1,13 @@
 %todo:
 %1) evt replace tsdata with Guido's code?
-%3) vary lag as a separate parameter:  random zwischen 0-5 oder 5-20
-%4) Pipeline 6): rank of sum(real(CS),3) = npcs
+
+%10) ground truth mit MIM aggregieren
 %5) MIM MIC auch für baseline
+
 %6) calculate pipeline 8) region-wise
 %7) Noise ändern
 %8) vary eloreta
 %9) vary hemispheres symmetric or not
-%10) ground truth mit MIM aggregieren
-%11) mean und std raus und später
 
 %%
 
