@@ -7,9 +7,16 @@ iroi_tar = randi(D.nroi,params.iInt,1);
 %set parameters
 Lepo = 100;
 N = n_trials*Lepo;
-lag = randi(20,params.iInt,params.iReg);
 id_trials_1 = 1:n_trials;
 id_trials_2 = 1:n_trials;
+
+%set random small or large lag
+if params.ilag == 1
+    lag = randi([0, 5],params.iInt,params.iReg);
+else
+    lag = randi([5, 20],params.iInt,params.iReg);
+end
+
 
 %random signal generation and shifting 
 s1 = randn(D.nroi,params.iReg, N);
