@@ -1,4 +1,4 @@
-function [mic, mim] = fp_get_mim_pca(A,CS,fqA,D,mode1)
+function [mic, mim] = fp_get_mim(A,CS,fqA,D,mode1)
 %mode1 is either a number for fixed pcs, or 'max' (select npcs = rank of
 %region data), or 'percent' (select npcs that 90% of the variance is
 %preserved), or 'case2' (mim only to pool dimensions, then summation), or
