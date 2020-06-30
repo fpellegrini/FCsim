@@ -48,7 +48,7 @@ for aroi = 1:D.nroi
             
         elseif strcmp(mode1,'max')
             %pipeline 6)
-            npcs(aroi) = min(rank(CSs),size(V_,1));
+            npcs(aroi) = min(nmeg,size(V_,1));
             
         elseif strcmp(mode1,'percent')
             %pipeline 7)
@@ -80,24 +80,24 @@ if strcmp(mode1,'all')
     tic
     for ifi = 1:5
         npcs.fixed = repmat(ifi,D.nroi,1);
-        [mic_fixed{ifi},mim_fixed{ifi}] = compute_mode_mim(ifi, D, npcs.fixed, V, A2, ZS, CS,fqA);
+        [mic_fixed{ifi},mim_fixed{ifi}] = compute_mode_mim(ifi, D, npcs.fixed, V, A2, ZS, CS,fqA,ihemi);
     end
     toc
     fprintf('max \n')
     tic
-    [mic_max,mim_max] = compute_mode_mim('max', D, npcs.max, V, A2, ZS, CS,fqA);
+    [mic_max,mim_max] = compute_mode_mim('max', D, npcs.max, V, A2, ZS, CS,fqA,ihemi);
     toc
     tic
     fprintf('90 percent \n')
     toc
     tic
-    [mic90,mim90] = compute_mode_mim('percent', D, npcs.percent, V, A2, ZS, CS,fqA);
+    [mic90,mim90] = compute_mode_mim('percent', D, npcs.percent, V, A2, ZS, CS,fqA,ihemi);
     toc
     tic
     fprintf('case2 and baseline \n')
     toc
     tic
-    [mic_bandc,mim_bandc] = compute_mode_mim('bandc',D,[],[],A2,[],CS,fqA);
+    [mic_bandc,mim_bandc] = compute_mode_mim('bandc',D,[],[],A2,[],CS,fqA,ihemi);
     toc
     
     mic.fixed = mic_fixed; 
@@ -113,7 +113,7 @@ if strcmp(mode1,'all')
     
     
 else
-    [mic,mim] = compute_mode_mim(mode1, D, npcs, V, A2, ZS, CS,fqA);
+    [mic,mim] = compute_mode_mim(mode1, D, npcs, V, A2, ZS, CS,fqA,ihemi);
 end
 
 toc
@@ -121,7 +121,7 @@ end
 
 
 
-function [mic,mim] = compute_mode_mim(mode1, D, npcs, V, A2, ZS, CS,fqA)
+function [mic,mim] = compute_mode_mim(mode1, D, npcs, V, A2, ZS, CS,fqA,ihemi)
 
 [nmeg, ~, nfreq] = size(A2{1});
 
