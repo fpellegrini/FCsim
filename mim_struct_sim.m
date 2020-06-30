@@ -3,12 +3,13 @@
 
 %%
 
-DIROUT = [];
-DIRLOG = [];
+DIROUT = './';
+DIRLOG = './log/';
+if ~exist(DIRLOG); mkdir(DIRLOG); end
 
 rng('shuffle')
-varyParam = 1:8;
-nit = 500;
+varyParam = 1%:8;
+nit = 1%500;
 fres = 40;
 n_trials = 200;
 
@@ -131,10 +132,10 @@ for ip = varyParam
                                     %interacting sources and voxels is generated
                                     for iit = 1: nit
                                         
-                                        fprintf('Working on %d. \n',iit)
+                                        fprintf('Working on iteration %d. \n',iit)
                                         %% signal generation
                                         
-                                        clearvars -except mm_gt mc_gt bmm_gt bmc_gt GT MIM MIC ...
+                                        clearvars -except DIROUT DIRLOG mm_gt mc_gt bmm_gt bmc_gt GT MIM MIC ...
                                             params iit nit nInteractions nRegionInts SNR noise_mix ...
                                             nlag filtertype hemisym ip varyParam...
                                             fres n_trials PERFORMANCE iss iInt iReg isnr ilag ifilt ihemi
@@ -143,11 +144,17 @@ for ip = varyParam
                                         % ROI labels
                                         % In D.sub_ind_roi, there are the randomly
                                         % selected voxels of each region
+                                        fprintf('Getting atlas positions... \n')
+                                        tic
                                         D = fp_get_Desikan(params.iReg);
+                                        toc
                                         
+                                        fprintf('Signal generation... \n')
+                                        tic
                                         %signal generation
                                         [signal_sensor,gt,L,iroi_seed, iroi_tar] = fp_generate_mim_signal(params, ...
                                             fres,n_trials, D);
+                                        toc
                                         
                                         
                                         %% get CS and filter A
@@ -159,10 +166,13 @@ for ip = varyParam
                                         regu=.000001;
                                         
                                         %cross spectrum
+                                        fprintf('Calculating cross spectrum... \n')
+                                        tic
                                         CS = fp_tsdata_to_cpsd(signal_sensor,fres,'WELCH',...
                                             [id_meg_chan], [id_meg_chan], id_trials_1, id_trials_2);
                                         CS(:,:,1)=[];
                                         nfreq = size(CS,3);
+                                        toc
                                         
                                         %leadfield
                                         L3 = L(:, D.ind_cortex, :);
@@ -214,6 +224,8 @@ for ip = varyParam
                                         [mic, mim] = fp_get_mim(A,CS,fqA,D,params.ihemi,'all');
                                         
                                         %% performance measures
+                                        fprintf('Performance measures... \n')
+                                        tic
                                         gt_save = gt;
                                         mic_save = mic;
                                         mim_save = mim;
@@ -304,11 +316,15 @@ for ip = varyParam
                                         clear m_max
                                         m_max = fp_get_nmaxima(mim.baseline,params.iInt*2);
                                         BASELINE(2,2,iit) = corr(m_max(:),gt.mim(:));
+                                        toc
                                         
                                     end
                                     
+                                    fprintf('Saving... \n')
+                                    tic
                                     outname = sprintf('%smim_%s.mat',DIROUT,logname);
                                     save(outname,'PERFORMANCE','BASELINE','-v7.3')
+                                    toc
                                     
                                     eval(sprintf('!mv %s%s_work %s%s_done',DIRLOG,logname,DIRLOG,logname))
                                 end
