@@ -2,7 +2,6 @@
 %1) evt replace tsdata with Guido's code?
 
 %7) Noise ändern
-%8) vary eloreta
 %9) vary hemispheres symmetric or not
 
 %%
@@ -11,7 +10,7 @@ DIROUT = [];
 DIRLOG = [];
 
 rng('shuffle')
-varyParam = 1:7;
+varyParam = 1:8;
 nit = 500;
 fres = 40;
 n_trials = 200;
@@ -29,6 +28,7 @@ for ip = varyParam
         signal_strength = 0.5;
         nlag = 1;
         filtertype= 'd'; %dics
+        hemisym = 0;
         
     elseif ip == 2
         %vary nInteractions
@@ -38,6 +38,7 @@ for ip = varyParam
         signal_strength = 0.5;
         nlag = 1;
         filtertype= 'd'; %dics
+        hemisym = 0;
         
     elseif ip == 3
         %vary nRegionInts
@@ -47,6 +48,7 @@ for ip = varyParam
         signal_strength = 0.5;
         nlag = 1;
         filtertype= 'd'; %dics
+        hemisym = 0;
         
     elseif ip == 4
         %vary SNR
@@ -56,6 +58,7 @@ for ip = varyParam
         signal_strength = 0.5;
         nlag = 1;
         filtertype= 'd'; %dics
+        hemisym = 0;
         
     elseif ip == 5
         %vary signal strength
@@ -65,6 +68,7 @@ for ip = varyParam
         signal_strength = [0.1:0.1:0.4 0.6:0.1:0.9];
         nlag = 1;
         filtertype= 'd'; %dics
+        hemisym = 0;
         
     elseif ip == 6
         %vary lag size
@@ -74,15 +78,27 @@ for ip = varyParam
         signal_strength = 0.5;
         nlag = 2; %small (0 to 5 samples (=1)) or large (5 to 20 samples (=2))
         filtertype= 'd'; %dics
+        hemisym = 0;
         
     elseif ip == 7
-        %defaults
+        %vary filter
         nInteractions = 1;
         nRegionInts = 1;
         SNR = 0.5;
         signal_strength = 0.5;
         nlag = 1;
         filtertype= 'e'; %eloreta
+        hemisym = 0;
+        
+    elseif ip == 8
+        %vary hemisphere symmetry 
+        nInteractions = 1;
+        nRegionInts = 1;
+        SNR = 0.5;
+        signal_strength = 0.5;
+        nlag = 1;
+        filtertype= 'd'; %dics
+        hemisym = 1; %symmetrize hemispheres 
     end
     
     
@@ -92,10 +108,11 @@ for ip = varyParam
                 for iss = signal_strength
                     for ilag = nlag
                         for ifilt = filtertype
+                            for ihemi = hemisym
                             
                             %create logfile for parallization
-                            logname = sprintf('iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s'...
-                                ,iInt,iReg,isnr*10,iss*10, ilag,ifilt);
+                            logname = sprintf('iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_hemisym%d'...
+                                ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,ihemi);
                             
                             if ~exist(sprintf('%s%s_work',DIRLOG,logname)) & ~exist(sprintf('%s%s_done',DIRLOG,logname))
                                 eval(sprintf('!touch %s%s_work',DIRLOG,logname))
@@ -108,6 +125,7 @@ for ip = varyParam
                                 params.iss = iss;
                                 params.ilag = ilag;
                                 params.ifilt = ifilt;
+                                params.ihemi = ihemi;
                                 
                                 % dimensions: (mim/mic, pipeline,perfomance measure,iit)
                                 PERFORMANCE = zeros(2,8,2,nit);
@@ -121,8 +139,8 @@ for ip = varyParam
                                     
                                     clearvars -except mm_gt mc_gt bmm_gt bmc_gt GT MIM MIC ...
                                         params iit nit nInteractions nRegionInts SNR signal_strength ...
-                                        nlag filtertype ip varyParam...
-                                        fres n_trials PERFORMANCE iss iInt iReg isnr ilag ifilt
+                                        nlag filtertype hemisym ip varyParam...
+                                        fres n_trials PERFORMANCE iss iInt iReg isnr ilag ifilt ihemi
                                     
                                     
                                     % ROI labels
@@ -196,7 +214,7 @@ for ip = varyParam
                                     %% calculate MIM
                                     
                                     %pca pipeline ('all' 8 pipelines + baseline)
-                                    [mic, mim] = fp_get_mim(A,CS,fqA,D,'all');
+                                    [mic, mim] = fp_get_mim(A,CS,fqA,D,params.ihemi,'all');
                                     
                                     %% performance measures
                                     gt_save = gt;

@@ -1,4 +1,4 @@
-function [mic, mim] = fp_get_mim(A,CS,fqA,D,mode1)
+function [mic, mim] = fp_get_mim(A,CS,fqA,D,ihemi,mode1)
 %mode1 is either a number for fixed pcs, or 'max' (select npcs = rank of
 %region data), or 'percent' (select npcs that 90% of the variance is
 %preserved), or 'case2' (mim only to pool dimensions, then summation), or
@@ -126,7 +126,7 @@ function [mic,mim] = compute_mode_mim(mode1, D, npcs, V, A2, ZS, CS,fqA)
 [nmeg, ~, nfreq] = size(A2{1});
 
 %makes sure that rois have the same npcs in both hemispheres
-if strcmp(mode1,'max')||strcmp(mode1,'percent')
+if (strcmp(mode1,'max')||strcmp(mode1,'percent')) && (ihemi==1)
     
     partner_rois(1,:) = 1:D.nroi;
     partner_rois(2,[1:2:D.nroi-1])=2:2:D.nroi;
