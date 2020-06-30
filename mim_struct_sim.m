@@ -1,7 +1,6 @@
 %todo:
 %1) evt replace tsdata with Guido's code?
 
-%6) calculate pipeline 8) region-wise
 %7) Noise ändern
 %8) vary eloreta
 %9) vary hemispheres symmetric or not
@@ -98,7 +97,8 @@ for ip = varyParam
                             %in each iteration, a new signal with new
                             %interacting sources and voxels is generated
                             for iit = 1: nit
-                                tic
+                                
+                                fprintf('Working on %d. \n',iit)
                                 %% signal generation
                                 
                                 clearvars -except mm_gt mc_gt bmm_gt bmc_gt GT MIM MIC ...
@@ -178,7 +178,7 @@ for ip = varyParam
                                 %% calculate MIM
                                 
                                 %pca pipeline ('all' 8 pipelines + baseline)
-                                [mic, mim] = fp_get_mim_pca(A,CS,fqA,D,'all');                                                               
+                                [mic, mim] = fp_get_mim(A,CS,fqA,D,'all');                                                               
                                 
                                 %% performance measures
                                 gt_save = gt;                                
@@ -272,7 +272,6 @@ for ip = varyParam
                                 m_max = fp_get_nmaxima(mim.baseline,params.iInt*2);
                                 BASELINE(2,2,iit) = corr(m_max(:),gt.mim(:));
                                 
-                                toc
                             end
                             
                             outname = sprintf('%smim_%dInts_%dRegs_0%dSNR_0%dSs.mat',DIROUT,...
