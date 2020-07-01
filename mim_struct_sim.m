@@ -21,7 +21,7 @@ for ip = varyParam
     if ip == 1
         %defaults
         nInteractions = 1;
-        nRegionInts = 1;
+        nRegionInts = 2;
         SNR = 0.5;
         noise_mix = 0.5;
         nlag = 1;
@@ -219,7 +219,7 @@ for ip = varyParam
                                         end
                                         
                                         %% calculate MIM
-                                        
+                                        keyboard
                                         %pca pipeline ('all' 8 pipelines + baseline)
                                         [mic, mim] = fp_get_mim(A,CS,fqA,D,params.ihemi,'all');
                                         
