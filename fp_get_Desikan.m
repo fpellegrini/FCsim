@@ -1,7 +1,6 @@
 function D = fp_get_Desikan(iReg)
 
 load('./processed_bs_wzb_template/bs_results.mat')
-
 % number of ROIs in the Desikan-Kiliany Atlas
 nroi = length(cortex.Atlas(3).Scouts);
 %roi inds
@@ -20,7 +19,9 @@ for iROI = 1:nroi
     
     sub_ind_cortex = cat(1,sub_ind_cortex, sub_ind_roi{iROI});
 %    [~,sub_ind_roi_cortex{iROI},~] =  intersect(sub_ind_cortex, sub_ind_roi{iROI});%only one voxel per region
-    
+    for ii = 1:iReg
+        sub_ind_roi_region{iROI}(ii) = find(ind_roi{iROI}==sub_ind_roi{iROI}(ii));
+    end
 end
 
 %maps roi indeices to voxels 
@@ -38,5 +39,6 @@ D.ind_cortex = ind_cortex;
 D.ind_roi_cortex = ind_roi_cortex;
 D.sub_ind_cortex = sub_ind_cortex;
 D.sub_ind_roi = sub_ind_roi;
+D.sub_ind_roi_region = sub_ind_roi_region;
 D.roi2vox = roi2vox;
 D.leadfield = leadfield;
