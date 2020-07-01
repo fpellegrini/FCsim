@@ -76,6 +76,7 @@ fprintf('Working on compute_mode. \n')
 tic
 if strcmp(mode1,'all')
     
+    keyboard
     fprintf('fixed 1 to 5 \n')
     tic
     for ifi = 1:5
@@ -87,15 +88,11 @@ if strcmp(mode1,'all')
     tic
     [mic_max,mim_max] = compute_mode_mim('max', D, npcs.max, V, A2, ZS, CS,fqA,ihemi);
     toc
-    tic
     fprintf('90 percent \n')
-    toc
     tic
     [mic90,mim90] = compute_mode_mim('percent', D, npcs.percent, V, A2, ZS, CS,fqA,ihemi);
     toc
-    tic
     fprintf('case2 and baseline \n')
-    toc
     tic
     [mic_bandc,mim_bandc] = compute_mode_mim('bandc',D,[],[],A2,[],CS,fqA,ihemi);
     toc
