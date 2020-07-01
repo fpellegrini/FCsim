@@ -1,5 +1,5 @@
 function [mic,mim]= fp_mim(Cohroi,npcs)
-%keyboard
+
 regu = 0.000001; 
 [~,~,nfreq] = size(Cohroi);
 nroi = length(npcs);
