@@ -128,6 +128,7 @@ end
 
 %loop over all roi combinations 
 for oroi = 1:D.nroi
+    tic
     for uroi = oroi+1:D.nroi
         clear P
         [nmeg, dummy, nfreq] = size(A2{oroi});
@@ -201,7 +202,7 @@ for oroi = 1:D.nroi
             mim2(uroi,oroi,:) = mim2(oroi,uroi,:);        
             mim2(oroi,oroi,:) = squeeze(mean(mean(mim_v(1:nvoxreg1,1:nvoxreg1,:),1),2));
             
-        else
+        elseif ~strcmp(mode1,'baseline')
             
             %MIC and MIM
             clear a b
@@ -210,6 +211,7 @@ for oroi = 1:D.nroi
             mim([oroi uroi],[oroi uroi],:) = b;
         end
     end
+    toc
 end
 
 if strcmp(mode1,'baseline')   
