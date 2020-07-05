@@ -8,7 +8,7 @@ DIRLOG = './log/';
 if ~exist(DIRLOG); mkdir(DIRLOG); end
 
 rng('shuffle')
-varyParam = 1%:8;
+varyParam = 1:8;
 nit = 1%500;
 fres = 40;
 n_trials = 200;
@@ -40,7 +40,16 @@ for ip = varyParam
                                         eval(sprintf('!touch %s%s_work',DIRLOG,logname))
                                         fprintf('Working on %s. \n',logname)
                                         
-                                        clear params PERFORMANCE
+
+
+                                        
+                                        %% signal generation
+                                        
+                                        clearvars -except DIROUT DIRLOG ...
+                                            iit nit nInteractions nRegionInts SNR noise_mix ...
+                                            nlag filtertype hemisym ip varyParam...
+                                            fres n_trials iss iInt iReg isnr ilag ifilt ihemi
+                                        
                                         params.iInt = iInt;
                                         params.iReg = iReg;
                                         params.isnr = isnr;
@@ -48,14 +57,6 @@ for ip = varyParam
                                         params.ilag = ilag;
                                         params.ifilt = ifilt;
                                         params.ihemi = ihemi;
-
-                                        
-                                        %% signal generation
-                                        
-                                        clearvars -except DIROUT DIRLOG mm_gt mc_gt bmm_gt bmc_gt GT MIM MIC ...
-                                            params iit nit nInteractions nRegionInts SNR noise_mix ...
-                                            nlag filtertype hemisym ip varyParam...
-                                            fres n_trials iss iInt iReg isnr ilag ifilt ihemi
                                         
                                         
                                         % ROI labels
@@ -66,9 +67,9 @@ for ip = varyParam
                                         D = fp_get_Desikan(params.iReg);
                                         toc
                                         
+                                        %signal generation
                                         fprintf('Signal generation... \n')
                                         tic
-                                        %signal generation
                                         [signal_sensor,gt,L,iroi_seed, iroi_tar] = fp_generate_mim_signal(params, ...
                                             fres,n_trials, D);
                                         toc
@@ -130,9 +131,7 @@ for ip = varyParam
                                             nfqA = nfreq;
                                             
                                             
-                                        elseif strcmp(filtertype,'l')
-                                            
-                                            
+                                        elseif strcmp(filtertype,'l')                 
                                         end
                                         
                                         %% calculate MIM
@@ -140,10 +139,10 @@ for ip = varyParam
                                         [mic, mim] = fp_get_mim(A,CS,fqA,D,params.ihemi,'all');
                                         
                                         %% performance measures
-                                        fprintf('Performance measures... \n')
-                                        
-                                        [PERFORMANCE, BASELINE] = fp_get_performance(gt, mic, mim);
-                                        
+                                        fprintf('Performance measures... \n') 
+                                        tic
+                                        [PERFORMANCE, BASELINE] = fp_get_performance(gt, mic, mim); 
+                                        toc
                                         
                                         %% save performance and baseline 
                                         fprintf('Saving... \n')

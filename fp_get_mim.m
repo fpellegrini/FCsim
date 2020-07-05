@@ -73,7 +73,6 @@ end
 toc
 
 fprintf('Working on compute_mode. \n')
-tic
 if strcmp(mode1,'all')
     
     fprintf('fixed 1 to 5 \n')
@@ -83,14 +82,17 @@ if strcmp(mode1,'all')
         [mic_fixed{ifi},mim_fixed{ifi}] = compute_mode_mim(ifi, D, npcs.fixed, V, A2, ZS, CS,fqA,ihemi);
     end
     toc
+    
     fprintf('max \n')
     tic
     [mic_max,mim_max] = compute_mode_mim('max', D, npcs.max, V, A2, ZS, CS,fqA,ihemi);
     toc
+    
     fprintf('90 percent \n')
     tic
     [mic90,mim90] = compute_mode_mim('percent', D, npcs.percent, V, A2, ZS, CS,fqA,ihemi);
     toc
+    
     fprintf('case2 and baseline \n')
     tic
     [mic_bandc,mim_bandc] = compute_mode_mim('bandc',D,[],[],A2,[],CS,fqA,ihemi);
@@ -112,7 +114,6 @@ else
     [mic,mim] = compute_mode_mim(mode1, D, npcs, V, A2, ZS, CS,fqA,ihemi);
 end
 
-toc
 end
 
 
@@ -128,8 +129,8 @@ end
 
 %loop over all roi combinations 
 for oroi = 1:D.nroi
-    tic
     for uroi = oroi+1:D.nroi
+        
         clear P
         [nmeg, dummy, nfreq] = size(A2{oroi});
         nvoxreg1 = dummy/ndim;
@@ -137,6 +138,7 @@ for oroi = 1:D.nroi
         %concatenate filters
         if strcmp(mode1,'bandc')|| strcmp(mode1,'baseline')||strcmp(mode1,'case2')
             P = cat(2,A2{oroi},A2{uroi});
+            
         else
             croi = 1;
             for jroi = [oroi uroi]
@@ -146,6 +148,7 @@ for oroi = 1:D.nroi
                 croi = croi +npcs(jroi);
             end
         end
+        
         
         %apply all filters
         CSroi = [];
@@ -211,7 +214,6 @@ for oroi = 1:D.nroi
             mim([oroi uroi],[oroi uroi],:) = b;
         end
     end
-    toc
 end
 
 if strcmp(mode1,'baseline')   

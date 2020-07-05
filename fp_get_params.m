@@ -41,11 +41,11 @@ elseif ip == 4
     hemisym = 0;
     
 elseif ip == 5
-    %vary signal strength
+    %vary noise_mix
     nInteractions = 1;
     nRegionInts = 1;
     SNR = 0.5;
-    noise_mix = [0.1:0.1:0.4 0.6:0.1:0.9];
+    noise_mix = [0 0.25 0.75 1];
     nlag = 1;
     filtertype= 'd'; %dics
     hemisym = 0;

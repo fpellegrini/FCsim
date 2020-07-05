@@ -2,8 +2,6 @@ function [PERFORMANCE, BASELINE] = fp_get_performance(gt, mic, mim)
 %performance dimensions: (mim/mic, pipeline,perfomance measure)
 %baseline dimensions: (mim/mix, performance measure)
 
-
-tic
 % gt_save = gt;
 % mic_save = mic;
 % mim_save = mim;
@@ -94,4 +92,3 @@ BASELINE(1,2) = corr(m_max(:),gt.mic(:));
 clear m_max
 m_max = fp_get_nmaxima(mim.baseline,params.iInt*2);
 BASELINE(2,2) = corr(m_max(:),gt.mim(:));
-toc
