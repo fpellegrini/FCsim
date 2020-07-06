@@ -1,5 +1,7 @@
 clear all
-id = 2;
+patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
+id = 3;
+ivox = 2665;
 D = spm_eeg_load(sprintf('redPLFP%s_off', '07'));
 fs = D.fsample;
 
@@ -7,13 +9,13 @@ X = D(:,:,:);
 x = squeeze(X(1,:,:));
 ntrial = size(X,3);
 
-load(sprintf('BF_Patient%s.mat','07'));
+load(sprintf('BF_Patient%s.mat',patientID{id}));
 
 L = fp_get_lf(inverse);
 ni = size(L,3);
 
-l = squeeze(L(:,2100,:));
-p = [0.5; 0.5];
+l = squeeze(L(:,ivox,:));
+p = randn(ni,1);
 p = p/norm(p);
 lp = l*p;
 
@@ -32,7 +34,7 @@ end
 % 
 % id_trials_1 = 1:ntrial;
 % id_trials_2 = 1:ntrial;
-% CS = fp_tsdata_to_cpsd(signal,150,'WELCH',[id_meg_chan], [id_meg_chan], id_trials_1, id_trials_2);
+% CS = fp_tsdata_to_cpsd(signal,75,'WELCH',[id_meg_chan], [id_meg_chan], id_trials_1, id_trials_2);
 % 
 % ns_org = size(L,2);
 % nfreq = size(CS, 3); 
@@ -51,7 +53,7 @@ end
 %     end
 % end
 % A = permute(A,[1 3 2 4]);
-% 
+
 % for idim = 1:2 
 %     for ifreq = 1:nfreq
 %         clear s
@@ -60,10 +62,10 @@ end
 %     end 
 % end 
 %         
-% pow = sum(d_pow,3)'; 
+% pow = sum((d_pow),3)'; 
 
 
-%eloreta
+% %eloreta
 A = squeeze(mkfilt_eloreta_v2(L));
 A = permute(A,[1, 3, 2]);
 for idim = 1:2 
@@ -87,4 +89,4 @@ outname = 'leadfield_check_beta_dics_2100.nii';
 fp_data2nii(beta,sources.pos,[],outname,id)
 
 outname = 'leadfield_check_gamma_dics_2100.nii';
-fp_data2nii(gamma,sources.pos,[],outname,id)
+fp_data2nii(all,sources.pos,[],outname,id)
