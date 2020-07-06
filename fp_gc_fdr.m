@@ -58,6 +58,11 @@ tic
 toc
 
 [p_fdr_true, p_masked_true] = fdr( true_p, 0.05);
+
+bh =zeros(size(true_val)); 
+bh(true_effectdir>0) = true_val(true_effectdir>0);
+bl =zeros(size(true_val)); 
+bl(true_effectdir<0) = true_val(true_effectdir<0);
 %% shuffled
 
 for iit = 1:nit
@@ -69,14 +74,16 @@ for iit = 1:nit
     c_DIFFGC = DIFFGC .* (sign(randn(size(DIFFGC))));
     
     fprintf('Testing...\n')
-    [shuf_p(iit,:,:,:),~,shuf_val(iit,:,:,:), shuf_effectdir(iit,:,:,:)] = fp_get_signrank_results_gc(c_DIFFGC,alpha);
+    [~,~,shuf_val, shuf_effectdir] = fp_get_signrank_results_gc(c_DIFFGC,alpha);
     
-end
-
-
-for iit = 1:nit 
-     uh(iit,:,:,:) = squeeze(shuf_p(iit,:,:,:))>true_p;
-     ul(iit,:,:,:) = squeeze(shuf_p(iit,:,:,:))<true_p;
+    al = zeros(size(shuf_val)); 
+    ah = al; 
+    al(shuf_effectdir<0) = shuf_val(shuf_effectdir<0);
+    ah(shuf_effectdir>0) = shuf_val(shuf_effectdir>0);        
+    
+    uh(iit,:,:,:) = ah>bh;
+    ul(iit,:,:,:) = al<bl;
+    
 end
 
 ph = squeeze(sum(uh,1))./nit;
