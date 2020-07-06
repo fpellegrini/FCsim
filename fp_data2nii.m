@@ -53,6 +53,7 @@ else
     end
 end
 
+data = data+100;
 cube = reshape(data(in), [91, 109, 91]);
 cube(mask==0) = 0;
 
@@ -62,8 +63,7 @@ cube(mask==0) = 0;
 % end 
 
 %scale
-Vq = cube.*sf;
-
+Vq = cube;
 % Vq = inpaintn(Vq,nit);
 
 %read in some template 
@@ -73,7 +73,7 @@ V.img = Vq;
 V=rmfield(V,'pinfo');
 
 %write nifti 
-spm_write_vol(V,Vq);
+Va =spm_write_vol(V,Vq);
 
 % X = wjn_read_nii(['./', outname,]);
 % s=[12 12 12];
