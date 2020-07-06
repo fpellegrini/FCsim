@@ -1,4 +1,4 @@
-function fp_fdr_mim(DIROUT,testmethod,alpha,fwf,j)
+function fp_fdr_mim(DIROUT,alpha,fwf,j)
 
 %Group statistics on megmeg data.
 %Clustering group statistics across space and frequencies.

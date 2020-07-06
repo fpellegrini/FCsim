@@ -81,20 +81,20 @@ suptitle(['subject ' num2str(id)])
 % colorbar
 outname = sprintf('sub_%d_coronal_channel%d_dim%d.png',id,isens,idim);
 print(outname,'-dpng');
-close all
+% close all
 
-figone(80,60)
-for ii = 15:10:85
-    subplot(2,4,(ii-5)/10)
-    imagesc(squeeze(Vq(:,:,ii))')
-    caxis(a)
-    set(gca,'YDir','Normal','XDir','Reverse')
-end
-suptitle(['subject ' num2str(id)])
-% colorbar
-outname = sprintf('sub_%d_transverse_channel%d_dim%d.png',id,isens,idim);
-print(outname,'-dpng');
-close all
+% figone(80,60)
+% for ii = 15:10:85
+%     subplot(2,4,(ii-5)/10)
+%     imagesc(squeeze(Vq(:,:,ii))')
+%     caxis(a)
+%     set(gca,'YDir','Normal','XDir','Reverse')
+% end
+% suptitle(['subject ' num2str(id)])
+% % colorbar
+% outname = sprintf('sub_%d_transverse_channel%d_dim%d.png',id,isens,idim);
+% print(outname,'-dpng');
+% close all
 
 
     
