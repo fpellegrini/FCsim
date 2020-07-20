@@ -257,9 +257,9 @@ b(:,2,5) = sum(a2(:,gammaband),2);
 for iside = 1:2
     for iband = 1:5
         
-        c = -squeeze(b(:,iside,iband));
+        c = squeeze(b(:,iside,iband));
 %         figure; plot(c(:))
-        outname = sprintf('GC_side%d_%s_neg.nii',iside,band{iband});
+        outname = sprintf('GC_side%d_%s.nii',iside,band{iband});
         fp_data2nii(c,pos,[],outname)
         
     end

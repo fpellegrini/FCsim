@@ -1,34 +1,29 @@
-clear all
-patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
-id = 3;
-ivox = 2665;
-D = spm_eeg_load(sprintf('redPLFP%s_off', '08'));
-fs = D.fsample;
+function leadfield_check_for_Stefan
 
-X = D(:,:,:);
-x = squeeze(X(1,:,:));
+load('./leadfield_data_for_Stefan.mat')
+ivox = 2665;
 ntrial = size(X,3);
 
-load(sprintf('BF_Patient%s.mat',patientID{id}));
+timeseries = squeeze(X(1,:,:));
 
-L = fp_get_lf(inverse);
-ni = size(L,3);
+%%
+ndim = size(L,3);
 
 l = squeeze(L(:,ivox,:));
-p = randn(ni,1);
+p = randn(ndim,1);
 p = p/norm(p);
 lp = l*p;
 
 for itrial = 1:ntrial 
     clear sens whitenoise
-    sens =  squeeze(lp* x(:,itrial)');
+    sens =  squeeze(lp* timeseries(:,itrial)');
     whitenoise = randn(size(sens));
     whitenoise = whitenoise ./ norm(whitenoise, 'fro');
     signal(:,:,itrial) = 0.9*sens + 0.1*whitenoise;
 end
 
 
-%dics
+% %dics
 % id_meg_chan = 1:size(signal,1);
 % nmeg = numel(id_meg_chan);
 % 
@@ -53,7 +48,7 @@ end
 %     end
 % end
 % A = permute(A,[1 3 2 4]);
-
+% 
 % for idim = 1:2 
 %     for ifreq = 1:nfreq
 %         clear s
@@ -62,7 +57,7 @@ end
 %     end 
 % end 
 %         
-% pow = sum((d_pow),3)'; 
+% pow = sum((real(d_pow)),3)'; 
 
 
 % %eloreta
@@ -78,15 +73,10 @@ for idim = 1:2
 end     
 pow = sum(sum(Pxx,3),4);
 
+%%
+pow(1,:) = []; %cut freq = 0 
 alpha = sum(pow(8:12,:),1);
-beta = sum(pow(13:30,:),1);
-gamma = sum(pow(30:end,:),1);
+% beta = sum(pow(13:30,:),1);
+% gamma = sum(pow(30:end,:),1);
 
-outname = 'leadfield_check_alpha_eloreta_2100.nii';
-fp_data2nii(alpha,sources.pos,[],outname,id)
-
-outname = 'leadfield_check_beta_dics_2100.nii';
-fp_data2nii(beta,sources.pos,[],outname,id)
-
-outname = 'leadfield_check_gamma_dics_2100.nii';
-fp_data2nii(all,sources.pos,[],outname,id)
+fp_plot_slices_for_Stefan(alpha, pos, 3, './alpha', [0 3] ,mask)

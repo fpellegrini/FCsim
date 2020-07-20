@@ -28,7 +28,7 @@ for id = 7:length(patientID)
             dat = squeeze(L(:,isens,idim)).*10^12;
             an(id,idim) =min(dat(:));
             ax(id,idim)=max(dat(:));
-            fp_plot_slices(dat,pos,[],isens,idim,[90 2020])
+            fp_plot_slices(dat,pos,id,isens,idim,[100 (10^-5)+100])
                    % fp_data2nii(dat,pos,[],outname,id)
         end
 end

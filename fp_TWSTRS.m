@@ -7,7 +7,7 @@ patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
 [~, voxID] = fp_find_commonvox;
 
 scores = db_twstrs();
-alpha = 0.05;
+alpha = 0.001;
 
 
 nsubs = numel(patientID);
@@ -83,7 +83,7 @@ for iit = 1:nit
     
     for ifreq = 1:nfreq
         for ivox = 1:ns           
-            [rho_shuf(iit,ivox,ifreq), pval_shuf(ivox, ifreq)] = corr(t_score', sCoh(:,iit,ifreq,ivox), 'Type','Spearman');
+            [rho_shuf(iit,ivox,ifreq), pval_shuf(ivox, ifreq)] = corr(t_score', sCoh(:,iit,ifreq,ivox), 'Type','Pearson');
         end
     end    
     onoff = pval_shuf < alpha;

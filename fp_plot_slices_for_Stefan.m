@@ -1,4 +1,4 @@
-function fp_plot_slices(data, pos, id,outname1, crange)
+function fp_plot_slices_for_Stefan(data, pos, id,outname1, crange,mask)
 %data should have be of size 1 x nvox 
 %pos are the positions in mni format 
 %nit is number of iterations (default: 500)
@@ -8,10 +8,6 @@ function fp_plot_slices(data, pos, id,outname1, crange)
 if sum(data)==0
     error('data is all zero') 
 end
-
-%mask for all data points outside the brain
-mask= wjn_read_nii('/Users/franziskapellegrini/Documents/Master/Masterarbeit/MasterThesis/wjn_toolbox/spm12/toolbox/FieldMap/brainmask.nii');
-mask = mask.img;
 
 %from mni to world coordinates
 [x, y, z, ~] = mni2orFROMxyz(pos(:,1), pos(:,2), pos(:,3),[],'mni');
@@ -47,15 +43,16 @@ end
 
 %offset data and crange to get an image distinguishable from background 
 data = data+100;
-a = crange+100;
+a(1) = crange(1)+97;
+a(2) = crange(2) +100;
 
-cube = reshape(data(in), [91, 109, 91]);
-cube(mask==0) = 0;
-Vq = cube;
+Vq = reshape(data(in), [91, 109, 91]);
+Vq(mask==0) = 0;
 
+%% plotting
 
-
-figone(80,60)
+figure
+% figone(80,60)
 for ii = 10:10:80
     subplot(2,4,ii/10)
     imagesc(squeeze(Vq(ii,:,:))')
@@ -66,7 +63,8 @@ suptitle(['subject ' num2str(id)])
 outname = sprintf('%s_sagittal.png',outname1);
 print(outname,'-dpng');
 
-figone(80,60)
+figure
+% figone(80,60)
 for ii = 15:10:85
     subplot(2,4,(ii-5)/10)
     imagesc(squeeze(Vq(:,ii,:))')
@@ -77,7 +75,8 @@ suptitle(['subject ' num2str(id)])
 outname = sprintf('%s_coronal.png',outname1);
 print(outname,'-dpng');
 
-figone(80,60)
+figure
+% figone(80,60)
 for ii = 15:10:85
     subplot(2,4,(ii-5)/10)
     imagesc(squeeze(Vq(:,:,ii))')
@@ -85,7 +84,7 @@ for ii = 15:10:85
     set(gca,'YDir','Normal','XDir','Reverse')
 end
 suptitle(['subject ' num2str(id)])
-outname = sprintf('sub_%d_transverse_channel%d_dim%d.png',id,isens,idim);
+outname = sprintf('%s_transverse.png',outname1);
 print(outname,'-dpng');
 
 
