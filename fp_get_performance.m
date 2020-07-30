@@ -1,4 +1,4 @@
-function [PERFORMANCE, BASELINE] = fp_get_performance(gt, mic, mim)
+function [PERFORMANCE, BASELINE] = fp_get_performance(gt, mic, mim, params)
 %performance dimensions: (mim/mic, pipeline,perfomance measure)
 %baseline dimensions: (mim/mix, performance measure)
 

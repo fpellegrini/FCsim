@@ -1,4 +1,4 @@
-function [signal_sensor, gt,L_save,iroi_seed,iroi_tar] = fp_generate_mim_signal...
+function [sig,brain_noise,sensor_noise, gt,L_save,iroi_seed,iroi_tar] = fp_generate_mim_signal...
     (params, fres,n_trials, D)
 
 iroi_seed = randi(D.nroi,params.iInt,1);
@@ -11,6 +11,7 @@ id_trials_1 = 1:n_trials;
 id_trials_2 = 1:n_trials;
 
 %set random small or large lag
+
 if params.ilag == 1
     lag = randi([0, 5],params.iInt,params.iReg);
 else
@@ -53,27 +54,12 @@ else
 end
 clear gt1 gt_mic gt_mim
 
-
 %leadfield for forward model
 L_save = D.leadfield;
 L3 = L_save(:, D.sub_ind_cortex, :);
-for is=1:D.nroi*params.iReg
-    clear L2
-    L2 = L3(:,is,:);
-    
-    %remove radial orientation
-    clear u s
-    [u, s, v] = svd(squeeze(L2));
-    L_forward(:,is,:) = u(:,:)*s(:,1:2);
-end
-ni = size(L_forward,3);
-
-%mixing dimensions of leadfield 
-for in = 1 : D.nroi*params.iReg
-    p = randn(ni,1);
-    p = p/norm(p);
-    L1 = squeeze(L_forward(:,in,:));
-    L_mix(:,in) = L1*p;
+normals = D.normals(D.sub_ind_cortex,:)'; 
+for is = 1:numel(D.sub_ind_cortex)
+    L_mix(:,is) = squeeze(L3(:,is,:))*squeeze(normals(:,is));
 end
 
 sig_ind = [];
@@ -90,18 +76,13 @@ for itrial = 1:n_trials
     clear sig sensor_noise noise brain_noise noise 
     
     %signal
-    sig = L_mix(:,sig_ind) * signal_gt(sig_ind,:,itrial);
-    sig = sig ./ norm(sig, 'fro');    
+    sig{itrial} = L_mix(:,sig_ind) * signal_gt(sig_ind,:,itrial);
+    sig{itrial} = sig{itrial} ./ norm(sig{itrial}, 'fro');    
     %brain noise
-    brain_noise = L_mix(:,noise_ind) * signal_gt(noise_ind,:,itrial);
-    brain_noise = brain_noise ./ norm(brain_noise, 'fro');    
+    brain_noise{itrial} = L_mix(:,noise_ind) * signal_gt(noise_ind,:,itrial);
+    brain_noise{itrial} = brain_noise{itrial} ./ norm(brain_noise{itrial}, 'fro');    
     %white noise
-    sensor_noise = randn(size(sig));
-    sensor_noise = sensor_noise ./ norm(sensor_noise, 'fro');
-    %combine noise sources 
-    noise = params.iss*brain_noise + (1-params.iss)*sensor_noise;
-    noise = noise ./ norm(noise, 'fro');
-    %combine signal and noise 
-    sig = params.isnr*sig + (1-params.isnr)*noise;
-    signal_sensor(:,:,itrial) = sig ./ norm(sig, 'fro');
+    sensor_noise{itrial} = randn(size(sig{itrial}));
+    sensor_noise{itrial} = sensor_noise{itrial} ./ norm(sensor_noise{itrial}, 'fro');
+
 end

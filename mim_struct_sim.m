@@ -1,15 +1,14 @@
-%todo:
-%1) evt replace tsdata with Guido's code?
+function mim_struct_sim
 
-%%
+fp_addpath
 
-DIROUT = './';
+DIROUT = '/home/bbci/data/haufe/Franziska/data/';
 DIRLOG = './log/';
 if ~exist(DIRLOG); mkdir(DIRLOG); end
 
 rng('shuffle')
 varyParam = 1:8;
-nit = 1%500;
+nit = 1; %500;
 fres = 40;
 n_trials = 200;
 
@@ -141,7 +140,7 @@ for ip = varyParam
                                         %% performance measures
                                         fprintf('Performance measures... \n') 
                                         tic
-                                        [PERFORMANCE, BASELINE] = fp_get_performance(gt, mic, mim); 
+                                        [PERFORMANCE, BASELINE] = fp_get_performance(gt, mic, mim, params); 
                                         toc
                                         
                                         %% save performance and baseline 

@@ -42,3 +42,4 @@ D.sub_ind_roi = sub_ind_roi;
 D.sub_ind_roi_region = sub_ind_roi_region;
 D.roi2vox = roi2vox;
 D.leadfield = leadfield;
+D.normals = cortex.VertNormals;
