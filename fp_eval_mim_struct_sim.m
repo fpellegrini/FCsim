@@ -11,7 +11,7 @@ nit = 100;
 
 
 for ip = varyParam
-    clear nInteractions nRegionInts SNR
+    clear nInteractions nRegionInts SNR noise_mix nlag filtertype hemisym
     
     [nInteractions,nRegionInts,SNR,noise_mix,nlag,filtertype,hemisym] = fp_get_params(ip);
     
@@ -44,7 +44,7 @@ for ip = varyParam
                                         params.ip = ip;
                                         
                                                                            
-                                        fp_mim_struct_sim(params)
+                                        fp_mim_struct_sim(params,logname)
                                         
                                         eval(sprintf('!mv %s%s_work %s%s_done',DIRLOG,logname,DIRLOG,logname))
                                         
