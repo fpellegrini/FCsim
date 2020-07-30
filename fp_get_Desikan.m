@@ -1,6 +1,6 @@
 function D = fp_get_Desikan(iReg)
 
-load('./processed_bs_wzb_template/bs_results.mat')
+load('./processed_bs_wzb_90_2000/bs_results.mat')
 % number of ROIs in the Desikan-Kiliany Atlas
 nroi = length(cortex.Atlas(3).Scouts);
 %roi inds
