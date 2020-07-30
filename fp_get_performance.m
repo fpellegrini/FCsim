@@ -24,7 +24,7 @@ mim.baseline = sum(mim.baseline,3);
 
 
 % (1)correlation mim/mic and ground truth
-for ii = 1:5
+for ii = 1:numel(mic.fixed)
     PERFORMANCE(1,ii,1) = corr(mic.fixed{ii}(:),gt.mic(:));
     PERFORMANCE(2,ii,1) = corr(mim.fixed{ii}(:),gt.mim(:));
 end

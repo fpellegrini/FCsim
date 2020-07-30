@@ -14,7 +14,6 @@ S = complex(zeros(n1,n2,h));
 for ii = 1:n1
     o = ind_1(ii); 
     S(ii,:,:) = transpose(cpsd(X_1(:,o),X_2(:,ind_2),window,noverlap,nfft)); % cross-spectra 
-    
     if ismember(o,ind_pow)
         clear b 
         b = find(ind_2 == o);        
