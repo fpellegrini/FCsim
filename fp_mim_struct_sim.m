@@ -1,10 +1,10 @@
-function fp_mim_struct_sim(params)
+function fp_mim_struct_sim(params,logname)
 
 DIROUT = '/home/bbci/data/haufe/Franziska/data/';
 
 if params.ip==7 && ~strcmp(params.ifilt,'l')
     load(sprintf('%s/mim_CS/filt/%d.mat',DIROUT,params.iit));
-elseif params.ip==9 && ~params.ihemi==0
+elseif params.ip==8 && ~params.ihemi==0
     load(sprintf('%s/mim_CS/hemi/%d.mat',DIROUT,params.iit));
 else
     
@@ -13,9 +13,9 @@ else
     elseif params.ip==4 && ~params.isnr==0.1
         load(sprintf('%s/mim_CS/snr/%d.mat',DIROUT,params.iit));
     else
+        
         fres = 40;
         n_trials = 200;
-        regu=.000001;
         
         %% signal generation
         
@@ -30,8 +30,8 @@ else
         %signal generation
         fprintf('Signal generation... \n')
         tic
-        [sig,brain_noise,sensor_noise,gt,L,iroi_seed, iroi_tar] = fp_generate_mim_signal(params, ...
-            fres,n_trials, D);
+        [sig,brain_noise,sensor_noise,gt,L,iroi_seed, iroi_tar,D] = fp_generate_mim_signal(params, ...
+            fres,n_trials, D,DIROUT);
         toc
         
         if params.ip==5 && params.iss==0
@@ -49,8 +49,8 @@ else
         noise = params.iss*brain_noise{itrial} + (1-params.iss)*sensor_noise{itrial};
         noise = noise ./ norm(noise, 'fro');
         %combine signal and noise
-        signal_sensor = params.isnr*sig{itrial} + (1-params.isnr)*noise;
-        signal_sensor(:,:,itrial) = signal_sensor ./ norm(signal_sensor, 'fro');
+        signal_sensor1 = params.isnr*sig{itrial} + (1-params.isnr)*noise;
+        signal_sensor(:,:,itrial) = signal_sensor1 ./ norm(signal_sensor1, 'fro');
     end
     
     
@@ -72,13 +72,13 @@ else
     if params.ip==7 && strcmp(params.ifilt,'l')
         outname = sprintf('%s/mim_CS/filt/%d.mat',DIROUT,params.iit);
         save(outname,'-v7.3')
-    elseif params.ip==9 && params.ihemi==0
+    elseif params.ip==8 && params.ihemi==0
         outname = sprintf('%s/mim_CS/hemi/%d.mat',DIROUT,params.iit);
         save(outname,'-v7.3')
     end
 end
 
-%leadfield
+%% leadfield
 L3 = L(:, D.ind_cortex, :);
 for is=1:D.nvox
     clear L2
@@ -92,13 +92,13 @@ end
 ni = size(L_backward,3);
 
 %construct source filter
-if strcmp(ifilt,'e')
+if strcmp(params.ifilt,'e')
     A = squeeze(mkfilt_eloreta_v2(L_backward));
     A = permute(A,[1, 3, 2]);
     fqA = ones(1,nfreq);%only one filter for all freqs.
     nfqA = 1;
     
-elseif strcmp(ifilt,'d')
+elseif strcmp(params.ifilt,'d')
     
     A=zeros(nmeg,ni,D.nvox,nfreq);
     
@@ -117,7 +117,7 @@ elseif strcmp(ifilt,'d')
     nfqA = nfreq;
     
     
-elseif strcmp(filtertype,'l')
+elseif strcmp(params.ifilt,'l')
     cCS = sum(CS,3);
     reg = 0.05*trace(cCS)/length(cCS);
     Cr = cCS + reg*eye(size(cCS,1));
@@ -130,7 +130,7 @@ end
 
 %% calculate MIM
 %pca pipeline ('all' 8 pipelines + baseline)
-[mic, mim] = fp_get_mim(A,CS,fqA,D,params.ihemi,'all');
+[mic, mim, to_save] = fp_get_mim(A,CS,fqA,nfqA, D,params.ihemi,'all');
 
 %% performance measures
 fprintf('Performance measures... \n')
@@ -142,6 +142,6 @@ toc
 fprintf('Saving... \n')
 tic
 outname = sprintf('%smim_%s.mat',DIROUT,logname);
-save(outname,'PERFORMANCE','BASELINE','-v7.3')
+save(outname,'-v7.3')
 toc
 

@@ -56,7 +56,7 @@ elseif ip == 6
     nRegionInts = 1;
     SNR = 0.5;
     noise_mix = 0.5;
-    nlag = 1; %small (0 to 5 samples (=1)) or large (5 to 20 samples (=2))
+    nlag = 1:2; %small (0 to 5 samples (=1)) or large (5 to 20 samples (=2))
     filtertype= 'l'; %lcmv
     hemisym = 0;
     
