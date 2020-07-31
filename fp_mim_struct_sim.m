@@ -123,7 +123,7 @@ elseif strcmp(params.ifilt,'l')
     reg = 0.05*trace(cCS)/length(cCS);
     Cr = cCS + reg*eye(size(cCS,1));
     
-    [~, A] = lcmv_meg(Cr, L_backward, struct('alpha', 0, 'onedim', 0));
+    [~, A] = lcmv(Cr, L_backward, struct('alpha', 0, 'onedim', 0));
     A = permute(A,[1, 3, 2]);
     fqA = ones(1,nfreq);%only one filter for all freqs.
     nfqA = 1;   
@@ -131,7 +131,7 @@ end
 
 %% calculate MIM
 %pca pipeline ('all' 8 pipelines + baseline)
-[mic, mim, to_save] = fp_get_mim(A,CS,fqA,nfqA, D,params.ihemi,'all');
+[mic, mim, to_save] = fp_get_mim(A,CS,fqA,nfqA, D,params.ihemi,'baseline');
 
 %% performance measures
 fprintf('Performance measures... \n')

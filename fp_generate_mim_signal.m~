@@ -73,31 +73,31 @@ clear gt1 gt_mic gt_mim
 
 %leadfield for forward model
 L_save = D.leadfield;
-L3 = L_save(:, D.sub_ind_cortex, :);
+% L3 = L_save(:, D.sub_ind_cortex, :);
 normals = D.normals(D.sub_ind_cortex,:)'; 
 for is = 1:numel(D.sub_ind_cortex)
     L_mix(:,is) = squeeze(L3(:,is,:))*squeeze(normals(:,is));
 end
 %%
-% 
-% for is=1:size(L3,2)
-%      clear L2
-%      L2 = L3(:,is,:);
-% 
-%      %remove radial orientation
-%      clear u s
-%      [u, s, v] = svd(squeeze(L2));
-%      L_forward(:,is,:) = u(:,:)*s(:,1:2);
-%  end
-% 
-%  ni = size(L_forward,3);
-% 
-%  for in = 1:size(L3,2)   
-%      p = randn(ni,1);
-%      p = p/norm(p);
-%      L1 = squeeze(L_forward(:,in,:));
-%      L_mix(:,in) = L1*p;
-%  end
+
+for is=1:size(L3,2)
+     clear L2
+     L2 = L3(:,is,:);
+
+     %remove radial orientation
+     clear u s
+     [u, s, v] = svd(squeeze(L2));
+     L_forward(:,is,:) = u(:,:)*s(:,1:2);
+ end
+
+ ni = size(L_forward,3);
+
+ for in = 1:size(L3,2)   
+     p = randn(ni,1);
+     p = p/norm(p);
+     L1 = squeeze(L_forward(:,in,:));
+     L_mix(:,in) = L1*p;
+ end
  
  %%
 
