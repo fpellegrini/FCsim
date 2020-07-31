@@ -7,7 +7,7 @@ if ip == 1
     SNR = 0.5;
     noise_mix = 0.5;
     nlag = 2;
-    filtertype= 'l'; %lcmv
+    filtertype= {'l'}; %lcmv
     hemisym = 0;
     
 elseif ip == 2
@@ -17,7 +17,7 @@ elseif ip == 2
     SNR = 0.5;
     noise_mix = 0.5;
     nlag = 2;
-    filtertype= 'l'; %lcmv
+    filtertype= {'l'}; %lcmv
     hemisym = 0;
     
 elseif ip == 3
@@ -27,7 +27,7 @@ elseif ip == 3
     SNR = 0.5;
     noise_mix = 0.5;
     nlag = 2;
-    filtertype= 'l'; %lcmv
+    filtertype= {'l'}; %lcmv
     hemisym = 0;
     
 elseif ip == 4
@@ -37,7 +37,7 @@ elseif ip == 4
     SNR = [0.1:0.9];
     noise_mix = 0.5;
     nlag = 2;
-    filtertype= 'l'; %lcmv
+    filtertype= {'l'}; %lcmv
     hemisym = 0;
     
 elseif ip == 5
@@ -47,7 +47,7 @@ elseif ip == 5
     SNR = 0.5;
     noise_mix = [0 0.25 0.5 0.75 1];
     nlag = 2;
-    filtertype= 'l'; %lcmv
+    filtertype= {'l'}; %lcmv
     hemisym = 0;
     
 elseif ip == 6
@@ -57,7 +57,7 @@ elseif ip == 6
     SNR = 0.5;
     noise_mix = 0.5;
     nlag = 1:2; %small (0 to 5 samples (=1)) or large (5 to 20 samples (=2))
-    filtertype= 'l'; %lcmv
+    filtertype= {'l'}; %lcmv
     hemisym = 0;
     
 elseif ip == 7
@@ -77,6 +77,6 @@ elseif ip == 8
     SNR = 0.5;
     noise_mix = 0.5;
     nlag = 2;
-    filtertype= 'l'; %lcmv
+    filtertype= {'l'}; %lcmv
     hemisym = 0:1; %symmetrize hemispheres
 end
