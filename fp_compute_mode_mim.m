@@ -1,6 +1,6 @@
 function [mic,mim,to_save] = fp_compute_mode_mim(mode1, D, npcs, V, A2, ZS, CS,fqA,nfqA,ihemi)
 
-ndim = 2; 
+ndim = 3; 
 
 %when ihemi == 1: makes sure that rois have the same npcs in both hemispheres
 if (strcmp(mode1,'max')||strcmp(mode1,'percent')) && (ihemi==1)    

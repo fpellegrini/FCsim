@@ -80,15 +80,16 @@ end
 
 %% leadfield
 L3 = L(:, D.ind_cortex, :);
-for is=1:D.nvox
-    clear L2
-    L2 = L3(:,is,:);
-    
-    %remove radial orientation
-    clear u s
-    [u, s, v] = svd(squeeze(L2));
-    L_backward(:,is,:) = u(:,:)*s(:,1:2);
-end
+L_backward = L3; 
+% for is=1:D.nvox
+%     clear L2
+%     L2 = L3(:,is,:);
+%     
+%     %remove radial orientation
+%     clear u s
+%     [u, s, v] = svd(squeeze(L2));
+%     L_backward(:,is,:) = u(:,:)*s(:,1:2);
+% end
 ni = size(L_backward,3);
 
 %construct source filter
