@@ -80,7 +80,7 @@ if strcmp(mode1,'all')
     
     fprintf('fixed 1 to 5 \n')
     tic
-    for ifi = 1:4
+    for ifi = 1:5
         npcs.fixed = repmat(ifi,D.nroi,1);
         [mic_fixed{ifi},mim_fixed{ifi},to_save_fixed{ifi}] = fp_compute_mode_mim(ifi, D, npcs.fixed, V, A2, ZS, CS,fqA,nfqA,ihemi);
     end
