@@ -9,7 +9,7 @@ function [PERFORMANCE, BASELINE] = fp_get_performance(gt, mic, mim, params)
 gt.mic = sum(gt.mic,3);
 gt.mim = sum(gt.mim,3);
 
-for ii =1:5
+for ii =1:numel(mim.fixed)
     mic.fixed{ii} = sum(mic.fixed{ii},3);
     mim.fixed{ii} = sum(mim.fixed{ii},3);
 end
@@ -41,7 +41,7 @@ BASELINE(2,1) = corr(mim.baseline(:),gt.mim(:));
 
 
 % (2) correlation maxima of mim/mic and ground truth
-for ii = 1:5
+for ii = 1:numel(mim.fixed)
     %mic
     clear m_max
     m_max = fp_get_nmaxima(mic.fixed{ii},params.iInt*2);

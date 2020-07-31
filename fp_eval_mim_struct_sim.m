@@ -20,10 +20,10 @@ for ip = varyParam
             for isnr = SNR
                 for iss = noise_mix
                     for ilag = nlag
-                        for ifilt = filtertype
+                        for ifi = 1:numel(filtertype)
                             for ihemi = hemisym
                                 for iit = 1: nit
-                                    
+                                    ifilt = filtertype{ifi}; 
                                     
                                     %create logfile for parallization
                                     logname = sprintf('iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_hemisym%d_iter%d'...

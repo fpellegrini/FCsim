@@ -23,7 +23,7 @@ elseif ip == 2
 elseif ip == 3
     %vary nRegionInts
     nInteractions = 1;
-    nRegionInts = 2:3;
+    nRegionInts = 2;
     SNR = 0.5;
     noise_mix = 0.5;
     nlag = 2;
@@ -67,7 +67,7 @@ elseif ip == 7
     SNR = 0.5;
     noise_mix = 0.5;
     nlag = 2;
-    filtertype= ['l';'d';'e'];
+    filtertype= {'d';'l';'e'};
     hemisym = 0;
     
 elseif ip == 8
