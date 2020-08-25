@@ -1,10 +1,10 @@
 function [sig,brain_noise,sensor_noise, gt,L_save,iroi_seed,iroi_tar,D] = fp_generate_mim_signal...
-    (params, fres,n_trials, D,DIROUT)
+    (params, fres,n_trials, D,DIROUT1)
 
 %if second condition of lag, then load parameters of first condition 
 flag = true; 
-if params.ip==6 && params.ilag ==2
-    load(sprintf('%s/mim_CS/lag/%d.mat',DIROUT,params.iit));
+if params.ip==6 
+    load(sprintf('%smim_lag/%d.mat',DIROUT1,params.iit));
     flag = false; 
 end
 
@@ -33,7 +33,7 @@ if flag
 end
 
 %save this state of s1 for later use 
-if params.ip==6 && params.ilag ==1
+if params.ip==1
     s1_save = s1;
 end
 
@@ -127,8 +127,11 @@ for itrial = 1:n_trials
 
 end
 
-if params.ip==6 && params.ilag ==1
-    outname = sprintf('%s/mim_CS/lag/%d.mat',DIROUT,params.iit);
+if params.ip==1
+    fprintf('Saving lag stuff... \n')
+    dir1 =  sprintf('%smim_lag/',DIROUT1);
+    if ~exist(dir1); mkdir(dir1); end
+    outname = sprintf('%smim_lag/%d.mat',DIROUT1,params.iit);
     s1 = s1_save;
     save(outname,'iroi_seed','iroi_tar','D','sensor_noise','s1','-v7.3')   
 end

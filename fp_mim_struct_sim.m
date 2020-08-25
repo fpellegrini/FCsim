@@ -1,17 +1,14 @@
 function fp_mim_struct_sim(params,logname)
 
-DIROUT = '/home/bbci/data/haufe/Franziska/data/';
+DIROUT = '/home/bbci/data/haufe/Franziska/data/mim_sim/';
+DIROUT1 = '/home/bbci/data/haufe/Franziska/data/mim_save/';
 
-if params.ip==7 && ~strcmp(params.ifilt,'l')
-    load(sprintf('%s/mim_CS/filt/%d.mat',DIROUT,params.iit));
-elseif params.ip==8 && ~params.ihemi==0
-    load(sprintf('%s/mim_CS/hemi/%d.mat',DIROUT,params.iit));
+if params.ip==7 || params.ip==8
+    load(sprintf('%s/mim_CS/%d.mat',DIROUT1,params.iit));
 else
     
-    if params.ip==5 && ~params.iss==0
-        load(sprintf('%s/mim_CS/noise_mix/%d.mat',DIROUT,params.iit));
-    elseif params.ip==4 && ~params.isnr==0.1
-        load(sprintf('%s/mim_CS/snr/%d.mat',DIROUT,params.iit));
+    if params.ip==5 || params.ip ==4
+        load(sprintf('%s/mim_sig/%d.mat',DIROUT1,params.iit));
     else
         
         fres = 40;
@@ -31,14 +28,13 @@ else
         fprintf('Signal generation... \n')
         tic
         [sig,brain_noise,sensor_noise,gt,L,iroi_seed, iroi_tar,D] = fp_generate_mim_signal(params, ...
-            fres,n_trials, D,DIROUT);
+            fres,n_trials, D,DIROUT1);
         toc
         
-        if params.ip==5 && params.iss==0
-            outname = sprintf('%s/mim_CS/noise_mix/%d.mat',DIROUT,params.iit);
-            save(outname,'-v7.3')
-        elseif params.ip==4 && params.isnr==0.1
-            outname = sprintf('%s/mim_CS/snr/%d.mat',DIROUT,params.iit);
+        if params.ip==1
+            dir1 =  sprintf('%s/mim_sig/',DIROUT1);
+            if ~exist(dir1); mkdir(dir1); end
+            outname = sprintf('%s/mim_sig/%d.mat',DIROUT1,params.iit);
             save(outname,'-v7.3')
         end
     end
@@ -69,12 +65,12 @@ else
     CS(:,:,1)=[];
     nfreq = size(CS,3);
     toc
-    if params.ip==7 && strcmp(params.ifilt,'l')
-        outname = sprintf('%s/mim_CS/filt/%d.mat',DIROUT,params.iit);
-        save(outname,'-v7.3')
-    elseif params.ip==8 && params.ihemi==0
-        outname = sprintf('%s/mim_CS/hemi/%d.mat',DIROUT,params.iit);
-        save(outname,'-v7.3')
+    
+    if params.ip==1
+       dir1 =  sprintf('%s/mim_CS/',DIROUT1);
+       if ~exist(dir1); mkdir(dir1); end
+       outname = sprintf('%s/mim_CS/%d.mat',DIROUT1,params.iit);
+       save(outname,'-v7.3')
     end
 end
 
@@ -131,7 +127,7 @@ end
 
 %% calculate MIM
 %pca pipeline ('all' 8 pipelines + baseline)
-[mic, mim, to_save] = fp_get_mim(A,CS,fqA,nfqA, D,params.ihemi,'baseline');
+[mic, mim, to_save] = fp_get_mim(A,CS,fqA,nfqA, D,params.ihemi,'all');
 
 %% performance measures
 fprintf('Performance measures... \n')

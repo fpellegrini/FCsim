@@ -34,7 +34,7 @@ elseif ip == 4
     %vary SNR
     nInteractions = 1;
     nRegionInts = 1;
-    SNR = [0.1:0.9];
+    SNR = [0.1:0.4, 0.6:0.9];
     noise_mix = 0.5;
     nlag = 2;
     filtertype= {'l'}; %lcmv
@@ -45,7 +45,7 @@ elseif ip == 5
     nInteractions = 1;
     nRegionInts = 1;
     SNR = 0.5;
-    noise_mix = [0 0.25 0.5 0.75 1];
+    noise_mix = [0 0.25 0.75 1];
     nlag = 2;
     filtertype= {'l'}; %lcmv
     hemisym = 0;
@@ -56,7 +56,7 @@ elseif ip == 6
     nRegionInts = 1;
     SNR = 0.5;
     noise_mix = 0.5;
-    nlag = 1:2; %small (0 to 5 samples (=1)) or large (5 to 20 samples (=2))
+    nlag = 1; %small (0 to 5 samples (=1)) or large (5 to 20 samples (=2))
     filtertype= {'l'}; %lcmv
     hemisym = 0;
     
@@ -67,7 +67,7 @@ elseif ip == 7
     SNR = 0.5;
     noise_mix = 0.5;
     nlag = 2;
-    filtertype= {'d';'l';'e'};
+    filtertype= {'d';'e'};
     hemisym = 0;
     
 elseif ip == 8
@@ -78,5 +78,5 @@ elseif ip == 8
     noise_mix = 0.5;
     nlag = 2;
     filtertype= {'l'}; %lcmv
-    hemisym = 0:1; %symmetrize hemispheres
+    hemisym = 1; %symmetrize hemispheres
 end
