@@ -38,6 +38,8 @@ for oroi = 1:D.nroi
             CSroi(:, :, ifreq) = reshape(P(:,:,fqA(ifreq)), nmeg, [])'*CS(:, :, ifreq)...
                 *reshape(P(:,:,fqA(ifreq)), nmeg, []);
         end
+%         fprintf('applied filters')
+%         d=whos; sum([d.bytes])/1000^3
 %         CSroi_save{oroi,uroi} = CSroi;
         
         
@@ -49,7 +51,14 @@ for oroi = 1:D.nroi
             Cohroi(:,:,ifreq) = CSroi(:,:,ifreq)./ sqrt(pow*pow');
         end
         clear CSroi
-        Cohroi_save{oroi,uroi} = Cohroi; 
+        if strcmp(mode1,'bandc')||strcmp(mode1,'case2')||strcmp(mode1,'baseline')
+%         keyboard
+            Cohroi_save{oroi,uroi} = Cohroi(1:nvoxreg1,nvoxreg1+1:end,:);
+            Cohroi_save{oroi,oroi} = Cohroi(1:nvoxreg1,1:nvoxreg1,:);
+        else 
+            Cohroi_save{oroi,uroi} = Cohroi(1:npcs(oroi),npcs(oroi)+1:end,:);
+            Cohroi_save{oroi,oroi} = Cohroi(1:npcs(oroi),1:npcs(oroi),end);
+        end
         
        
         if strcmp(mode1,'baseline')||strcmp(mode1,'bandc')
@@ -73,6 +82,8 @@ for oroi = 1:D.nroi
             [a, b]= fp_mim(baseline,npcs);
             mic1([oroi uroi],[oroi uroi],:) = a;
             mim1([oroi uroi],[oroi uroi],:) = b;
+%             fprintf('Calculated baseline')
+%             d=whos; sum([d.bytes])/1000^3
 
             
         end
@@ -90,6 +101,8 @@ for oroi = 1:D.nroi
             mim2(oroi,uroi,:) = squeeze(mean(mean(mim_v(1:nvoxreg1,nvoxreg1+1:end,:),1),2));
             mim2(uroi,oroi,:) = mim2(oroi,uroi,:);        
             mim2(oroi,oroi,:) = squeeze(mean(mean(mim_v(1:nvoxreg1,1:nvoxreg1,:),1),2));
+%             fprintf('calculated case2')
+%             d=whos; sum([d.bytes])/1000^3
             
         elseif ~strcmp(mode1,'baseline')
             
@@ -98,6 +111,8 @@ for oroi = 1:D.nroi
             [a , b ] =  fp_mim(Cohroi,npcs([oroi uroi]));
             mic([oroi uroi],[oroi uroi],:) = a;
             mim([oroi uroi],[oroi uroi],:) = b;
+%             fprintf('calculated mim')
+%             d=whos; sum([d.bytes])/1000^3
         end
     end
 end
@@ -109,13 +124,20 @@ elseif strcmp(mode1,'case2')
     mic = mic2;
     mim=mim2;
 elseif strcmp(mode1,'bandc')
-    mic.baseline = mic1; 
+    mic.baseline = mic1;
+    clear mic1
     mim.baseline = mim1; 
+    clear mim1
     mic.case2 = mic2; 
-    mim.case2 = mim2;    
+    clear mic2
+    mim.case2 = mim2; 
+    clear mim2
 end
 
 to_save.P = P_save; 
 to_save.Cohroi = Cohroi_save;
 % to_save.CSroi = CSroi_save; 
 to_save.npcs = npcs; 
+
+fprintf('calculated mode mim')
+d=whos; sum([d.bytes])/1000^3

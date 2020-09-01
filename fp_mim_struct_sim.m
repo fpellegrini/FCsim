@@ -2,6 +2,7 @@ function fp_mim_struct_sim(params,logname)
 
 DIROUT = '/home/bbci/data/haufe/Franziska/data/mim_sim/';
 DIROUT1 = '/home/bbci/data/haufe/Franziska/data/mim_save/';
+if ~exist(DIROUT1);mkdir(DIROUT1); end
 
 if params.ip==7 || params.ip==8
     load(sprintf('%s/mim_CS/%d.mat',DIROUT1,params.iit));
@@ -30,6 +31,7 @@ else
         [sig,brain_noise,sensor_noise,gt,L,iroi_seed, iroi_tar,D] = fp_generate_mim_signal(params, ...
             fres,n_trials, D,DIROUT1);
         toc
+        d=whos; sum([d.bytes])/1000^3
         
         if params.ip==1
             dir1 =  sprintf('%s/mim_sig/',DIROUT1);
@@ -125,15 +127,19 @@ elseif strcmp(params.ifilt,'l')
     nfqA = 1;   
 end
 
+d=whos; sum([d.bytes])/1000^3
 %% calculate MIM
 %pca pipeline ('all' 8 pipelines + baseline)
 [mic, mim, to_save] = fp_get_mim(A,CS,fqA,nfqA, D,params.ihemi,'all');
+fprintf('pipelines calculated')
+d=whos; sum([d.bytes])/1000^3
 
 %% performance measures
 fprintf('Performance measures... \n')
 tic
 [PERFORMANCE, BASELINE] = fp_get_performance(gt, mic, mim, params);
 toc
+d=whos; sum([d.bytes])/1000^3
 
 %% save performance and baseline
 fprintf('Saving... \n')

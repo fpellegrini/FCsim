@@ -17,7 +17,7 @@ for aroi = 1:D.nroi
     A2{aroi} = reshape(A_, [nmeg, ni*nvoxroi, nfqA]);
     
     
-    if ~strcmp(mode1,'case2')&& ~strcmp(mode1,'baseline')
+    if ~strcmp(mode1,'case2')&& ~strcmp(mode1,'baseline')&& ~strcmp(mode1,'bandc')
         
         %project CS to voxel space
         for ifq = 1: nfreq
@@ -74,6 +74,7 @@ for aroi = 1:D.nroi
     end
 end
 toc
+d=whos; sum([d.bytes])/1000^3
 %%
 fprintf('Working on compute_mode. \n')
 if strcmp(mode1,'all')
@@ -85,32 +86,32 @@ if strcmp(mode1,'all')
         [mic_fixed{ifi},mim_fixed{ifi},to_save_fixed{ifi}] = fp_compute_mode_mim(ifi, D, npcs.fixed, V, A2, ZS, CS,fqA,nfqA,ihemi);
     end
     toc
-    mic.fixed = mic_fixed;
-    clear mic_fixed
-    mim.fixed = mim_fixed;
-    clear mim_fixed
+    d=whos; sum([d.bytes])/1000^3
     
     fprintf('max \n')
     tic
     [mic_max,mim_max,to_save_max] = fp_compute_mode_mim('max', D, npcs.max, V, A2, ZS, CS,fqA,nfqA,ihemi);
     toc
+    d=whos; sum([d.bytes])/1000^3
     
     fprintf('90 percent \n')
     tic
     [mic90,mim90,to_save90] = fp_compute_mode_mim('percent', D, npcs.percent, V, A2, ZS, CS,fqA,nfqA,ihemi);
     toc
+    d=whos; sum([d.bytes])/1000^3
     
     fprintf('case2 and baseline \n')
     tic
     [mic_bandc,mim_bandc,to_save_bandc] = fp_compute_mode_mim('bandc',D,[],[],A2,[],CS,fqA,nfqA,ihemi);
     toc
+    d=whos; sum([d.bytes])/1000^3
     
-    
+    mic.fixed = mic_fixed;
     mic.max = mic_max;
     mic.percent = mic90;
     mic.case2 = mic_bandc.case2;
     mic.baseline = mic_bandc.baseline;
-    
+    mim.fixed = mim_fixed;
     mim.max = mim_max;
     mim.percent = mim90;
     mim.case2 = mim_bandc.case2;
@@ -119,7 +120,7 @@ if strcmp(mode1,'all')
     to_save.fixed = to_save_fixed;
     to_save.max = to_save_max;
     to_save.percent = to_save90;
-%     to_save.bandc = to_save_bandc; %too large to be saved 
+    to_save.bandc = to_save_bandc; %too large to be saved?
     
     
 else
