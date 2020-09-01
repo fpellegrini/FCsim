@@ -85,6 +85,10 @@ if strcmp(mode1,'all')
         [mic_fixed{ifi},mim_fixed{ifi},to_save_fixed{ifi}] = fp_compute_mode_mim(ifi, D, npcs.fixed, V, A2, ZS, CS,fqA,nfqA,ihemi);
     end
     toc
+    mic.fixed = mic_fixed;
+    clear mic_fixed
+    mim.fixed = mim_fixed;
+    clear mim_fixed
     
     fprintf('max \n')
     tic
@@ -101,12 +105,12 @@ if strcmp(mode1,'all')
     [mic_bandc,mim_bandc,to_save_bandc] = fp_compute_mode_mim('bandc',D,[],[],A2,[],CS,fqA,nfqA,ihemi);
     toc
     
-    mic.fixed = mic_fixed;
+    
     mic.max = mic_max;
     mic.percent = mic90;
     mic.case2 = mic_bandc.case2;
     mic.baseline = mic_bandc.baseline;
-    mim.fixed = mim_fixed;
+    
     mim.max = mim_max;
     mim.percent = mim90;
     mim.case2 = mim_bandc.case2;
