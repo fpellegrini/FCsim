@@ -1,6 +1,7 @@
 function fp_mim_struct_sim(params,logname)
 
 DIROUT = '/home/bbci/data/haufe/Franziska/data/mim_sim/';
+if ~exist(DIROUT);mkdir(DIROUT); end
 DIROUT1 = '/home/bbci/data/haufe/Franziska/data/mim_save/';
 if ~exist(DIROUT1);mkdir(DIROUT1); end
 
