@@ -4,7 +4,10 @@ function [sig,brain_noise,sensor_noise, gt,L_save,iroi_seed,iroi_tar,D] = fp_gen
 %if second condition of lag, then load parameters of first condition 
 flag = true; 
 if params.ip==6 
+    params_save = params; 
     load(sprintf('%smim_lag/%d.mat',DIROUT1,params.iit));
+    params = params_save; 
+    clear params_save
     flag = false; 
 end
 
@@ -66,8 +69,8 @@ if params.iReg~=1 %mim across two voxels of one region
     gt.mic = gt_mic; 
     gt.mim = gt_mim; 
 else 
-    gt.mic = gt1;
-    gt.mim = gt1; 
+    gt.mic = abs(imag(gt1));
+    gt.mim = abs(imag(gt1)); 
 end
 clear gt1 gt_mic gt_mim
 
@@ -133,5 +136,5 @@ if params.ip==1
     if ~exist(dir1); mkdir(dir1); end
     outname = sprintf('%smim_lag/%d.mat',DIROUT1,params.iit);
     s1 = s1_save;
-    save(outname,'iroi_seed','iroi_tar','D','sensor_noise','s1','-v7.3')   
+    %save(outname,'iroi_seed','iroi_tar','D','sensor_noise','s1','-v7.3')   
 end

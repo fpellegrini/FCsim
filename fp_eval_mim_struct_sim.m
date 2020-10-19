@@ -11,10 +11,6 @@ rng('shuffle')
 
 %%
 %prevent array jobs to start at exactly the same time
-% pause(randi(120,1))
-% pause(randi(120,1))
-% pause(randi(120,1))
-% pause(randi(120,1))
 iit = str2num(getenv('SGE_TASK_ID'))
 
 % for ip = varyParam
@@ -51,9 +47,10 @@ for iInt = nInteractions
                                 params.ihemi = ihemi;
                                 params.iit = iit;
                                 params.ip = ip;
+                                params.logname = logname; 
                                 
                                 
-                                fp_mim_struct_sim(params,logname)
+                                fp_mim_struct_sim(params)
                                 
                                 eval(sprintf('!mv %s%s_work %s%s_done',DIRLOG,logname,DIRLOG,logname))
                                 
