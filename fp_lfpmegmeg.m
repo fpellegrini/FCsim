@@ -11,7 +11,7 @@ end
 
 %%
 patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
-nit= 1000;
+nit= 100;
 
 %this is Precentral left and right, SMA left and right, parietal left and
 %right, cerebellum, and pallidum
@@ -19,7 +19,9 @@ myrois = [1 15 3 17 8 22 13 14];
 
 
 %%
-for id = 1:numel(patientID)
+for id = 6:numel(patientID)
+    clearvars -except DIRLOG DIROUT patientID nit myrois id 
+    
     logname = sprintf('%s',patientID{id});
     
     if ~exist(sprintf('%s%s_work',DIRLOG,logname)) & ~exist(sprintf('%s%s_done',DIRLOG,logname))
