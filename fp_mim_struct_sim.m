@@ -38,7 +38,7 @@ else
             dir1 =  sprintf('%s/mim_sig/',DIROUT1);
             if ~exist(dir1); mkdir(dir1); end
             outname = sprintf('%s/mim_sig/%d.mat',DIROUT1,params.iit);
-            save(outname,'-v7.3')
+%             save(outname,'-v7.3')
         end
     end
     
@@ -73,7 +73,7 @@ else
        dir1 =  sprintf('%s/mim_CS/',DIROUT1);
        if ~exist(dir1); mkdir(dir1); end
        outname = sprintf('%s/mim_CS/%d.mat',DIROUT1,params.iit);
-       save(outname,'-v7.3')
+%        save(outname,'-v7.3')
     end
 end
 
