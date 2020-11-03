@@ -19,7 +19,7 @@ for oroi = 1:D.nroi
         %concatenate filters
         if strcmp(mode1,'bandc')|| strcmp(mode1,'baseline')||strcmp(mode1,'case2')
             P = cat(2,A2{oroi},A2{uroi});
-            
+            P_save{oroi} = A2{oroi}; 
         else
             croi = 1;
             for jroi = [oroi uroi]
@@ -28,8 +28,9 @@ for oroi = 1:D.nroi
                 end
                 croi = croi +npcs(jroi);
             end
+            P_save{oroi} = P(:,1:npcs(oroi),:);
         end
-        P_save{oroi,uroi} = P; 
+        
         
         
         %apply all filters
@@ -51,14 +52,15 @@ for oroi = 1:D.nroi
             Cohroi(:,:,ifreq) = CSroi(:,:,ifreq)./ sqrt(pow*pow');
         end
         clear CSroi
-        if strcmp(mode1,'bandc')||strcmp(mode1,'case2')||strcmp(mode1,'baseline')
-%         keyboard
-            Cohroi_save{oroi,uroi} = Cohroi(1:nvoxreg1,nvoxreg1+1:end,:);
-            Cohroi_save{oroi,oroi} = Cohroi(1:nvoxreg1,1:nvoxreg1,:);
-        else 
-            Cohroi_save{oroi,uroi} = Cohroi(1:npcs(oroi),npcs(oroi)+1:end,:);
-            Cohroi_save{oroi,oroi} = Cohroi(1:npcs(oroi),1:npcs(oroi),end);
-        end
+%         if strcmp(mode1,'bandc')||strcmp(mode1,'case2')||strcmp(mode1,'baseline')
+% %         keyboard
+%             Cohroi_save{oroi,uroi} = Cohroi(1:nvoxreg1,nvoxreg1+1:end,:);
+%             Cohroi_save{oroi,oroi} = Cohroi(1:nvoxreg1,1:nvoxreg1,:);
+%             d=whos; sum([d.bytes])/1000^3
+%         else 
+%             Cohroi_save{oroi,uroi} = Cohroi(1:npcs(oroi),npcs(oroi)+1:end,:);
+%             Cohroi_save{oroi,oroi} = Cohroi(1:npcs(oroi),1:npcs(oroi),end);
+%         end
         
        
         if strcmp(mode1,'baseline')||strcmp(mode1,'bandc')
@@ -135,7 +137,7 @@ elseif strcmp(mode1,'bandc')
 end
 
 to_save.P = P_save; 
-to_save.Cohroi = Cohroi_save;
+% to_save.Cohroi = Cohroi_save;
 % to_save.CSroi = CSroi_save; 
 to_save.npcs = npcs; 
 

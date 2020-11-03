@@ -12,6 +12,7 @@ ilag=2;
 ihemi=0;
 ifilt='l';
 
+%%
 for iit=1:nit
     inname = sprintf('mim_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_hemisym%d_iter%d'...
         ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,ihemi,iit);
@@ -25,11 +26,11 @@ for iit=1:nit
     %there was some bug, so we recalculate PERFORMANCE and BASELINE
     %PERFORMANCE has the dimensions: 2 (mim/mic) x 8 (pipelines) x
     %2 (perfomance measure)
-%     clear PERFORMANCE BASELINE
-%     [PERFORMANCE, BASELINE] = fp_get_performance(gt, mic, mim, params);
+    clear PERFORMANCE BASELINE
+    [PERFORMANCE, BASELINE] = fp_get_performance(gt, mic, mim, params);
 
-%     perf_mim_corr(:,iit) = [squeeze(PERFORMANCE(1,:,1)) squeeze(BASELINE(1,1))];
-%     perf_mic_corr(:,iit) = [squeeze(PERFORMANCE(2,:,1)) squeeze(BASELINE(1,1))];
+    perf_mim_corr(:,iit) = [squeeze(PERFORMANCE(1,:,1)) squeeze(BASELINE(1,1))];
+    perf_mic_corr(:,iit) = [squeeze(PERFORMANCE(2,:,1)) squeeze(BASELINE(1,1))];
 %     perf_mim_corr_max(:,iit) = [squeeze(PERFORMANCE(1,:,2)) squeeze(BASELINE(1,1))];
 %     perf_mic_corr_max(:,iit) = [squeeze(PERFORMANCE(2,:,2)) squeeze(BASELINE(1,1))];
     
@@ -83,13 +84,25 @@ end
 %%
 for ip = 1:9
     for im = 1:2 
-        mean_auc(ip,im) = mean(auc(:,ip,im));
+        median_auc(ip,im) = median(auc(:,ip,im));
         std_auc(ip,im) = std(auc(:,ip,im)); 
-        [p_auc(ip,im),h_auc(ip,im),stats] = signrank(auc(:,ip,im),0,'tail','right');
+        [p_auc(ip,im),h_auc(ip,im),stats] = signrank(auc(:,ip,im),0.5,'tail','right');
         t_auc(ip,im) = stats.signedrank;
     end
 end
 
+figure
+bar(median_auc)
+title('median auc')
+xlabel('pipelines')
+ylabel('auc')
+legend('mic','mim')
+figure
+bar(-log10(p_auc))
+title('-log10(p auc)')
+xlabel('pipelines')
+ylabel('-log10(p auc)')
+legend('mic','mim')
 %% save
 clear cc
 outname= '/home/bbci/data/haufe/Franziska/data/mimsim_ana.mat';
@@ -106,32 +119,33 @@ grid on
 title('MIM correlation with ground truth')
 xlabel('Pipelines')
 ylabel('correlation coefficient')
+% 
+% subplot(2,1,2)
+% boxplot(squeeze(perf_mim_corr_max'),'Labels',{'1 pc','2 pc', '3 pc',...
+%     '4 pc','5 pc','max','90 percent','case2','baseline'})
+% grid on
+% title('maxima of MIM correlation with ground truth')
+% xlabel('Pipelines')
+% ylabel('correlation coefficient')
 
+% figure
 subplot(2,1,2)
-boxplot(squeeze(perf_mim_corr_max'),'Labels',{'1 pc','2 pc', '3 pc',...
-    '4 pc','5 pc','max','90 percent','case2','baseline'})
-grid on
-title('maxima of MIM correlation with ground truth')
-xlabel('Pipelines')
-ylabel('correlation coefficient')
-
-figure
-subplot(2,1,1)
 boxplot(squeeze(perf_mic_corr'),'Labels',{'1 pc','2 pc', '3 pc',...
     '4 pc','5 pc','max','90 percent','case2','baseline'})
 grid on
 title('MIC correlation with ground truth')
 xlabel('Pipelines')
 ylabel('correlation coefficient')
+% 
+% subplot(2,1,2)
+% boxplot(squeeze(perf_mic_corr_max'),'Labels',{'1 pc','2 pc', '3 pc',...
+%     '4 pc','5 pc','max','90 percent','case2','baseline'})
+% grid on
+% title('maxima of MIC correlation with ground truth')
+% xlabel('Pipelines')
+% ylabel('correlation coefficient')
 
-subplot(2,1,2)
-boxplot(squeeze(perf_mic_corr_max'),'Labels',{'1 pc','2 pc', '3 pc',...
-    '4 pc','5 pc','max','90 percent','case2','baseline'})
-grid on
-title('maxima of MIC correlation with ground truth')
-xlabel('Pipelines')
-ylabel('correlation coefficient')
-
+%%
 %hist
 figure; 
 subplot(2,1,1)

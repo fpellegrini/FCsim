@@ -1,4 +1,4 @@
-function fp_mim_struct_sim(params,logname)
+function fp_mim_struct_sim(params)
 
 DIROUT = '/home/bbci/data/haufe/Franziska/data/mim_sim/';
 if ~exist(DIROUT);mkdir(DIROUT); end
@@ -6,11 +6,17 @@ DIROUT1 = '/home/bbci/data/haufe/Franziska/data/mim_save/';
 if ~exist(DIROUT1);mkdir(DIROUT1); end
 
 if params.ip==7 || params.ip==8
+    params_save = params; 
     load(sprintf('%s/mim_CS/%d.mat',DIROUT1,params.iit));
+    params = params_save; 
+    clear params_save
 else
     
     if params.ip==5 || params.ip ==4
+        params_save = params;
         load(sprintf('%s/mim_sig/%d.mat',DIROUT1,params.iit));
+        params= params_save;
+        clear params_save 
     else
         
         fres = 40;
@@ -34,12 +40,12 @@ else
         toc
         d=whos; sum([d.bytes])/1000^3
         
-        if params.ip==1
-            dir1 =  sprintf('%s/mim_sig/',DIROUT1);
-            if ~exist(dir1); mkdir(dir1); end
-            outname = sprintf('%s/mim_sig/%d.mat',DIROUT1,params.iit);
+%         if params.ip==1
+%             dir1 =  sprintf('%s/mim_sig/',DIROUT1);
+%             if ~exist(dir1); mkdir(dir1); end
+%             outname = sprintf('%s/mim_sig/%d.mat',DIROUT1,params.iit);
 %             save(outname,'-v7.3')
-        end
+%         end
     end
     
     
@@ -69,12 +75,12 @@ else
     nfreq = size(CS,3);
     toc
     
-    if params.ip==1
-       dir1 =  sprintf('%s/mim_CS/',DIROUT1);
-       if ~exist(dir1); mkdir(dir1); end
-       outname = sprintf('%s/mim_CS/%d.mat',DIROUT1,params.iit);
+%     if params.ip==1
+%        dir1 =  sprintf('%s/mim_CS/',DIROUT1);
+%        if ~exist(dir1); mkdir(dir1); end
+%        outname = sprintf('%s/mim_CS/%d.mat',DIROUT1,params.iit);
 %        save(outname,'-v7.3')
-    end
+%     end
 end
 
 %% leadfield
@@ -145,7 +151,7 @@ d=whos; sum([d.bytes])/1000^3
 %% save performance and baseline
 fprintf('Saving... \n')
 tic
-outname = sprintf('%smim_%s.mat',DIROUT,logname);
+outname = sprintf('%smim_%s.mat',DIROUT,params.logname);
 save(outname,'-v7.3')
 toc
 

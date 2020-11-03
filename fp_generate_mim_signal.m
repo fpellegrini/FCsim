@@ -130,11 +130,11 @@ for itrial = 1:n_trials
 
 end
 
-if params.ip==1
-    fprintf('Saving lag stuff... \n')
-    dir1 =  sprintf('%smim_lag/',DIROUT1);
-    if ~exist(dir1); mkdir(dir1); end
-    outname = sprintf('%smim_lag/%d.mat',DIROUT1,params.iit);
-    s1 = s1_save;
-    %save(outname,'iroi_seed','iroi_tar','D','sensor_noise','s1','-v7.3')   
-end
+% if params.ip==1
+%     fprintf('Saving lag stuff... \n')
+%     dir1 =  sprintf('%smim_lag/',DIROUT1);
+%     if ~exist(dir1); mkdir(dir1); end
+%     outname = sprintf('%smim_lag/%d.mat',DIROUT1,params.iit);
+%     s1 = s1_save;
+%     %save(outname,'iroi_seed','iroi_tar','D','sensor_noise','s1','-v7.3')   
+% end

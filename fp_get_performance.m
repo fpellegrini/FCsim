@@ -41,54 +41,54 @@ BASELINE(2,1) = corr(mim.baseline(:),gt.mim(:));
 
 
 % (2) correlation maxima of mim/mic and ground truth
-for ii = 1:numel(mim.fixed)
-    %mic
-    clear m_max
-    m_max = fp_get_nmaxima(mic.fixed{ii},params.iInt*2);
-    PERFORMANCE(1,ii,2) = corr(m_max(:),gt.mic(:));
-    
-    %mim
-    clear m_max
-    m_max = fp_get_nmaxima(mim.fixed{ii},params.iInt*2);
-    PERFORMANCE(2,ii,2) = corr(m_max(:),gt.mim(:));
-end
-
-%max pipeline
-%mic
-clear m_max
-m_max = fp_get_nmaxima(mic.max,params.iInt*2);
-PERFORMANCE(1,6,2) = corr(m_max(:),gt.mic(:));
-%mim
-clear m_max
-m_max = fp_get_nmaxima(mim.max,params.iInt*2);
-PERFORMANCE(2,6,2) = corr(m_max(:),gt.mim(:));
-
-%percent pipeline
-%mic
-clear m_max
-m_max = fp_get_nmaxima(mic.percent,params.iInt*2);
-PERFORMANCE(1,7,2) = corr(m_max(:),gt.mic(:));
-%mim
-clear m_max
-m_max = fp_get_nmaxima(mim.percent,params.iInt*2);
-PERFORMANCE(2,7,2) = corr(m_max(:),gt.mim(:));
-
-%case2 pipeline
-%mic
-clear m_max
-m_max = fp_get_nmaxima(mic.case2,params.iInt*2);
-PERFORMANCE(1,8,2) = corr(m_max(:),gt.mic(:));
-%mim
-clear m_max
-m_max = fp_get_nmaxima(mim.case2,params.iInt*2);
-PERFORMANCE(2,8,2) = corr(m_max(:),gt.mim(:));
-
-%baseline
-%mic
-clear m_max
-m_max = fp_get_nmaxima(mic.baseline,params.iInt*2);
-BASELINE(1,2) = corr(m_max(:),gt.mic(:));
-%mim
-clear m_max
-m_max = fp_get_nmaxima(mim.baseline,params.iInt*2);
-BASELINE(2,2) = corr(m_max(:),gt.mim(:));
+% for ii = 1:numel(mim.fixed)
+%     %mic
+%     clear m_max
+%     m_max = fp_get_nmaxima(mic.fixed{ii},params.iInt*2);
+%     PERFORMANCE(1,ii,2) = corr(m_max(:),gt.mic(:));
+%     
+%     %mim
+%     clear m_max
+%     m_max = fp_get_nmaxima(mim.fixed{ii},params.iInt*2);
+%     PERFORMANCE(2,ii,2) = corr(m_max(:),gt.mim(:));
+% end
+% 
+% %max pipeline
+% %mic
+% clear m_max
+% m_max = fp_get_nmaxima(mic.max,params.iInt*2);
+% PERFORMANCE(1,6,2) = corr(m_max(:),gt.mic(:));
+% %mim
+% clear m_max
+% m_max = fp_get_nmaxima(mim.max,params.iInt*2);
+% PERFORMANCE(2,6,2) = corr(m_max(:),gt.mim(:));
+% 
+% %percent pipeline
+% %mic
+% clear m_max
+% m_max = fp_get_nmaxima(mic.percent,params.iInt*2);
+% PERFORMANCE(1,7,2) = corr(m_max(:),gt.mic(:));
+% %mim
+% clear m_max
+% m_max = fp_get_nmaxima(mim.percent,params.iInt*2);
+% PERFORMANCE(2,7,2) = corr(m_max(:),gt.mim(:));
+% 
+% %case2 pipeline
+% %mic
+% clear m_max
+% m_max = fp_get_nmaxima(mic.case2,params.iInt*2);
+% PERFORMANCE(1,8,2) = corr(m_max(:),gt.mic(:));
+% %mim
+% clear m_max
+% m_max = fp_get_nmaxima(mim.case2,params.iInt*2);
+% PERFORMANCE(2,8,2) = corr(m_max(:),gt.mim(:));
+% 
+% %baseline
+% %mic
+% clear m_max
+% m_max = fp_get_nmaxima(mic.baseline,params.iInt*2);
+% BASELINE(1,2) = corr(m_max(:),gt.mic(:));
+% %mim
+% clear m_max
+% m_max = fp_get_nmaxima(mim.baseline,params.iInt*2);
+% BASELINE(2,2) = corr(m_max(:),gt.mim(:));
