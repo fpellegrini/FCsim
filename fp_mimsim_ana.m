@@ -1,10 +1,10 @@
 function fp_mimsim_ana
 
-DIRIN = '/home/bbci/data/haufe/Franziska/data/mim_sim/';
+DIRIN = './mim_sim/';
 
 %default sparamenters
 nit = 100;
-iInt = 1; 
+iInt = 5; 
 iReg=1; 
 isnr=0.5;
 iss = 0.5;
@@ -12,7 +12,7 @@ ilag=2;
 ihemi=0;
 ifilt='l';
 %%
-for iit=1:nit
+for iit=[1:81 84:nit]
     inname = sprintf('mim_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_hemisym%d_iter%d'...
         ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,ihemi,iit);
     
@@ -35,8 +35,10 @@ for iit=1:nit
     
     %AUC
     label= zeros(68,68); 
-    label(iroi_seed,iroi_tar) = 1;
-    label(iroi_tar,iroi_seed) = 1;
+    for ilab = 1:length(iroi_seed)
+        label(iroi_seed(ilab),iroi_tar(ilab)) = 1;
+        label(iroi_tar(ilab),iroi_seed(ilab)) = 1;
+    end
     
     for ipip = 1:5
         cc = sum(mic.fixed{ipip},3);
@@ -96,7 +98,7 @@ figure
 bar(-log10(p_auc))
 %% save
 clear cc
-outname= sprintf('/home/bbci/data/haufe/Franziska/data/mimsim_ana_snr0%d_30nit.mat',round(isnr*10));
+outname= sprintf('./mimsim_ana_snr0%d_iInt%d.mat',round(isnr*10),iInt);
 save(outname,'-v7.3')
 
 %% plots
