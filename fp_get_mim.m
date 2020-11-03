@@ -7,6 +7,7 @@ function [mic, mim,to_save] = fp_get_mim(A,CS,fqA,nfqA, D,ihemi,mode1)
 nfreq = size(CS,3); 
 
 fprintf('Working on first part of mim_pca. \n')
+%%
 tic
 for aroi = 1:D.nroi
     
@@ -74,7 +75,7 @@ for aroi = 1:D.nroi
     end
 end
 toc
-d=whos; sum([d.bytes])/1000^3
+% d=whos; sum([d.bytes])/1000^3
 %%
 fprintf('Working on compute_mode. \n')
 if strcmp(mode1,'all')

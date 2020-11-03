@@ -11,7 +11,6 @@ iss = 0.5;
 ilag=2;
 ihemi=0;
 ifilt='l';
-
 %%
 for iit=1:nit
     inname = sprintf('mim_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_hemisym%d_iter%d'...
@@ -81,7 +80,7 @@ for iit=1:nit
 
 end
 
-%%
+%% mean and std of AUC 
 for ip = 1:9
     for im = 1:2 
         median_auc(ip,im) = median(auc(:,ip,im));
@@ -93,21 +92,13 @@ end
 
 figure
 bar(median_auc)
-title('median auc')
-xlabel('pipelines')
-ylabel('auc')
-legend('mic','mim')
 figure
 bar(-log10(p_auc))
-title('-log10(p auc)')
-xlabel('pipelines')
-ylabel('-log10(p auc)')
-legend('mic','mim')
 %% save
 clear cc
-outname= '/home/bbci/data/haufe/Franziska/data/mimsim_ana.mat';
+outname= sprintf('/home/bbci/data/haufe/Franziska/data/mimsim_ana_snr0%d_30nit.mat',round(isnr*10));
 save(outname,'-v7.3')
-%%
+
 %% plots
 
 % boxplots
@@ -119,7 +110,7 @@ grid on
 title('MIM correlation with ground truth')
 xlabel('Pipelines')
 ylabel('correlation coefficient')
-% 
+
 % subplot(2,1,2)
 % boxplot(squeeze(perf_mim_corr_max'),'Labels',{'1 pc','2 pc', '3 pc',...
 %     '4 pc','5 pc','max','90 percent','case2','baseline'})
@@ -136,7 +127,7 @@ grid on
 title('MIC correlation with ground truth')
 xlabel('Pipelines')
 ylabel('correlation coefficient')
-% 
+
 % subplot(2,1,2)
 % boxplot(squeeze(perf_mic_corr_max'),'Labels',{'1 pc','2 pc', '3 pc',...
 %     '4 pc','5 pc','max','90 percent','case2','baseline'})
@@ -145,8 +136,7 @@ ylabel('correlation coefficient')
 % xlabel('Pipelines')
 % ylabel('correlation coefficient')
 
-%%
-%hist
+%% hist
 figure; 
 subplot(2,1,1)
 hist(perf_mim_corr_max')
