@@ -62,7 +62,7 @@ for aroi = 1:D.nroi
             npcs(aroi) = min(find(vx_>0.9));
             
         elseif strcmp(mode1,'all')
-            npcs.max(aroi) = min(rank(CSs),size(V_,1));
+            npcs.max(aroi) = min(find(vx_>0.99999));
             vx_ = cumsum(D_)./sum(D_);
             npcs.percent(aroi) = min(find(vx_>0.9));
             
