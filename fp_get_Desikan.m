@@ -1,6 +1,6 @@
 function D = fp_get_Desikan(iReg)
 
-load('./processed_bs_wzb_90_2000/bs_results.mat')
+load('/home/bbci/data/haufe/Franziska/data/processed_bs_wzb_90_2000/bs_results.mat')
 % number of ROIs in the Desikan-Kiliany Atlas
 nroi = length(cortex.Atlas(3).Scouts);
 %roi inds
@@ -24,7 +24,7 @@ for iROI = 1:nroi
     end
 end
 
-%maps roi indices to voxels 
+%maps roi indeices to voxels 
 nvox = length(ind_cortex);
 roi2vox = zeros(nvox,1); 
 for iroi = 1:nroi 
