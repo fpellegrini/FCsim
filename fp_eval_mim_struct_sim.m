@@ -2,12 +2,10 @@ function fp_eval_mim_struct_sim(ip)
 
 fp_addpath
 
-DIRLOG ='/home/bbci/data/haufe/Franziska/log/mim_sim/';
+DIRLOG ='/home/bbci/data/haufe/Franziska/log/mim_sim1/';
 if ~exist(DIRLOG); mkdir(DIRLOG); end
 
 rng('shuffle')
-% varyParam = 1:8;
-% nit = 100;
 
 %%
 %prevent array jobs to start at exactly the same time

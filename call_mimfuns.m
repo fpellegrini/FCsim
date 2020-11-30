@@ -30,15 +30,30 @@ inname = sprintf('mim_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_hemisym%d_iter%d'
 load([DIRIN inname '.mat'])
 clear mic mim 
 
+%%
 % mode1 is either a number for fixed pcs (an integer), or 'max' (select npcs = rank of
 %region data), or 'percent' (select npcs that 90% of the variance is
 %preserved), or 'case2' (mim only to pool dimensions, then summation), or
 %'baseline', or 'all'
-mode1='max';
-[mic, mim, ~] = fp_get_mim(A,CS,fqA,nfqA, D,params.ihemi,mode1);
+mode1='baseline';
+[mic1, mim1, u1] = fp_get_mim(A,CS,fqA,nfqA, D,params.ihemi,mode1);
 
 %In fp_get_mim, also the npcs are calculated and the PCA is done. 
 %The selection of PCs and the calculation of the mim is then done in the 
 %subfunction fp_compute_mode_mim. 
 
+hist(mic1(:))
+figure; 
+hist(mim1(:))
+
+%% 
+
+[mic2, mim2, u2] = fp_get_mim(A,CS,fqA,nfqA, D,params.ihemi,mode1);
+hist(mic2(:))
+figure
+hist(mim2(:))
+
+%%
+norm(mic1(:)-mic2(:),'fro')
+norm(mim1(:)-mim2(:),'fro')
 

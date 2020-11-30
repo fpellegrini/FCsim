@@ -39,10 +39,6 @@ for oroi = 1:D.nroi
             CSroi(:, :, ifreq) = reshape(P(:,:,fqA(ifreq)), nmeg, [])'*CS(:, :, ifreq)...
                 *reshape(P(:,:,fqA(ifreq)), nmeg, []);
         end
-%         fprintf('applied filters')
-%         d=whos; sum([d.bytes])/1000^3
-%         CSroi_save{oroi,uroi} = CSroi;
-        
         
         %divide by power to obtain coherence
         clear Cohroi
@@ -52,16 +48,6 @@ for oroi = 1:D.nroi
             Cohroi(:,:,ifreq) = CSroi(:,:,ifreq)./ sqrt(pow*pow');
         end
         clear CSroi
-%         if strcmp(mode1,'bandc')||strcmp(mode1,'case2')||strcmp(mode1,'baseline')
-% %         keyboard
-%             Cohroi_save{oroi,uroi} = Cohroi(1:nvoxreg1,nvoxreg1+1:end,:);
-%             Cohroi_save{oroi,oroi} = Cohroi(1:nvoxreg1,1:nvoxreg1,:);
-%             d=whos; sum([d.bytes])/1000^3
-%         else 
-%             Cohroi_save{oroi,uroi} = Cohroi(1:npcs(oroi),npcs(oroi)+1:end,:);
-%             Cohroi_save{oroi,oroi} = Cohroi(1:npcs(oroi),1:npcs(oroi),end);
-%         end
-        
        
         if strcmp(mode1,'baseline')||strcmp(mode1,'bandc')
             %preselect "true" voxels (ind sub_ind_roi_region is the

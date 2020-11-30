@@ -1,8 +1,8 @@
 function fp_mim_struct_sim(params)
 
-DIROUT = '/home/bbci/data/haufe/Franziska/data/mim_sim/';
+DIROUT = '/home/bbci/data/haufe/Franziska/data/mim_sim1/';
 if ~exist(DIROUT);mkdir(DIROUT); end
-DIROUT1 = '/home/bbci/data/haufe/Franziska/data/mim_save/';
+DIROUT1 = '/home/bbci/data/haufe/Franziska/data/mim_save1/';
 if ~exist(DIROUT1);mkdir(DIROUT1); end
 
 if params.ip==7 || params.ip==8
@@ -19,9 +19,6 @@ else
         clear params_save 
     else
         
-        fres = 40;
-        n_trials = 200;
-        
         %% signal generation
         
         % ROI labels
@@ -34,30 +31,26 @@ else
         
         %signal generation
         fprintf('Signal generation... \n')
-        tic
-        [sig,brain_noise,sensor_noise,gt,L,iroi_seed, iroi_tar,D] = fp_generate_mim_signal(params, ...
-            fres,n_trials, D,DIROUT1);
-        toc
-        d=whos; sum([d.bytes])/1000^3
-        
-%         if params.ip==1
-%             dir1 =  sprintf('%s/mim_sig/',DIROUT1);
-%             if ~exist(dir1); mkdir(dir1); end
-%             outname = sprintf('%s/mim_sig/%d.mat',DIROUT1,params.iit);
-%             save(outname,'-v7.3')
-%         end
+        [sig,brain_noise,sensor_noise,gt,L,iroi_seed, iroi_tar,D, fres, n_trials] = fp_generate_mim_signal(params, ...
+            D,DIROUT1);
+     
+        if params.ip==1
+            dir1 =  sprintf('%s/mim_sig/',DIROUT1);
+            if ~exist(dir1); mkdir(dir1); end
+            outname = sprintf('%s/mim_sig/%d.mat',DIROUT1,params.iit);
+            save(outname,'-v7.3')
+        end
     end
-    
-    
+       
     %combine noise sources
-    for itrial = 1:n_trials
-        noise = params.iss*brain_noise{itrial} + (1-params.iss)*sensor_noise{itrial};
-        noise = noise ./ norm(noise, 'fro');
-        %combine signal and noise
-        signal_sensor1 = params.isnr*sig{itrial} + (1-params.isnr)*noise;
-        signal_sensor(:,:,itrial) = signal_sensor1 ./ norm(signal_sensor1, 'fro');
-    end
+    noise = params.iss*brain_noise + (1-params.iss)*sensor_noise;
+    noise = noise ./ norm(noise, 'fro');
+    %combine signal and noise
+    signal_sensor1 = params.isnr*sig + (1-params.isnr)*noise;
+    signal_sensor = signal_sensor1 ./ norm(signal_sensor1, 'fro');
     
+    %% reshape here! 
+    signal_sensor2 = reshape(signal_sensor,[],size(signal_sensor,2)/n_trials,n_trials);
     
     %% get CS and filter A
     %parameters
