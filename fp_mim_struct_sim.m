@@ -49,8 +49,8 @@ else
     signal_sensor1 = params.isnr*sig + (1-params.isnr)*noise;
     signal_sensor = signal_sensor1 ./ norm(signal_sensor1, 'fro');
     
-    %% reshape here! 
-    signal_sensor2 = reshape(signal_sensor,[],size(signal_sensor,2)/n_trials,n_trials);
+    %reshape
+    signal_sensor = reshape(signal_sensor,[],size(signal_sensor,2)/n_trials,n_trials);
     
     %% get CS and filter A
     %parameters
@@ -68,26 +68,17 @@ else
     nfreq = size(CS,3);
     toc
     
-%     if params.ip==1
-%        dir1 =  sprintf('%s/mim_CS/',DIROUT1);
-%        if ~exist(dir1); mkdir(dir1); end
-%        outname = sprintf('%s/mim_CS/%d.mat',DIROUT1,params.iit);
-%        save(outname,'-v7.3')
-%     end
+    if params.ip==1
+       dir1 =  sprintf('%s/mim_CS/',DIROUT1);
+       if ~exist(dir1); mkdir(dir1); end
+       outname = sprintf('%s/mim_CS/%d.mat',DIROUT1,params.iit);
+       save(outname,'-v7.3')
+    end
 end
 
 %% leadfield
 L3 = L(:, D.ind_cortex, :);
 L_backward = L3; 
-% for is=1:D.nvox
-%     clear L2
-%     L2 = L3(:,is,:);
-%     
-%     %remove radial orientation
-%     clear u s
-%     [u, s, v] = svd(squeeze(L2));
-%     L_backward(:,is,:) = u(:,:)*s(:,1:2);
-% end
 ni = size(L_backward,3);
 
 %construct source filter
@@ -127,13 +118,15 @@ elseif strcmp(params.ifilt,'l')
     nfqA = 1;   
 end
 
-d=whos; sum([d.bytes])/1000^3
 %% calculate MIM
 %pca pipeline ('all' 8 pipelines + baseline)
-[mic, mim, to_save] = fp_get_mim(A,CS,fqA,nfqA, D,params.ihemi,'all');
+[mic, mim, to_save, mean_coh] = fp_get_mim(A,CS,fqA,nfqA, D,params.ihemi,'all');
 fprintf('pipelines calculated')
 d=whos; sum([d.bytes])/1000^3
 
+%% corrected mim/mic
+
+[mim,mic,mean_coh,to_save] = fp_correct_mim(A,signal_sensor, fqA, nfqA, D, params.ihemi, mic, mim, mean_coh, to_save); 
 %% performance measures
 fprintf('Performance measures... \n')
 tic

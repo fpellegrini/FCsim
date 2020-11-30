@@ -1,4 +1,5 @@
 
+
 %default paramenters
 params.iInt = 1;
 params.iReg = 1;
@@ -27,18 +28,17 @@ D = fp_get_Desikan(params.iReg);
 
 %signal generation
 fprintf('Signal generation... \n')
-[sig,brain_noise,sensor_noise,gt,L,iroi_seed, iroi_tar,D] = fp_generate_mim_signal(params, ...
-    fres,n_trials, D,[]);
+[sig,brain_noise,sensor_noise,gt,L,iroi_seed, iroi_tar,D, fres, n_trials] = fp_generate_mim_signal(params, ...
+    D,[]);
 
 %combine noise sources
-for itrial = 1:n_trials
-    noise = params.iss*brain_noise{itrial} + (1-params.iss)*sensor_noise{itrial};
-    noise = noise ./ norm(noise, 'fro');
-    %combine signal and noise
-    signal_sensor1 = params.isnr*sig{itrial} + (1-params.isnr)*noise;
-    signal_sensor(:,:,itrial) = signal_sensor1 ./ norm(signal_sensor1, 'fro');
-end
+noise = params.iss*brain_noise + (1-params.iss)*sensor_noise;
+noise = noise ./ norm(noise, 'fro');
+%combine signal and noise
+signal_sensor1 = params.isnr*sig + (1-params.isnr)*noise;
+signal_sensor = signal_sensor1 ./ norm(signal_sensor1, 'fro');
 
+signal_sensor2 = reshape(signal_sensor,[],size(signal_sensor,2)/n_trials,n_trials);
 
 %% get CS and filter A
 %parameters

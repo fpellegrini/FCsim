@@ -1,4 +1,4 @@
-function [mic,mim,to_save] = fp_compute_mode_mim(mode1, D, npcs, V, A2, ZS, CS,fqA,nfqA,ihemi)
+function [mic,mim,to_save,mean_coh] = fp_compute_mode_mim(mode1, D, npcs, V, A2, ZS, CS,fqA,nfqA,ihemi)
 
 ndim = 3; 
 
@@ -70,8 +70,7 @@ for oroi = 1:D.nroi
             [a, b]= fp_mim(baseline,npcs);
             mic1([oroi uroi],[oroi uroi],:) = a;
             mim1([oroi uroi],[oroi uroi],:) = b;
-%             fprintf('Calculated baseline')
-%             d=whos; sum([d.bytes])/1000^3
+            mean_coh = [];
 
             
         end
@@ -89,8 +88,8 @@ for oroi = 1:D.nroi
             mim2(oroi,uroi,:) = squeeze(mean(mean(mim_v(1:nvoxreg1,nvoxreg1+1:end,:),1),2));
             mim2(uroi,oroi,:) = mim2(oroi,uroi,:);        
             mim2(oroi,oroi,:) = squeeze(mean(mean(mim_v(1:nvoxreg1,1:nvoxreg1,:),1),2));
-%             fprintf('calculated case2')
-%             d=whos; sum([d.bytes])/1000^3
+            mean_coh =[];
+
             
         elseif ~strcmp(mode1,'baseline')
             
@@ -99,8 +98,11 @@ for oroi = 1:D.nroi
             [a , b ] =  fp_mim(Cohroi,npcs([oroi uroi]));
             mic([oroi uroi],[oroi uroi],:) = a;
             mim([oroi uroi],[oroi uroi],:) = b;
-%             fprintf('calculated mim')
-%             d=whos; sum([d.bytes])/1000^3
+            
+            mean_coh(oroi,uroi,:) = mean(mean(abs(imag(Cohroi(1:npcs(oroi),npcs(oroi)+1:end,:))),1),2); 
+            mean_coh(uroi,oroi,:) = mean(mean(abs(imag(Cohroi(npcs(oroi)+1:end,1: npcs(oroi)   ,:))),1),2);
+            mean_coh(oroi,oroi,:) = mean(mean(abs(imag(Cohroi(1:npcs(oroi),1:npcs(oroi)    ,:))),1),2);
+            
         end
     end
 end

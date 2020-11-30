@@ -1,4 +1,4 @@
-function [mic, mim,to_save] = fp_get_mim(A,CS,fqA,nfqA, D,ihemi,mode1)
+function [mic, mim,to_save, mean_coh] = fp_get_mim(A,CS,fqA,nfqA, D,ihemi,mode1)
 %mode1 is either a number for fixed pcs, or 'max' (select npcs = rank of
 %region data), or 'percent' (select npcs that 90% of the variance is
 %preserved), or 'case2' (mim only to pool dimensions, then summation), or
@@ -14,8 +14,8 @@ for aroi = 1:D.nroi
     %filter at current roi
     clear A_ CSv
     A_ = A(:, :,D.ind_roi_cortex{aroi},:);
-    nvoxroi = size(A_,3); %voxels in the current roi
-    A2{aroi} = reshape(A_, [nmeg, ni*nvoxroi, nfqA]);
+    nvoxroi(aroi) = size(A_,3); %voxels in the current roi
+    A2{aroi} = reshape(A_, [nmeg, ni*nvoxroi(aroi), nfqA]);
     
     
     if ~strcmp(mode1,'case2')&& ~strcmp(mode1,'baseline')&& ~strcmp(mode1,'bandc')
@@ -41,30 +41,29 @@ for aroi = 1:D.nroi
         [V_, D_] = eig(CSs);
         [D_, in] = sort(real(diag(D_)), 'descend');
         V{aroi} = V_(:,in);
+        vx_ = cumsum(D_)./sum(D_);
         
         %npcs
         if isnumeric(mode1)
             %fixed number of pcs for every roi
             npcs(aroi) = mode1;
+            var_explained(aroi) = vx_(npcs(aroi));
             
         elseif strcmp(mode1,'max')
             %pipeline 6)
-            
-            % npcs(aroi) = min(nmeg,rank(CSs));
-            vx_ = cumsum(D_)./sum(D_);
             npcs(aroi) = min(find(vx_>0.99));
             
         elseif strcmp(mode1,'percent')
             %pipeline 7)
-            
-            % variance explained
-            vx_ = cumsum(D_)./sum(D_);
             npcs(aroi) = min(find(vx_>0.9));
             
         elseif strcmp(mode1,'all')
-            npcs.max(aroi) = min(find(vx_>0.99));
-            vx_ = cumsum(D_)./sum(D_);
+            
+            npcs.max(aroi) = min(find(vx_>0.99));           
             npcs.percent(aroi) = min(find(vx_>0.9));
+            for ii = 1:5 
+                var_explained(ii) = vx_(ii);
+            end
             
         end
     else
@@ -84,28 +83,24 @@ if strcmp(mode1,'all')
     tic
     for ifi = 1:5
         npcs.fixed = repmat(ifi,D.nroi,1);
-        [mic_fixed{ifi},mim_fixed{ifi},to_save_fixed{ifi}] = fp_compute_mode_mim(ifi, D, npcs.fixed, V, A2, ZS, CS,fqA,nfqA,ihemi);
+        [mic_fixed{ifi},mim_fixed{ifi},to_save_fixed{ifi},mean_coh_fixed{ifi}] = fp_compute_mode_mim(ifi, D, npcs.fixed, V, A2, ZS, CS,fqA,nfqA,ihemi);
     end
     toc
-    d=whos; sum([d.bytes])/1000^3
     
     fprintf('max \n')
     tic
-    [mic_max,mim_max,to_save_max] = fp_compute_mode_mim('max', D, npcs.max, V, A2, ZS, CS,fqA,nfqA,ihemi);
+    [mic_max,mim_max,to_save_max,mean_coh_max] = fp_compute_mode_mim('max', D, npcs.max, V, A2, ZS, CS,fqA,nfqA,ihemi);
     toc
-    d=whos; sum([d.bytes])/1000^3
     
     fprintf('90 percent \n')
     tic
-    [mic90,mim90,to_save90] = fp_compute_mode_mim('percent', D, npcs.percent, V, A2, ZS, CS,fqA,nfqA,ihemi);
+    [mic90,mim90,to_save90,mean_coh_90] = fp_compute_mode_mim('percent', D, npcs.percent, V, A2, ZS, CS,fqA,nfqA,ihemi);
     toc
-    d=whos; sum([d.bytes])/1000^3
     
     fprintf('case2 and baseline \n')
     tic
-    [mic_bandc,mim_bandc,to_save_bandc] = fp_compute_mode_mim('bandc',D,[],[],A2,[],CS,fqA,nfqA,ihemi);
+    [mic_bandc,mim_bandc,to_save_bandc,~] = fp_compute_mode_mim('bandc',D,[],[],A2,[],CS,fqA,nfqA,ihemi);
     toc
-    d=whos; sum([d.bytes])/1000^3
     
     mic.fixed = mic_fixed;
     mic.max = mic_max;
@@ -119,14 +114,64 @@ if strcmp(mode1,'all')
     mim.baseline = mim_bandc.baseline;
 
     to_save.fixed = to_save_fixed;
+    for ii = 1:5
+        to_save.fixed{ii}.var_explained = var_explained(ii);
+    end
     to_save.max = to_save_max;
     to_save.percent = to_save90;
     to_save.bandc = to_save_bandc; %too large to be saved?
+    to_save.nvoxroi = nvoxroi;
+    
+    
+    mean_coh.fixed = mean_coh_fixed; 
+    mean_coh.max = mean_coh_max; 
+    mean_coh.percent = mean_coh_90; 
+    
+    %% Correlations 
+    for oroi = 1:D.nroi 
+        for uroi = oroi+1:D.nroi
+            for ii = 1:5
+                c1 = sum(mim.fixed{ii},3);
+                c2 = sum(mic.fixed{ii},3);
+                c3 = sum(mean_coh.fixed{ii},3);
+                to_save.fixed{ii}.corr_voxmim(oroi,uroi) = corr(sqrt(nvoxroi(oroi) * nvoxroi(uroi)),c1(oroi,uroi));
+                to_save.fixed{ii}.corr_voxmic(oroi,uroi) = corr(sqrt(nvoxroi(oroi) * nvoxroi(uroi)),c2(oroi,uroi));
+                to_save.fixed{ii}.corr_voxmeancoh(oroi,uroi) = corr(sqrt(nvoxroi(oroi)* nvoxroi(uroi)),c3(oroi,uroi));
+            end
+            c1 = sum(mim.max,3);
+            c2 = sum(mic.max,3);
+            c3 = sum(mean_coh.max,3);
+            to_save.max.corr_voxmim(oroi,uroi) = corr(sqrt(nvoxroi(oroi) * nvoxroi(uroi)),c1(oroi,uroi));
+            to_save.max.corr_voxmic(oroi,uroi) = corr(sqrt(nvoxroi(oroi) * nvoxroi(uroi)),c2(oroi,uroi));
+            to_save.max.corr_voxnpcs(oroi,uroi) = corr(sqrt(nvoxroi(oroi) * nvoxroi(uroi)), to_save.max.npcs);
+            to_save.max.corr_voxmeancoh(oroi,uroi) = corr(sqrt(nvoxroi(oroi)* nvoxroi(uroi)),c3(oroi,uroi));
+                
+            c1 = sum(mim.percent,3);
+            c2 = sum(mic.percent,3);
+            c3 = sum(mean_coh.percent,3);
+            to_save.percent.corr_voxmim(oroi,uroi) = corr(sqrt(nvoxroi(oroi) * nvoxroi(uroi)),c1(oroi,uroi));
+            to_save.percent.corr_voxmic(oroi,uroi) = corr(sqrt(nvoxroi(oroi) * nvoxroi(uroi)),c2(oroi,uroi));
+            to_save.percent.corr_voxnpcs(oroi,uroi) = corr(sqrt(nvoxroi(oroi) * nvoxroi(uroi)), to_save.percent.npcs);
+            to_save.percent.corr_voxmeancoh(oroi,uroi) = corr(sqrt(nvoxroi(oroi)* nvoxroi(uroi)),c3(oroi,uroi));
+            
+            c1 = sum(mim.case2,3);
+            c2 = sum(mic.case2,3);
+            to_save.case2.corr_voxmim(oroi,uroi) = corr(sqrt(nvoxroi(oroi) * nvoxroi(uroi)),c1(oroi,uroi));
+            to_save.case2.corr_voxmic(oroi,uroi) = corr(sqrt(nvoxroi(oroi) * nvoxroi(uroi)),c2(oroi,uroi));
+    
+            c1 = sum(mim.baseline,3);
+            c2 = sum(mic.baseline,3);
+            to_save.baseline.corr_voxmim(oroi,uroi) = corr(sqrt(nvoxroi(oroi) * nvoxroi(uroi)),c1(oroi,uroi));
+            to_save.baseline.corr_voxmic(oroi,uroi) = corr(sqrt(nvoxroi(oroi) * nvoxroi(uroi)),c2(oroi,uroi));
+        end
+    end
     
     
 else
-    [mic,mim,to_save] = fp_compute_mode_mim(mode1, D, npcs, V, A2, ZS, CS,fqA,nfqA,ihemi);
+    [mic,mim,to_save, mean_coh] = fp_compute_mode_mim(mode1, D, npcs, V, A2, ZS, CS,fqA,nfqA,ihemi);
 end
+
+
 
 
 
