@@ -120,17 +120,46 @@ end
 
 %% calculate MIM
 %pca pipeline ('all' 8 pipelines + baseline)
-[mic, mim, to_save, mean_coh] = fp_get_mim(A,CS,fqA,nfqA, D,params.ihemi,'all');
+zs=1;
+[mic, mim, to_save, mean_coh] = fp_get_mim(A,CS,fqA,nfqA, D,params.ihemi,'all',zs);
 fprintf('pipelines calculated')
 d=whos; sum([d.bytes])/1000^3
 
 %% corrected mim/mic
 
 [mim,mic,mean_coh,to_save] = fp_correct_mim(A,signal_sensor, fqA, nfqA, D, params.ihemi, mic, mim, mean_coh, to_save); 
+
+%% without ZS standardisation
+zs=0;
+for ii = 1:5
+    [mic_fixed_zs{ii}, mim_fixed_zs{ii}, to_save_fixed_zs{ii}, mean_coh_fixed_zs{ii}] = fp_get_mim(A,CS,fqA,nfqA, D,params.ihemi,ii,zs);
+end
+[mic_max_zs, mim_max_zs, to_save_max_zs, mean_coh_max_zs] = fp_get_mim(A,CS,fqA,nfqA, D,params.ihemi,'max',zs);
+[mic_percent_zs, mim_percent_zs, to_save_percent_zs, mean_coh_percent_zs] = fp_get_mim(A,CS,fqA,nfqA, D,params.ihemi,'percent',zs);
+
+mic.fixed_zs0 = mic_fixed_zs;
+mim.fixed_zs0 = mim_fixed_zs; 
+to_save.fixed_zs0 = to_save_fixed_zs;
+mean_coh.fixed_zs0 = mean_coh_fixed_zs; 
+
+mic.max_zs0 = mic_max_zs; 
+mim.max_zs0 = mim_max_zs; 
+to_save.max_zs0 = to_save_max_zs;
+mean_coh.max_zs0 = mean_coh_max_zs; 
+
+mic.percent_zs0 = mic_percent_zs; 
+mim.percent_zs0 = mim_percent_zs; 
+to_save.percent_zs0 = to_save_percent_zs;
+mean_coh.percent_zs0 = mean_coh_percent_zs;
+
+clear mic_max_zs mim_max_zs to_save_max_zs mean_coh_max_zs mic_percent_zs ...
+    mim_percent_zs to_save_percent_zs mean_coh_percent_zs mic_fixed_zs ...
+    mim_fixed_zs to_save_fixed_zs mean_coh_fixed_zs
+
 %% performance measures
 fprintf('Performance measures... \n')
 tic
-[PERFORMANCE, BASELINE] = fp_get_performance(gt, mic, mim, params);
+[PERFORMANCE, BASELINE] = fp_get_performance(gt, mic, mim, mean_coh);
 toc
 d=whos; sum([d.bytes])/1000^3
 

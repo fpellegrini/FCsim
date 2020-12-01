@@ -1,4 +1,4 @@
-function [mic, mim,to_save, mean_coh] = fp_get_mim(A,CS,fqA,nfqA, D,ihemi,mode1)
+function [mic, mim,to_save, mean_coh] = fp_get_mim(A,CS,fqA,nfqA, D,ihemi,mode1,zs)
 %mode1 is either a number for fixed pcs, or 'max' (select npcs = rank of
 %region data), or 'percent' (select npcs that 90% of the variance is
 %preserved), or 'case2' (mim only to pool dimensions, then summation), or
@@ -28,7 +28,11 @@ for aroi = 1:D.nroi
         
         %zscoring
         clear CSz
-        ZS{aroi} = diag(sqrt(mean(diag(squeeze(sum(real(CSv), 3))))./diag(squeeze(sum(real(CSv), 3)))));
+        if zs
+            ZS{aroi} = diag(sqrt(mean(diag(squeeze(sum(real(CSv), 3))))./diag(squeeze(sum(real(CSv), 3)))));
+        else 
+            ZS{aroi} = eye(size(CSv,1));
+        end
         
         %apply ZS
         for ifreq = 1:nfreq

@@ -2,6 +2,7 @@ function [mim, mic, mean_coh,to_save] = fp_correct_mim(A,signal_sensor_save, fqA
 
 nit = 50; 
 n_trials = size(signal_sensor_save,3); 
+zs=1;
 
 
 for iit = 1:nit 
@@ -20,10 +21,10 @@ for iit = 1:nit
     nfreq = size(CS,3);
     
     clear mim1 mic1 mean_coh1
-    [mic_max_shuf(:,:,:,iit), mim_max_shuf(:,:,:,iit), ~, mean_coh_max_shuf(:,:,:,iit)] = fp_get_mim(A,CS,fqA,nfqA, D,ihemi,'max');
+    [mic_max_shuf(:,:,:,iit), mim_max_shuf(:,:,:,iit), ~, mean_coh_max_shuf(:,:,:,iit)] = fp_get_mim(A,CS,fqA,nfqA, D,ihemi,'max',zs);
     
     clear mim1 mic1 mean_coh1
-    [mic90_shuf(:,:,:,iit), mim90_shuf(:,:,:,iit), ~, mean_coh90_shuf(:,:,:,iit)] = fp_get_mim(A,CS,fqA,nfqA, D,ihemi,'percent');
+    [mic90_shuf(:,:,:,iit), mim90_shuf(:,:,:,iit), ~, mean_coh90_shuf(:,:,:,iit)] = fp_get_mim(A,CS,fqA,nfqA, D,ihemi,'percent',zs);
     
 end
 
