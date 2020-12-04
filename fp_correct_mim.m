@@ -1,7 +1,7 @@
-function [mim, mic, mean_coh,to_save] = fp_correct_mim(A,signal_sensor_save, fqA, nfqA, D, ihemi, mic, mim, mean_coh, to_save)
+function [mim, mic, mean_coh,to_save] = fp_correct_mim(A,signal_sensor, fqA, nfqA, D, ihemi, mic, mim, mean_coh, to_save,fres)
 
 nit = 50; 
-n_trials = size(signal_sensor_save,3); 
+n_trials = size(signal_sensor,3); 
 zs=1;
 
 
@@ -62,11 +62,11 @@ mean_coh.percent_corrected = (mean_coh.percent - m90)./s90;
 
 to_save.max.mim_shuf = mim_max_shuf; 
 to_save.max.mic_shuf = mic_max_shuf; 
-to_save.max.mean_coh_shuf = mean_coh_shuf; 
+to_save.max.mean_coh_shuf = mean_coh_max_shuf; 
 
-to_save.percent.mim_shuf = mim_percent_shuf; 
-to_save.percent.mic_shuf = mic_percent_shuf; 
-to_save.percent.mean_coh_shuf = mean_coh_shuf; 
+to_save.percent.mim_shuf = mim90_shuf; 
+to_save.percent.mic_shuf = mic90_shuf; 
+to_save.percent.mean_coh_shuf = mean_coh90_shuf; 
 
 
 
