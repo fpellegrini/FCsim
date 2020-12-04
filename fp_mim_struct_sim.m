@@ -25,9 +25,7 @@ else
         % In D.sub_ind_roi, there are the randomly
         % selected voxels of each region
         fprintf('Getting atlas positions... \n')
-        tic
         D = fp_get_Desikan(params.iReg);
-        toc
         
         %signal generation
         fprintf('Signal generation... \n')
@@ -126,10 +124,13 @@ fprintf('pipelines calculated')
 d=whos; sum([d.bytes])/1000^3
 
 %% corrected mim/mic
-
-[mim,mic,mean_coh,to_save] = fp_correct_mim(A,signal_sensor, fqA, nfqA, D, params.ihemi, mic, mim, mean_coh, to_save); 
-
+fprintf('Correct MIM...\n')
+tic
+[mim,mic,mean_coh,to_save] = fp_correct_mim(A,signal_sensor, fqA, nfqA, D, params.ihemi, mic, mim, mean_coh, to_save,fres); 
+toc
 %% without ZS standardisation
+fprintf('Calculating fix, max and percent without ZS standardisation... \n')
+tic
 zs=0;
 for ii = 1:5
     [mic_fixed_zs{ii}, mim_fixed_zs{ii}, to_save_fixed_zs{ii}, mean_coh_fixed_zs{ii}] = fp_get_mim(A,CS,fqA,nfqA, D,params.ihemi,ii,zs);
@@ -155,6 +156,8 @@ mean_coh.percent_zs0 = mean_coh_percent_zs;
 clear mic_max_zs mim_max_zs to_save_max_zs mean_coh_max_zs mic_percent_zs ...
     mim_percent_zs to_save_percent_zs mean_coh_percent_zs mic_fixed_zs ...
     mim_fixed_zs to_save_fixed_zs mean_coh_fixed_zs
+
+toc
 
 %% performance measures
 fprintf('Performance measures... \n')

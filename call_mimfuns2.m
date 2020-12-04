@@ -3,7 +3,7 @@
 %default paramenters
 params.iInt = 1;
 params.iReg = 1;
-params.isnr = 0.5;
+params.isnr = 0.1;
 params.iss = 0.5;
 params.ilag = 2;
 params.ifilt = 'l';
@@ -14,9 +14,6 @@ params.ip = 1;
 logname = sprintf('iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_hemisym%d_iter%d'...
     ,params.iInt,params.iReg,params.isnr*10,params.iss*10, params.ilag,params.ifilt,params.ihemi,params.iit);
 params.logname = logname;
-
-fres = 40;
-n_trials = 200;
 
 %% signal generation
 
