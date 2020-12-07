@@ -60,13 +60,34 @@ m90 = mean(mean_coh90_shuf,4);
 s90 = std(mean_coh90_shuf,0,4); 
 mean_coh.percent_corrected = (mean_coh.percent - m90)./s90; 
 
-to_save.max.mim_shuf = mim_max_shuf; 
-to_save.max.mic_shuf = mic_max_shuf; 
-to_save.max.mean_coh_shuf = mean_coh_max_shuf; 
+to_save.max_corrected.mim_shuf = mim_max_shuf; 
+to_save.max_corrected.mic_shuf = mic_max_shuf; 
+to_save.max_corrected.mean_coh_shuf = mean_coh_max_shuf; 
 
-to_save.percent.mim_shuf = mim90_shuf; 
-to_save.percent.mic_shuf = mic90_shuf; 
-to_save.percent.mean_coh_shuf = mean_coh90_shuf; 
+to_save.percent_corrected.mim_shuf = mim90_shuf; 
+to_save.percent_corrected.mic_shuf = mic90_shuf; 
+to_save.percent_corrected.mean_coh_shuf = mean_coh90_shuf; 
+
+%%
+nvoxroi_all = to_save.nvoxroi'* to_save.nvoxroi;
+nvoxroi_all = nvoxroi_all(:);
+
+c1 = sum(mim.max_corrected,3);
+c2 = sum(mic.max_corrected,3);
+c3 = sum(mean_coh.max_corrected,3);
+to_save.max_corrected.corr_voxmim = corr(nvoxroi_all,c1(:));
+to_save.max_corrected.corr_voxmic = corr(nvoxroi_all ,c2(:));
+to_save.max_corrected.corr_voxnpcs = corr(to_save.nvoxroi', to_save.max.npcs');
+to_save.max_corrected.corr_voxmeancoh = corr(nvoxroi_all,c3(:));
+
+c1 = sum(mim.percent_corrected,3);
+c2 = sum(mic.percent_corrected,3);
+c3 = sum(mean_coh.percent_corrected,3);
+to_save.percent_corrected.corr_voxmim = corr(nvoxroi_all,c1(:));
+to_save.percent_corrected.corr_voxmic = corr(nvoxroi_all,c2(:));
+to_save.percent_corrected.corr_voxnpcs = corr(to_save.nvoxroi', to_save.percent.npcs');
+to_save.percent_corrected.corr_voxmeancoh = corr(nvoxroi_all,c3(:));
+
 
 
 
