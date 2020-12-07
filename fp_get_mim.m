@@ -129,41 +129,41 @@ if strcmp(mode1,'all')
     mean_coh.percent = mean_coh_90; 
     
     %% Correlations 
-    nvocroi_all = nvoxroi'*nvoxroi;
-    nvocroi_all = nvocroi_all(:);
+    nvoxroi_all = nvoxroi'*nvoxroi;
+    nvoxroi_all = nvoxroi_all(:);
     for ii = 1:5
         c1 = sum(mim.fixed{ii},3);
         c2 = sum(mic.fixed{ii},3);
         c3 = sum(mean_coh.fixed{ii},3);
-        to_save.fixed{ii}.corr_voxmim = corr(nvocroi_all,c1(:));
-        to_save.fixed{ii}.corr_voxmic = corr(nvocroi_all,c2(:));
-        to_save.fixed{ii}.corr_voxmeancoh = corr(nvocroi_all,c3(:));
+        to_save.fixed{ii}.corr_voxmim = corr(nvoxroi_all,c1(:));
+        to_save.fixed{ii}.corr_voxmic = corr(nvoxroi_all,c2(:));
+        to_save.fixed{ii}.corr_voxmeancoh = corr(nvoxroi_all,c3(:));
     end
     c1 = sum(mim.max,3);
     c2 = sum(mic.max,3);
     c3 = sum(mean_coh.max,3);
-    to_save.max.corr_voxmim = corr(nvocroi_all,c1(:));
-    to_save.max.corr_voxmic = corr(nvocroi_all ,c2(:));
-    to_save.max.corr_voxnpcs = corr(nvoxroi, to_save.max.npcs);
-    to_save.max.corr_voxmeancoh = corr(nvocroi_all,c3(:));
+    to_save.max.corr_voxmim = corr(nvoxroi_all,c1(:));
+    to_save.max.corr_voxmic = corr(nvoxroi_all ,c2(:));
+    to_save.max.corr_voxnpcs = corr(nvoxroi', to_save.max.npcs');
+    to_save.max.corr_voxmeancoh = corr(nvoxroi_all,c3(:));
                 
     c1 = sum(mim.percent,3);
     c2 = sum(mic.percent,3);
     c3 = sum(mean_coh.percent,3);
-    to_save.percent.corr_voxmim = corr(nvocroi_all,c1(:));
-    to_save.percent.corr_voxmic = corr(nvocroi_all,c2(:));
-    to_save.percent.corr_voxnpcs = corr(nvoxroi, to_save.percent.npcs);
-    to_save.percent.corr_voxmeancoh = corr(nvocroi_all,c3(:));
+    to_save.percent.corr_voxmim = corr(nvoxroi_all,c1(:));
+    to_save.percent.corr_voxmic = corr(nvoxroi_all,c2(:));
+    to_save.percent.corr_voxnpcs = corr(nvoxroi', to_save.percent.npcs');
+    to_save.percent.corr_voxmeancoh = corr(nvoxroi_all,c3(:));
             
     c1 = sum(mim.case2,3);
     c2 = sum(mic.case2,3);
-    to_save.case2.corr_voxmim = corr(nvocroi_all,c1(:));
-    to_save.case2.corr_voxmic = corr(nvocroi_all,c2(:));
+    to_save.case2.corr_voxmim = corr(nvoxroi_all,c1(:));
+    to_save.case2.corr_voxmic = corr(nvoxroi_all,c2(:));
     
     c1 = sum(mim.baseline,3);
     c2 = sum(mic.baseline,3);
-    to_save.baseline.corr_voxmim = corr(nvocroi_all,c1(:));
-    to_save.baseline.corr_voxmic = corr(nvocroi_all,c2(:));
+    to_save.baseline.corr_voxmim = corr(nvoxroi_all,c1(:));
+    to_save.baseline.corr_voxmic = corr(nvoxroi_all,c2(:));
 
     
     
