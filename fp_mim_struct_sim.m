@@ -160,11 +160,11 @@ clear mic_max_zs mim_max_zs to_save_max_zs mean_coh_max_zs mic_percent_zs ...
 toc
 
 %% performance measures
-fprintf('Performance measures... \n')
-tic
-[PERFORMANCE, BASELINE] = fp_get_performance(gt, mic, mim, mean_coh);
-toc
-d=whos; sum([d.bytes])/1000^3
+% fprintf('Performance measures... \n')
+% tic
+% [PERFORMANCE, BASELINE] = fp_get_performance(gt, mic, mim, mean_coh);
+% toc
+% d=whos; sum([d.bytes])/1000^3
 
 %% save performance and baseline
 fprintf('Saving... \n')
