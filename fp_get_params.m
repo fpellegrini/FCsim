@@ -4,7 +4,7 @@ if ip == 1
     %defaults
     nInteractions = 1;
     nRegionInts = 1;
-    SNR = 0.2;
+    SNR = 0.1;
     noise_mix = 0.5;
     nlag = 2;
     filtertype= {'l'}; %lcmv
@@ -34,7 +34,7 @@ elseif ip == 4
     %vary SNR
     nInteractions = 1;
     nRegionInts = 1;
-    SNR = [0.1 0.3:0.1:0.9];
+    SNR = [0.2:0.1:0.9];
     noise_mix = 0.5;
     nlag = 2;
     filtertype= {'l'}; %lcmv
