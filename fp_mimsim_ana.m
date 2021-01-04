@@ -1,35 +1,25 @@
 function fp_mimsim_ana
 
-DIRIN = '/home/bbci/data/haufe/Franziska/data/mim_sim_snr02/';
+DIRIN = '/home/bbci/data/haufe/Franziska/data/mim_sim1/';
 
 %default sparamenters
 nit = 100;
 iInt = 1; 
 iReg=1; 
-isnr=0.2;
+isnr=0.1;
 iss = 0.5;
 ilag=2;
 ihemi=0;
 ifilt='l';
+
+
 %%
-for iit=[12 14 18 22 23 8]
+for iit= 1:nit
     inname = sprintf('mim_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_hemisym%d_iter%d'...
         ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,ihemi,iit);
     
     load([DIRIN inname '.mat'])
         
-    %ground truth
-%     gt.mic = abs(imag(gt.mic));
-%     gt.mim = abs(imag(gt.mim)); 
-    
-    %PERFORMANCE has the dimensions: 2 (mim/mic) x 8 (pipelines)
-%     clear PERFORMANCE BASELINE
-%     [PERFORMANCE, BASELINE] = fp_get_performance(gt, mic, mim, mean_coh);
-% 
-%     perf_mim_corr(:,iit) = [squeeze(PERFORMANCE(1,:)) squeeze(BASELINE(1,1))];
-%     perf_mic_corr(:,iit) = [squeeze(PERFORMANCE(2,:)) squeeze(BASELINE(1,1))];
-%     perf_mc_corr(:,iit) = [squeeze(PERFORMANCE(3,:))];
-    
     %AUC
     label= zeros(68,68); 
     label(iroi_seed,iroi_tar) = 1;
@@ -128,7 +118,7 @@ for iit=[12 14 18 22 23 8]
     corrs(iit,10,1) = to_save.max_corrected.corr_voxmic;
     corrs(iit,10,2) = to_save.max_corrected.corr_voxmim; 
     corrs(iit,10,3) = to_save.max_corrected.corr_voxmeancoh;
-    corrs(iit,10,4) = corr(to_save.max_corrected.npcs',to_save.nvoxroi');
+    corrs(iit,10,4) = corr(to_save.max.npcs',to_save.nvoxroi');
     
     cc = sum(mic.percent_corrected,3);
     [~,~,~, auc(iit,11,1)] = ...
@@ -145,7 +135,7 @@ for iit=[12 14 18 22 23 8]
     corrs(iit,11,1) = to_save.percent_corrected.corr_voxmic;
     corrs(iit,11,2) = to_save.percent_corrected.corr_voxmim; 
     corrs(iit,11,3) = to_save.percent_corrected.corr_voxmeancoh;
-    corrs(iit,11,4) = corr(to_save.percent_corrected.npcs',to_save.nvoxroi');
+    corrs(iit,11,4) = corr(to_save.percent.npcs',to_save.nvoxroi');
     
     
     for ipip = 1:5
@@ -194,10 +184,14 @@ for iit=[12 14 18 22 23 8]
 
 end
 
+%% save auc 
+outname = '/home/bbci/data/haufe/Franziska/data/mim_sim1_auc';
+save(outname,'auc','-v7.3')
+
 %% mean and std of AUC 
 for ip = 1:18
     for im = 1:3
-        median_auc(ip,im) = median(auc(:,ip,im));
+        median_auc(ip,im) = mean(auc(:,ip,im));
         std_auc(ip,im) = std(auc(:,ip,im)); 
         [p_auc(ip,im),h_auc(ip,im),stats] = signrank(auc(:,ip,im),0.5,'tail','right');
         t_auc(ip,im) = stats.signedrank;
@@ -205,21 +199,26 @@ for ip = 1:18
 end
 
 figure
+subplot(2,1,1)
 bar(median_auc)
 xTicks = 1:18;
-xticklabels = {'1 pc','2 pc', '3 pc',...
-    '4 pc','5 pc','max','90 percent','case2','baseline','max corr','90 percent corr', '1 zs0',...
-    '2 zs0', '3 zs0', '4 zs0', '5 zs0', 'max zso', 'percent zs0'};
+xticklabels = {'1zs','2zs', '3zs','4zs','5zs',...
+    '99% zs','90% zs','sumVox','baseline','99%corr','90%corr', ...
+    '1 pc','2 pc', '3 pc', '4 pc', '5 pc', '99%', '90%'};
 ylabel('auc')
 set(gca,'XTick', xTicks, 'XTickLabel',xticklabels)
-figure
+legend('mic','mim','mean coh')
+grid on 
+subplot(2,1,2)
 bar(-log10(p_auc))
 set(gca,'XTick', xTicks, 'XTickLabel',xticklabels)
 ylabel('-log10(p)')
+legend('mic','mim','mean coh')
+grid on 
 
 %% corrs  
-
 corrs(:,8:9,3:4)=nan;
+%%
 for ip = 1:11
     for im = 1:4
         median_corrs(ip,im) = nanmedian(corrs(:,ip,im));
@@ -228,71 +227,26 @@ for ip = 1:11
 end
 
 bar(median_corrs)
-xTicks = 1:9;
-xticklabels = {'1 pc','2 pc', '3 pc',...
-    '4 pc','5 pc','max','90 percent','case2','baseline'};
+xTicks = 1:11;
+xticklabels = {'1zs','2zs', '3zs','4zs','5zs',...
+    '99% zs','90% zs','sumVox','baseline','99%corr','90%corr'};
+
 ylabel('Pearson correlations')
 set(gca,'XTick', xTicks, 'XTickLabel',xticklabels)
 legend('voxmim','voxmic','voxmeancoh','voxnpcs')
 
-%% variance explained 
-
+%% variance explained
+%%
 for ipip = 1:5 
     median_varex(ipip) = median(varex(:,ipip));
 end 
 
 plot(median_varex)
+grid on
+xlabel('Number of fixed PCs')
+ylabel('Variance explained')
+title('variance explained, median across iterations, snr = 0.1')
 %% save
 clear cc
-outname= sprintf('/home/bbci/data/haufe/Franziska/data/mimsim_ana_snr0%d_30nit.mat',round(isnr*10));
+outname= sprintf('/home/bbci/data/haufe/Franziska/data/mimsim_ana1_snr0%d.mat',round(isnr*10));
 save(outname,'-v7.3')
-
-%% plots
-
-% boxplots
-figure
-subplot(2,1,1)
-boxplot(squeeze(perf_mim_corr'),'Labels',{'1 pc','2 pc', '3 pc',...
-    '4 pc','5 pc','max','90 percent','case2','baseline','max corr','90 percent corr', '1 zs0',...
-    '2 zs0', '3 zs0', '4 zs0', '5 zs0', 'max zso', 'percent zs0'})
-grid on
-title('MIM correlation with ground truth')
-xlabel('Pipelines')
-ylabel('correlation coefficient')
-
-% subplot(2,1,2)
-% boxplot(squeeze(perf_mim_corr_max'),'Labels',{'1 pc','2 pc', '3 pc',...
-%     '4 pc','5 pc','max','90 percent','case2','baseline'})
-% grid on
-% title('maxima of MIM correlation with ground truth')
-% xlabel('Pipelines')
-% ylabel('correlation coefficient')
-
-% figure
-subplot(2,1,2)
-boxplot(squeeze(perf_mic_corr'),'Labels',{'1 pc','2 pc', '3 pc',...
-    '4 pc','5 pc','max','90 percent','case2','baseline'})
-grid on
-title('MIC correlation with ground truth')
-xlabel('Pipelines')
-ylabel('correlation coefficient')
-
-% subplot(2,1,2)
-% boxplot(squeeze(perf_mic_corr_max'),'Labels',{'1 pc','2 pc', '3 pc',...
-%     '4 pc','5 pc','max','90 percent','case2','baseline'})
-% grid on
-% title('maxima of MIC correlation with ground truth')
-% xlabel('Pipelines')
-% ylabel('correlation coefficient')
-
-%% hist
-figure; 
-subplot(2,1,1)
-hist(perf_mim_corr_max')
-title('maxima of MIC correlation with gt for 9 pipelines')
-xlabel('correlation coefficient')
-subplot(2,1,2)
-hist(perf_mic_corr_max')
-title('maxima of MIM correlation with gt for 9 pipelines')
-xlabel('correlation coefficient')
-
