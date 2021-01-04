@@ -1,4 +1,4 @@
-function [mic, mim,to_save, mean_coh] = fp_get_mim(A,CS,fqA,nfqA, D,ihemi,mode1,zs)
+function [mic, mim,to_save, mean_icoh, mean_acoh] = fp_get_mim(A,CS,fqA,nfqA, D,ihemi,mode1,zs)
 %mode1 is either a number for fixed pcs, or 'max' (select npcs = rank of
 %region data), or 'percent' (select npcs that 90% of the variance is
 %preserved), or 'case2' (mim only to pool dimensions, then summation), or
@@ -84,18 +84,18 @@ if strcmp(mode1,'all')
     tic
     for ifi = 1:5
         npcs.fixed = repmat(ifi,D.nroi,1);
-        [mic_fixed{ifi},mim_fixed{ifi},to_save_fixed{ifi},mean_coh_fixed{ifi}] = fp_compute_mode_mim(ifi, D, npcs.fixed, V, A2, ZS, CS,fqA,nfqA,ihemi);
+        [mic_fixed{ifi},mim_fixed{ifi},to_save_fixed{ifi},mean_icoh_fixed{ifi}, mean_acoh_fixed{ifi}] = fp_compute_mode_mim(ifi, D, npcs.fixed, V, A2, ZS, CS,fqA,nfqA,ihemi);
     end
     toc
     
     fprintf('max \n')
     tic
-    [mic_max,mim_max,to_save_max,mean_coh_max] = fp_compute_mode_mim('max', D, npcs.max, V, A2, ZS, CS,fqA,nfqA,ihemi);
+    [mic_max,mim_max,to_save_max,mean_icoh_max,mean_acoh_max] = fp_compute_mode_mim('max', D, npcs.max, V, A2, ZS, CS,fqA,nfqA,ihemi);
     toc
     
     fprintf('90 percent \n')
     tic
-    [mic90,mim90,to_save90,mean_coh_90] = fp_compute_mode_mim('percent', D, npcs.percent, V, A2, ZS, CS,fqA,nfqA,ihemi);
+    [mic90,mim90,to_save90,mean_icoh_90, mean_acoh_90] = fp_compute_mode_mim('percent', D, npcs.percent, V, A2, ZS, CS,fqA,nfqA,ihemi);
     toc
     
     fprintf('case2 and baseline \n')
@@ -124,9 +124,13 @@ if strcmp(mode1,'all')
     to_save.nvoxroi = nvoxroi;
     
     
-    mean_coh.fixed = mean_coh_fixed; 
-    mean_coh.max = mean_coh_max; 
-    mean_coh.percent = mean_coh_90; 
+    mean_icoh.fixed = mean_icoh_fixed; 
+    mean_icoh.max = mean_icoh_max; 
+    mean_icoh.percent = mean_icoh_90; 
+    
+    mean_acoh.fixed = mean_acoh_fixed; 
+    mean_acoh.max = mean_acoh_max; 
+    mean_acoh.percent = mean_acoh_90; 
     
     %% Correlations 
     nvoxroi_all = nvoxroi'*nvoxroi;
@@ -134,26 +138,33 @@ if strcmp(mode1,'all')
     for ii = 1:5
         c1 = sum(mim.fixed{ii},3);
         c2 = sum(mic.fixed{ii},3);
-        c3 = sum(mean_coh.fixed{ii},3);
+        c3 = sum(mean_icoh.fixed{ii},3);
+        c4 = sum(mean_acoh.fixed{ii},3);
         to_save.fixed{ii}.corr_voxmim = corr(nvoxroi_all,c1(:));
         to_save.fixed{ii}.corr_voxmic = corr(nvoxroi_all,c2(:));
-        to_save.fixed{ii}.corr_voxmeancoh = corr(nvoxroi_all,c3(:));
+        to_save.fixed{ii}.corr_voxmeancoh = corr(nvoxroi_all,c3(:));        
+        to_save.fixed{ii}.corr_voxmeanabscoh = corr(nvoxroi_all,c4(:));
+        
     end
     c1 = sum(mim.max,3);
     c2 = sum(mic.max,3);
-    c3 = sum(mean_coh.max,3);
+    c3 = sum(mean_icoh.max,3);
+    c4 = sum(mean_acoh.max,3);
     to_save.max.corr_voxmim = corr(nvoxroi_all,c1(:));
     to_save.max.corr_voxmic = corr(nvoxroi_all ,c2(:));
     to_save.max.corr_voxnpcs = corr(nvoxroi', to_save.max.npcs');
     to_save.max.corr_voxmeancoh = corr(nvoxroi_all,c3(:));
+    to_save.max.corr_voxmeanabscoh = corr(nvoxroi_all,c4(:));
                 
     c1 = sum(mim.percent,3);
     c2 = sum(mic.percent,3);
-    c3 = sum(mean_coh.percent,3);
+    c3 = sum(mean_icoh.percent,3);
+    c4 = sum(mean_acoh.percent,3);
     to_save.percent.corr_voxmim = corr(nvoxroi_all,c1(:));
     to_save.percent.corr_voxmic = corr(nvoxroi_all,c2(:));
     to_save.percent.corr_voxnpcs = corr(nvoxroi', to_save.percent.npcs');
     to_save.percent.corr_voxmeancoh = corr(nvoxroi_all,c3(:));
+    to_save.percent.corr_voxmeanabscoh = corr(nvoxroi_all,c4(:));
             
     c1 = sum(mim.case2,3);
     c2 = sum(mic.case2,3);
@@ -168,7 +179,7 @@ if strcmp(mode1,'all')
     
     
 else
-    [mic,mim,to_save, mean_coh] = fp_compute_mode_mim(mode1, D, npcs, V, A2, ZS, CS,fqA,nfqA,ihemi);
+    [mic,mim,to_save, mean_icoh, mean_acoh] = fp_compute_mode_mim(mode1, D, npcs, V, A2, ZS, CS,fqA,nfqA,ihemi);
 end
 
 
