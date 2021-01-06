@@ -1,4 +1,4 @@
-function [mic, mim,to_save, mean_icoh, mean_acoh] = fp_get_mim(A,CS,fqA,nfqA, D,ihemi,mode1,zs)
+function [mic, mim,to_save, mean_icoh, mean_acoh,t] = fp_get_mim(A,CS,fqA,nfqA, D,ihemi,mode1,zs,t)
 %mode1 is either a number for fixed pcs, or 'max' (select npcs = rank of
 %region data), or 'percent' (select npcs that 90% of the variance is
 %preserved), or 'case2' (mim only to pool dimensions, then summation), or
@@ -6,6 +6,7 @@ function [mic, mim,to_save, mean_icoh, mean_acoh] = fp_get_mim(A,CS,fqA,nfqA, D,
 [nmeg, ni, nvox,~] = size(A);
 nfreq = size(CS,3); 
 
+tic
 fprintf('Working on first part of mim_pca. \n')
 %%
 for aroi = 1:D.nroi
@@ -76,6 +77,7 @@ for aroi = 1:D.nroi
         npcs=[];
     end
 end
+t.pca = toc;
 %%
 fprintf('Working on compute_mode. \n')
 if strcmp(mode1,'all')
@@ -86,22 +88,22 @@ if strcmp(mode1,'all')
         npcs.fixed = repmat(ifi,D.nroi,1);
         [mic_fixed{ifi},mim_fixed{ifi},to_save_fixed{ifi},mean_icoh_fixed{ifi}, mean_acoh_fixed{ifi}] = fp_compute_mode_mim(ifi, D, npcs.fixed, V, A2, ZS, CS,fqA,nfqA,ihemi);
     end
-    toc
+    t.fixed = toc;
     
     fprintf('max \n')
     tic
     [mic_max,mim_max,to_save_max,mean_icoh_max,mean_acoh_max] = fp_compute_mode_mim('max', D, npcs.max, V, A2, ZS, CS,fqA,nfqA,ihemi);
-    toc
+    t.ninetynine = toc;
     
     fprintf('90 percent \n')
     tic
     [mic90,mim90,to_save90,mean_icoh_90, mean_acoh_90] = fp_compute_mode_mim('percent', D, npcs.percent, V, A2, ZS, CS,fqA,nfqA,ihemi);
-    toc
+    t.ninety = toc;
     
     fprintf('case2 and baseline \n')
     tic
     [mic_bandc,mim_bandc,to_save_bandc,~] = fp_compute_mode_mim('bandc',D,[],[],A2,[],CS,fqA,nfqA,ihemi);
-    toc
+    t.bandc = toc;
     
     mic.fixed = mic_fixed;
     mic.max = mic_max;
@@ -133,6 +135,7 @@ if strcmp(mode1,'all')
     mean_acoh.percent = mean_acoh_90; 
     
     %% Correlations 
+    tic
     nvoxroi_all = nvoxroi'*nvoxroi;
     nvoxroi_all = nvoxroi_all(:);
     for ii = 1:5
@@ -176,10 +179,13 @@ if strcmp(mode1,'all')
     to_save.baseline.corr_voxmim = corr(nvoxroi_all,c1(:));
     to_save.baseline.corr_voxmic = corr(nvoxroi_all,c2(:));
 
+    t.corrs = toc;
     
     
 else
+    tic
     [mic,mim,to_save, mean_icoh, mean_acoh] = fp_compute_mode_mim(mode1, D, npcs, V, A2, ZS, CS,fqA,nfqA,ihemi);
+    t.mim = toc;
 end
 
 

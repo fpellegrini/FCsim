@@ -76,12 +76,9 @@ for oroi = 1:D.nroi
         if strcmp(mode1,'case2')|| strcmp(mode1,'bandc')
             
             %MIC and MIM
-            fprintf('case2 mim rois %d and %d. \n',oroi,uroi)
-            tic
             npcs = repmat(ndim,size(Cohroi,1)/(ndim),1);
             [mic_v,mim_v] =  fp_mim(Cohroi,npcs);
-            toc
-            
+          
             %sum up mim/ mic within rois
             mic2(oroi,uroi,:) = squeeze(mean(mean(mic_v(1:nvoxreg1,nvoxreg1+1:end,:),1),2));
             mic2(uroi,oroi,:) = mic2(oroi,uroi,:);
@@ -128,7 +125,5 @@ elseif strcmp(mode1,'bandc')
     clear mim2
 end
 
-to_save.P = P_save; 
-% to_save.Cohroi = Cohroi_save;
-% to_save.CSroi = CSroi_save; 
+to_save.P = P_save;  
 to_save.npcs = npcs; 

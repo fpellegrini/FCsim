@@ -34,15 +34,20 @@ for iit= 1:nit
         [~,~,~, auc(iit,ipip,2)] = ...
             perfcurve(label(:),cc(:),1);
         clear cc
-        cc = sum(mean_coh.fixed{ipip},3);
+        cc = sum(mean_icoh.fixed{ipip},3);
         [~,~,~, auc(iit,ipip,3)] = ...
+            perfcurve(label(:),cc(:),1);
+        clear cc
+        cc = sum(mean_acoh.fixed{ipip},3);
+        [~,~,~, auc(iit,ipip,4)] = ...
             perfcurve(label(:),cc(:),1);
         clear cc
         
         corrs(iit,ipip,1) = to_save.fixed{ipip}.corr_voxmic;
         corrs(iit,ipip,2) = to_save.fixed{ipip}.corr_voxmim; 
         corrs(iit,ipip,3) = to_save.fixed{ipip}.corr_voxmeancoh;
-        corrs(iit,ipip,4) = corr(to_save.fixed{ipip}.npcs,to_save.nvoxroi');
+        corrs(iit,ipip,4) = to_save.fixed{ipip}.corr_voxmeanabscoh;
+        corrs(iit,ipip,5) = corr(to_save.fixed{ipip}.npcs,to_save.nvoxroi');
         
         varex(iit,ipip) = to_save.fixed{ipip}.var_explained;
         
@@ -55,14 +60,19 @@ for iit= 1:nit
     [~,~,~, auc(iit,6,2)] = ...
         perfcurve(label(:),cc(:),1);
     clear cc
-    cc = sum(mean_coh.max,3);
+    cc = sum(mean_icoh.max,3);
     [~,~,~, auc(iit,6,3)] = ...
+        perfcurve(label(:),cc(:),1);
+    clear cc
+    cc = sum(mean_acoh.max,3);
+    [~,~,~, auc(iit,6,4)] = ...
         perfcurve(label(:),cc(:),1);
     clear cc
     corrs(iit,6,1) = to_save.max.corr_voxmic;
     corrs(iit,6,2) = to_save.max.corr_voxmim; 
     corrs(iit,6,3) = to_save.max.corr_voxmeancoh;
-    corrs(iit,6,4) = corr(to_save.max.npcs',to_save.nvoxroi');
+    corrs(iit,6,4) = to_save.max.corr_voxmeanabscoh;
+    corrs(iit,6,5) = corr(to_save.max.npcs',to_save.nvoxroi');
     
     cc = sum(mic.percent,3);
     [~,~,~, auc(iit,7,1)] = ...
@@ -72,14 +82,19 @@ for iit= 1:nit
     [~,~,~, auc(iit,7,2)] = ...
         perfcurve(label(:),cc(:),1);
     clear cc 
-    cc = sum(mean_coh.percent,3);
+    cc = sum(mean_icoh.percent,3);
     [~,~,~, auc(iit,7,3)] = ...
+        perfcurve(label(:),cc(:),1);
+    clear cc 
+    cc = sum(mean_acoh.percent,3);
+    [~,~,~, auc(iit,7,4)] = ...
         perfcurve(label(:),cc(:),1);
     clear cc 
     corrs(iit,7,1) = to_save.percent.corr_voxmic;
     corrs(iit,7,2) = to_save.percent.corr_voxmim; 
     corrs(iit,7,3) = to_save.percent.corr_voxmeancoh;
-    corrs(iit,7,4) = corr(to_save.percent.npcs',to_save.nvoxroi');
+    corrs(iit,7,4) = to_save.percent.corr_voxmeanabscoh;
+    corrs(iit,7,5) = corr(to_save.percent.npcs',to_save.nvoxroi');
     
     cc = sum(mic.case2,3);
     [~,~,~, auc(iit,8,1)] = ...
@@ -111,7 +126,7 @@ for iit= 1:nit
     [~,~,~, auc(iit,10,2)] = ...
         perfcurve(label(:),cc(:),1);
     clear cc
-    cc = sum(mean_coh.max_corrected,3);
+    cc = sum(mean_icoh.max_corrected,3);
     [~,~,~, auc(iit,10,3)] = ...
         perfcurve(label(:),cc(:),1);
     clear cc
@@ -128,7 +143,7 @@ for iit= 1:nit
     [~,~,~, auc(iit,11,2)] = ...
         perfcurve(label(:),cc(:),1);
     clear cc 
-    cc = sum(mean_coh.percent_corrected,3);
+    cc = sum(mean_icoh.percent_corrected,3);
     [~,~,~, auc(iit,11,3)] = ...
         perfcurve(label(:),cc(:),1);
     clear cc 
@@ -147,7 +162,7 @@ for iit= 1:nit
         [~,~,~, auc(iit,11+ipip,2)] = ...
             perfcurve(label(:),cc(:),1);
         clear cc
-        cc = sum(mean_coh.fixed_zs0{ipip},3);
+        cc = sum(mean_icoh.fixed_zs0{ipip},3);
         [~,~,~, auc(iit,11+ipip,3)] = ...
             perfcurve(label(:),cc(:),1);
         clear cc
@@ -163,7 +178,7 @@ for iit= 1:nit
     [~,~,~, auc(iit,17,2)] = ...
         perfcurve(label(:),cc(:),1);
     clear cc
-    cc = sum(mean_coh.max_zs0,3);
+    cc = sum(mean_icoh.max_zs0,3);
     [~,~,~, auc(iit,17,3)] = ...
         perfcurve(label(:),cc(:),1);
     clear cc
@@ -176,7 +191,7 @@ for iit= 1:nit
     [~,~,~, auc(iit,18,2)] = ...
         perfcurve(label(:),cc(:),1);
     clear cc 
-    cc = sum(mean_coh.percent_zs0,3);
+    cc = sum(mean_icoh.percent_zs0,3);
     [~,~,~, auc(iit,18,3)] = ...
         perfcurve(label(:),cc(:),1);
     clear cc 
@@ -185,7 +200,7 @@ for iit= 1:nit
 end
 
 %% save auc 
-outname = '/home/bbci/data/haufe/Franziska/data/mim_sim1_auc';
+outname = '/home/bbci/data/haufe/Franziska/data/mim_sim1_auc_default';
 save(outname,'auc','-v7.3')
 
 %% mean and std of AUC 
@@ -199,7 +214,6 @@ for ip = 1:18
 end
 
 figure
-subplot(2,1,1)
 bar(median_auc)
 xTicks = 1:18;
 xticklabels = {'1zs','2zs', '3zs','4zs','5zs',...
@@ -207,12 +221,6 @@ xticklabels = {'1zs','2zs', '3zs','4zs','5zs',...
     '1 pc','2 pc', '3 pc', '4 pc', '5 pc', '99%', '90%'};
 ylabel('auc')
 set(gca,'XTick', xTicks, 'XTickLabel',xticklabels)
-legend('mic','mim','mean coh')
-grid on 
-subplot(2,1,2)
-bar(-log10(p_auc))
-set(gca,'XTick', xTicks, 'XTickLabel',xticklabels)
-ylabel('-log10(p)')
 legend('mic','mim','mean coh')
 grid on 
 
@@ -246,7 +254,3 @@ grid on
 xlabel('Number of fixed PCs')
 ylabel('Variance explained')
 title('variance explained, median across iterations, snr = 0.1')
-%% save
-clear cc
-outname= sprintf('/home/bbci/data/haufe/Franziska/data/mimsim_ana1_snr0%d.mat',round(isnr*10));
-save(outname,'-v7.3')
