@@ -1,8 +1,8 @@
 function fp_mim_struct_sim(params)
 
-DIROUT = '/home/bbci/data/haufe/Franziska/data/mim_sim1/';
+DIROUT = '/home/bbci/data/haufe/Franziska/data/mim_sim2/';
 if ~exist(DIROUT);mkdir(DIROUT); end
-DIROUT1 = '/home/bbci/data/haufe/Franziska/data/mim_save1/';
+DIROUT1 = '/home/bbci/data/haufe/Franziska/data/mim_save2/';
 if ~exist(DIROUT1);mkdir(DIROUT1); end
 
 if params.ip==7 || params.ip==8

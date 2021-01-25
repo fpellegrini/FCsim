@@ -1,15 +1,15 @@
 function fp_mimsim_ana_reduced
 
-DIRIN = '/home/bbci/data/haufe/Franziska/data/mim_sim1/';
+DIRIN = '/home/bbci/data/haufe/Franziska/data/mim_sim/';
 
 %default sparamenters
 nit = 100;
 iInt = 1; 
 iReg=1; 
-isnr=0.1;
+isnr=0.5;
 iss = 0.5;
 ilag=2;
-ihemi=1;
+ihemi=0;
 ifilt='l';
 
 

@@ -14,6 +14,9 @@ end
 if flag
     iroi_seed = randi(D.nroi,params.iInt,1);
     iroi_tar = randi(D.nroi,params.iInt,1);
+    while iroi_seed==iroi_tar
+        iroi_tar = randi(D.nroi,params.iInt,1);
+    end
 end
 
 %set parameters
