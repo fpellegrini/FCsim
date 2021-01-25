@@ -2,10 +2,10 @@ function fp_lfpmegmeg
 
 fp_addpath_sabzi
 
-DIRLOG = '~/log/lfpmegmeg/';
+DIRLOG = '~/log/lfpmegmeg1/';
 if ~exist(DIRLOG); mkdir(DIRLOG); end
 
-DIROUT = '~/data/lfpmegmeg/';
+DIROUT = '~/data/lfpmegmeg1/';
 if ~exist(DIROUT); mkdir(DIROUT); 
 end
 
@@ -17,10 +17,12 @@ nit= 100;
 %right, cerebellum, and pallidum
 myrois = [1 15 3 17 8 22 13 14]; 
 
+fixed_npcs = 5;
+
 
 %%
-for id = 6:numel(patientID)
-    clearvars -except DIRLOG DIROUT patientID nit myrois id 
+for id = 1:numel(patientID)
+    clearvars -except DIRLOG DIROUT patientID nit myrois id fixed_npcs
     
     logname = sprintf('%s',patientID{id});
     
@@ -121,9 +123,9 @@ for id = 6:numel(patientID)
             [V_, D_] = eig(real(CSs));
             [D_, in] = sort(real(diag(D_)), 'descend');
             % variance explained
-            vx_ = cumsum(D_)./sum(D_);
-            invx = 1:min(length(vx_), nmeg);
-            npcs(aroi) = min(find(vx_>0.9));
+%             vx_ = cumsum(D_)./sum(D_);
+%             invx = 1:min(length(vx_), nmeg);
+            npcs(aroi) = fixed_npcs; %min(find(vx_>0.9));
             
             V{aroi} = V_(:,in);
 
