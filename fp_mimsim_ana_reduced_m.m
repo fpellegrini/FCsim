@@ -1,139 +1,299 @@
 function fp_mimsim_ana_reduced_m
 
-DIRIN = '/home/bbci/data/haufe/Franziska/data/mim_sim2/';
-
-%default paramenters
-nit = 100;
-iInt = 1; 
-iReg=1; 
-isnr=0.5;
-iss = 0.5;
-ilag=2;
-ihemi=0;
-ifilt='d';
+DIRIN = '~/data/mim_sim2/';
 
 
+name = {...
+    'ip1_default';...
+    'ip2_int2';...
+    'ip2_int3';...
+    'ip2_int4';...
+    'ip2_int5';...
+    'ip3_iReg2';...
+    'ip4_isnr01';...
+    'ip4_isnr03';...
+    'ip4_isnr07';...
+    'ip4_isnr09';...
+    'ip5_iss0';...
+    'ip5_iss025';...
+    'ip5_iss075';...
+    'ip5_iss1';...
+    'ip6_lag1';...
+    'ip7_dics';...
+    'ip7_eloreta';...
+    'ip8_hemisym1'};
 
 %%
-for iit= [1:nit]
-    inname = sprintf('mim_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_hemisym%d_iter%d'...
-        ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,ihemi,iit);
+
+for iname = 1:numel(name)
     
-    load([DIRIN inname '.mat'])
-   
+    clearvars -except iname name DIRIN
     
-    for ipip = 1:5
-        cc = sum(mic.fixed{ipip},3);
-        [mrr(iit,ipip,1), mrrs(iit,ipip,1),hk(iit,ipip,1)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+    %default paramenters
+    nit = 100;
+    iInt = 1;
+    iReg=1;
+    isnr=0.5;
+    iss = 0.5;
+    ilag=2;
+    ihemi=0;
+    ifilt='l';
+    
+    switch iname
+        case iname>1 && iname<6
+            iInt = iname;
+        case 6
+            iReg = 2;
+        case 7
+            isnr = 0.1;
+        case 8
+            isnr = 0.3;
+        case 9
+            isnr = 0.7;
+        case 10
+            isnr = 0.9;
+        case 11
+            iss=0;
+        case 12
+            iss = 0.25;
+        case 13
+            iss = 0.75;
+        case 14
+            iss = 1;
+        case 15
+            ilag = 1;
+        case 16
+            ifilt = 'd';
+        case 17
+            ifilt = 'e';
+        case 18
+            ihemi = 1;
+    end
+    
+    
+    %%
+    for iit= [1:nit]
+        inname = sprintf('mim_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_hemisym%d_iter%d'...
+            ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,ihemi,iit);
+        
+        load([DIRIN inname '.mat'])
+        
+        
+        for ipip = 1:5
+            cc = sum(mic.fixed{ipip},3);
+            [mrr(iit,ipip,1), pr(iit,ipip,1),hk(iit,ipip,1)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+            clear cc
+            cc = sum(mic.fixed{ipip},3);
+            [mrr(iit,ipip,2),pr(iit,ipip,2), hk(iit,ipip,2)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+            clear cc
+            cc = sum(mean_icoh.fixed{ipip},3);
+            [mrr(iit,ipip,3),pr(iit,ipip,3), hk(iit,ipip,3)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+            clear cc
+            cc = sum(mean_acoh.fixed{ipip},3);
+            [mrr(iit,ipip,4),pr(iit,ipip,4), hk(iit,ipip,4)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+            clear c
+            
+
+            corrs(iit,ipip,1) = to_save.fixed{ipip}.corr_voxmic;
+            corrs(iit,ipip,2) = to_save.fixed{ipip}.corr_voxmim;
+            corrs(iit,ipip,3) = to_save.fixed{ipip}.corr_voxmeancoh;
+            corrs(iit,ipip,4) = to_save.fixed{ipip}.corr_voxmeanabscoh;
+            corrs(iit,ipip,5) = corr(to_save.fixed{ipip}.npcs,to_save.nvoxroi');
+
+            varex(iit,ipip) = to_save.fixed{ipip}.var_explained;
+            
+        end
+        
+        %
+        cc = sum(mic.max,3);
+        [mrr(iit,6,1),pr(iit,6,1), hk(iit,6,1)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
         clear cc
-        cc = sum(mic.fixed{ipip},3);
-        [mrr(iit,ipip,2),mrrs(iit,ipip,2), hk(iit,ipip,2)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+        cc = sum(mim.max,3);
+        [mrr(iit,6,2),pr(iit,6,2), hk(iit,6,2)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
         clear cc
-        cc = sum(mean_icoh.fixed{ipip},3);
-        [mrr(iit,ipip,3),mrrs(iit,ipip,3), hk(iit,ipip,3)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+        cc = sum(mean_icoh.max,3);
+        [mrr(iit,6,3),pr(iit,6,3), hk(iit,6,3)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
         clear cc
-%         
-%         corrs(iit,ipip,1) = to_save.fixed{ipip}.corr_voxmic;
-%         corrs(iit,ipip,2) = to_save.fixed{ipip}.corr_voxmim; 
-%         corrs(iit,ipip,3) = to_save.fixed{ipip}.corr_voxmeancoh;
-%         corrs(iit,ipip,4) = to_save.fixed{ipip}.corr_voxmeanabscoh;
-%         corrs(iit,ipip,5) = corr(to_save.fixed{ipip}.npcs,to_save.nvoxroi');
-%         
-%         varex(iit,ipip) = to_save.fixed{ipip}.var_explained;
+        cc = sum(mean_acoh.max,3);
+        [mrr(iit,6,4),pr(iit,6,4), hk(iit,6,4)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+        clear cc
+        
+        corrs(iit,6,1) = to_save.max.corr_voxmic;
+        corrs(iit,6,2) = to_save.max.corr_voxmim;
+        corrs(iit,6,3) = to_save.max.corr_voxmeancoh;
+        corrs(iit,6,4) = to_save.max.corr_voxmeanabscoh;
+        corrs(iit,6,5) = corr(to_save.max.npcs',to_save.nvoxroi');
+        %
+        cc = sum(mic.percent,3);
+        [mrr(iit,7,1), pr(iit,7,1),hk(iit,7,1)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+        clear cc
+        cc = sum(mim.percent,3);
+        [mrr(iit,7,2), pr(iit,7,2),hk(iit,7,2)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+        clear cc
+        cc = sum(mean_icoh.percent,3);
+        [mrr(iit,7,3), pr(iit,7,3),hk(iit,7,3)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+        clear cc
+        cc = sum(mean_acoh.percent,3);
+        [mrr(iit,7,4), pr(iit,7,4),hk(iit,7,4)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+        clear cc
+        
+        
+        corrs(iit,7,1) = to_save.percent.corr_voxmic;
+        corrs(iit,7,2) = to_save.percent.corr_voxmim;
+        corrs(iit,7,3) = to_save.percent.corr_voxmeancoh;
+        corrs(iit,7,4) = to_save.percent.corr_voxmeanabscoh;
+        corrs(iit,7,5) = corr(to_save.percent.npcs',to_save.nvoxroi');
+        
+        cc = sum(mic.baseline,3);
+        [mrr(iit,9,1), pr(iit,9,1),hk(iit,9,1)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+        clear ccii
+        cc = sum(mim.baseline,3);
+        [mrr(iit,9,2),pr(iit,9,2), hk(iit,9,2)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+        clear cc
+        
+        corrs(iit,9,1) = to_save.baseline.corr_voxmic;
+        corrs(iit,9,2) = to_save.baseline.corr_voxmim;
+        
+        if iname == 1
+            cc= sum(mic.case2,3);
+            [mrr(iit,8,1),mrrs(iit,8,1), hk(iit,8,1)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+            clear cc
+            cc= sum(mim.case2,3);
+            [mrr(iit,8,2),mrrs(iit,8,2), hk(iit,8,2)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+            clear cc
+            
+            %corrected
+            cc = sum(mic.max_corrected,3);
+            [mrr(iit,10,1),pr(iit,10,1), hk(iit,10,1)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+            clear cc
+            cc = sum(mim.max_corrected,3);
+            [mrr(iit,10,2),pr(iit,10,2), hk(iit,10,2)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+            clear cc
+            cc = sum(mean_icoh.max_corrected,3);
+            [mrr(iit,10,3),pr(iit,10,3), hk(iit,1,3)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+            clear cc
+            cc = sum(mean_acoh.max_corrected,3);
+            [mrr(iit,10,4),pr(iit,10,4), hk(iit,10,4)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+            clear cc
+            
+            corrs(iit,10,1) = to_save.max_corrected.corr_voxmic;
+            corrs(iit,10,2) = to_save.max_corrected.corr_voxmim;
+            corrs(iit,10,3) = to_save.max_corrected.corr_voxmeancoh;
+            corrs(iit,10,4) = to_save.max_corrected.corr_voxmeanabscoh;
+            %
+            cc = sum(mic.percent_corrected,3);
+            [mrr(iit,11,1), pr(iit,11,1),hk(iit,11,1)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+            clear cc
+            cc = sum(mim.percent_corrected,3);
+            [mrr(iit,11,2), pr(iit,11,2),hk(iit,11,2)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+            clear cc
+            cc = sum(mean_icoh.percent_corrected,3);
+            [mrr(iit,11,3), pr(iit,11,3),hk(iit,11,3)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+            clear cc
+            cc = sum(mean_acoh.percent_corrected,3);
+            [mrr(iit,11,4), pr(iit,11,4),hk(iit,11,4)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+            clear cc
+        
+        
+            corrs(iit,11,1) = to_save.percent_corrected.corr_voxmic;
+            corrs(iit,11,2) = to_save.percent_corrected.corr_voxmim;
+            corrs(iit,11,3) = to_save.percent_corrected.corr_voxmeancoh;
+            corrs(iit,11,4) = to_save.percent_corrected.corr_voxmeanabscoh;
+            
+            
+            %zs0
+            
+            for ipip = 1:5
+                cc = sum(mic.fixed_zs0{ipip},3);
+                [mrr(iit,12+ipip,1), pr(iit,ipip,1),hk(iit,ipip,1)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+                clear cc
+                cc = sum(mic.fixed_zs0{ipip},3);
+                [mrr(iit,12+ipip,2),pr(iit,ipip,2), hk(iit,ipip,2)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+                clear cc
+                cc = sum(mean_icoh.fixed_zs0{ipip},3);
+                [mrr(iit,12+ipip,3),pr(iit,ipip,3), hk(iit,ipip,3)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+                clear cc
+                cc = sum(mean_acoh.fixed_zs0{ipip},3);
+                [mrr(iit,12+ipip,4),pr(iit,ipip,4), hk(iit,ipip,4)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+                clear c
+                
+            end
+            
+            %
+            cc = sum(mic.max_zs0,3);
+            [mrr(iit,18,1),pr(iit,18,1), hk(iit,18,1)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+            clear cc
+            cc = sum(mim.max_zs0,3);
+            [mrr(iit,18,2),pr(iit,18,2), hk(iit,18,2)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+            clear cc
+            cc = sum(mean_icoh.max_zs0,3);
+            [mrr(iit,18,3),pr(iit,18,3), hk(iit,18,3)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+            clear cc
+            cc = sum(mean_acoh.max_zs0,3);
+            [mrr(iit,18,4),pr(iit,18,4), hk(iit,18,4)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+            clear cc
+            
+            %
+            cc = sum(mic.percent_zs0,3);
+            [mrr(iit,19,1), pr(iit,19,1),hk(iit,19,1)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+            clear cc
+            cc = sum(mim.percent_zs0,3);
+            [mrr(iit,19,2), pr(iit,19,2),hk(iit,19,2)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+            clear cc
+            cc = sum(mean_icoh.percent_zs0,3);
+            [mrr(iit,19,3), pr(iit,19,3),hk(iit,19,3)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+            clear cc
+            cc = sum(mean_acoh.percent_zs0,3);
+            [mrr(iit,19,4), pr(iit,19,4),hk(iit,19,4)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+            clear cc
+            
+        end
         
     end
-
+    
+    %%
+    if iname > 1
+        mrr(:,8,:)=[];
+        pr(:,8,:)=[];
+        hk(:,8,:)=[];
+    end
+    %%
+    outname = [DIRIN 'mrr_mim2_' name{iname} '.mat'];
+    save(outname,'mrr','pr','hk','corrs','varex','-v7.3')
+end
+%%
 %
-    cc = sum(mic.max,3);
-    [mrr(iit,6,1),mrrs(iit,6,1), hk(iit,6,1)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
-    clear cc
-    cc = sum(mim.max,3);
-    [mrr(iit,6,2),mrrs(iit,6,2), hk(iit,6,2)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
-    clear cc
-    cc = sum(mean_icoh.max,3);
-    [mrr(iit,6,3),mrrs(iit,6,3), hk(iit,6,3)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
-    clear cc
-    
-%     corrs(iit,6,1) = to_save.max.corr_voxmic;
-%     corrs(iit,6,2) = to_save.max.corr_voxmim; 
-%     corrs(iit,6,3) = to_save.max.corr_voxmeancoh;
-%     corrs(iit,6,4) = to_save.max.corr_voxmeanabscoh;
-%     corrs(iit,6,5) = corr(to_save.max.npcs',to_save.nvoxroi');
-%     
-    cc = sum(mic.percent,3);
-    [mrr(iit,7,1), mrrs(iit,7,1),hk(iit,7,1)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
-    clear cc
-    cc = sum(mim.percent,3);
-    [mrr(iit,7,2), mrrs(iit,7,2),hk(iit,7,2)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
-    clear cc 
-    cc = sum(mean_icoh.percent,3);
-    [mrr(iit,7,3), mrrs(iit,7,3),hk(iit,7,3)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
-    clear cc 
-%     corrs(iit,7,1) = to_save.percent.corr_voxmic;
-%     corrs(iit,7,2) = to_save.percent.corr_voxmim; 
-%     corrs(iit,7,3) = to_save.percent.corr_voxmeancoh;
-%     corrs(iit,7,4) = to_save.percent.corr_voxmeanabscoh;
-%     corrs(iit,7,5) = corr(to_save.percent.npcs',to_save.nvoxroi');
-  
-    cc = sum(mic.baseline,3);
-    [mrr(iit,9,1), mrrs(iit,9,1),hk(iit,9,1)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
-    clear cc
-    cc = sum(mim.baseline,3);
-    [mrr(iit,9,2),mrrs(iit,9,2), hk(iit,9,2)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
-    clear cc
-    
-%     corrs(iit,8,1) = to_save.baseline.corr_voxmic;
-%     corrs(iit,8,2) = to_save.baseline.corr_voxmim; 
-
-%     cc= sum(mic.case2,3);
-%      [mrr(iit,8,1),mrrs(iit,8,1), hk(iit,8,1)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
-%      clear cc
-%      cc= sum(mim.case2,3);
-%      [mrr(iit,8,2),mrrs(iit,8,2), hk(iit,8,2)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
-%      clear cc
-
-end
-    
-%%
-mrr(:,8,:)=[];
-mrrs(:,8,:)=[];
-hk(:,8,:)=[];
-%%
-outname = [DIRIN 'mrr_mim2_dics.mat'];
-save(outname,'mrr','mrrs','hk','-v7.3')
-%%
-
-a = {'1zs','2zs', '3zs','4zs','5zs',...
-    '99% zs','90% zs','sumVox','baseline'};
-
-b = {'mic','mim'};
-
-
-for jj = 1:2
-    figone(30,50)
-    for ii = 1:9
-        subplot(3,3,ii)
-        hist(mrrs(:,ii,jj))
-        title(['mrr ' a{ii} ' ' b{jj}])
-        ylim([0 100])
-        
-    end
-%     saveas(gcf,['../figures/mimsim_ana/mrrs_' b{jj}],'png')
-%     close all
-end
-
-for jj = 1:2
-    figone(30,50)
-    for ii = 1:9
-        subplot(3,3,ii)
-        hist(hk(:,ii,jj))
-        title(['hits at 2 ' a{ii} ' ' b{jj}])
-        ylim([0 100])
-        
-    end
-%     saveas(gcf,['../figures/mimsim_ana/hk_' b{jj}],'png')
-%     close all
-end
+% a = {'1zs','2zs', '3zs','4zs','5zs',...
+%     '99% zs','90% zs','sumVox','baseline'};
+%
+% b = {'mic','mim'};
+%
+%
+% for jj = 1:2
+%     figone(30,50)
+%     for ii = 1:9
+%         subplot(3,3,ii)
+%         hist(pr(:,ii,jj))
+%         title(['mrr ' a{ii} ' ' b{jj}])
+%         ylim([0 100])
+%
+%     end
+% %     saveas(gcf,['../figures/mimsim_ana/mrrs_' b{jj}],'png')
+% %     close all
+% end
+%
+% for jj = 1:2
+%     figone(30,50)
+%     for ii = 1:9
+%         subplot(3,3,ii)
+%         hist(hk(:,ii,jj))
+%         title(['hits at 2 ' a{ii} ' ' b{jj}])
+%         ylim([0 100])
+%         
+%     end
+% %     saveas(gcf,['../figures/mimsim_ana/hk_' b{jj}],'png')
+% %     close all
+% end
 %     
 % %     cc = sum(mic.max_corrected,3);
 % %     [~,~,~, auc(iit,10,1)] = ...
