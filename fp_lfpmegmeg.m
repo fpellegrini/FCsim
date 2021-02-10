@@ -15,12 +15,12 @@ nit= 100;
 
 %this is Precentral left and right, SMA left and right, parietal left and
 %right, cerebellum, and pallidum
-myrois = [1 15 3 17 8 22 13 14]; 
 
+myrois = [1 15 3 17 8 22 13 14]; 
 fixed_npcs = 5;
-%
 
 %%
+myrois = [1 15 3 17 8 22 13 14]; 
 for id = 1:numel(patientID)
     clearvars -except DIRLOG DIROUT patientID nit myrois id fixed_npcs
     
