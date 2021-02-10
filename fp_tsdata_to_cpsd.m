@@ -26,7 +26,7 @@ end
 if ~isequal(sort(ind_1),sort(unique(ind_1))) || ~isequal(sort(ind_2), sort(unique(ind_2)))
     error('ind_1 and ind_2 must be unique')
 end
-% keyboard
+
 if strcmpi(method,'MT')    
       
     nchunks = floor(((n_times-noverlap)/(window-noverlap))); % FFT chunks per channel
