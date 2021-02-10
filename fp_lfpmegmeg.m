@@ -112,9 +112,9 @@ for id = 1:numel(patientID)
             
             %zscoring
             clear CSz 
-            ZS{aroi} = diag(sqrt(mean(diag(squeeze(sum(real(CSv), 3))))./diag(squeeze(sum(real(CSv), 3)))));
+%             ZS{aroi} = diag(sqrt(mean(diag(squeeze(sum(real(CSv), 3))))./diag(squeeze(sum(real(CSv), 3)))));
             for ifreq = 1:nfreq
-                CSz(ifreq,:, :) = ZS{aroi}'*squeeze(CSv(:,:, ifreq))*ZS{aroi};
+                CSz(ifreq,:, :) = CSv(:,:,ifreq); %ZS{aroi}'*squeeze(CSv(:,:, ifreq))*ZS{aroi};
             end
             
             %region pca
@@ -138,7 +138,7 @@ for id = 1:numel(patientID)
 %                 npcs(aroi) = max(npcs(aroi),npcs(partner_rois(2,aroi)));
 %             end
             V{aroi} = V{aroi}(:, 1:npcs(aroi));
-            P(:, croi:croi+npcs(aroi)-1) = A2{aroi} * ZS{aroi} * real(V{aroi});
+            P(:, croi:croi+npcs(aroi)-1) = A2{aroi} * real(V{aroi});
             croi = croi +npcs(aroi);
         end
         clear ZS
