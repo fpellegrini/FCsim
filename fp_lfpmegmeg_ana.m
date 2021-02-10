@@ -1,11 +1,12 @@
 function fp_lfpmegmeg_ana 
 
-DIRIN = '~/Dropbox/Franziska/Data_MEG_Project/lfpmegmeg/';
-DIRFIG = '~/Dropbox/Franziska/Data_MEG_Project/figures/lfpmegmeg/';
+DIRIN = '~/Dropbox/Franziska/Data_MEG_Project/lfpmegmeg/5fixed_noZS/';
+DIRFIG = '~/Dropbox/Franziska/Data_MEG_Project/figures/lfpmegmeg/5fixed_noZS/';
 if ~exist(DIRFIG);mkdir(DIRFIG); end
 
 patientID = {'04'; '07'; '08'; '09'; '10';'11';'12';'18';'20';'22';'25'};
 
+%%
 for id = 1: numel(patientID)
     
     %% imCoh (mim/mic) 
@@ -62,7 +63,7 @@ for id = 1: numel(patientID)
 %     set(gca,'XTick', xticks,'XTickLabel',xticklabels,'YTick',xticks,'YTickLabel',xticklabels)
 %     xtickangle(45)
 %     colorbar
-%     caxis([4 15])
+%     caxis([4 22])
 % 
 %     subplot(2,2,2)
 %     imagesc(squeeze(MIC_TRUE(:,7,:)))
@@ -115,8 +116,8 @@ for id = 1: numel(patientID)
 %     outname= [DIRFIG 'imCoh_sub' patientID{id}];
 %     saveas(gcf,outname, 'png')
 %     close all
-    
-    %% subject-wise plots of true GC
+%     
+%     % subject-wise plots of true GC
 %     roi = 7;
 %     
 %     figone(15,40) 
@@ -153,7 +154,7 @@ for id = 1: numel(patientID)
 %     outname= [DIRFIG 'GC_sub' patientID{id}];
 %     saveas(gcf,outname, 'png')
 %     close all
-%     
+    
     
 end 
 
@@ -189,7 +190,7 @@ for ibands = 1: size(fbands,1)
     xticklabels = {'Precentral left','Precentral right', 'SMA left', 'SMA right', 'Parietal left',...
         'Parietal right', 'cerebellum','pallidum','LFP right','LFP left'};
     set(gca,'XTick', xticks,'XTickLabel',xticklabels)
-    xtickangle(45)
+    xtickangle(45) 
     caxis([0 1])
     
     subplot(2,5,ibands+5)
@@ -203,7 +204,11 @@ for ibands = 1: size(fbands,1)
     set(gca,'XTick', xticks,'XTickLabel',xticklabels)
     xtickangle(45)
     caxis([0 1])
+    
 end
+outname= [DIRFIG 'MIM_group_band'];
+saveas(gcf,outname, 'png')
+close all
 
 %% within subjects for 5 freq bands 
 
@@ -253,7 +258,12 @@ for iband = 1:size(fbands,1)
         colorbar
         caxis([0 2])
         
+        
     end 
+    
+    outname= [DIRFIG 'MIM_withinsubs_band' fnames{iband}];
+    saveas(gcf,outname, 'png')
+    close all
 end 
 
 for iband = 1:size(fbands,1)
@@ -274,4 +284,8 @@ for iband = 1:size(fbands,1)
         colorbar
         caxis([0 2])
     end 
+    
+    outname= [DIRFIG 'MIC_withinsubs_band' fnames{iband}];
+    saveas(gcf,outname, 'png')
+    close all
 end 
