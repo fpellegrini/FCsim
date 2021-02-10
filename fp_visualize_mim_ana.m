@@ -2,8 +2,8 @@
 clear all
 close all
 
-load('./mimsim_ana_snr02_30nit.mat')
-
+load('./mimsim_ana_snr05_iInt2.mat')
+%%
 figure
 bar(median_auc)
 title('median auc')
