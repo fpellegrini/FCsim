@@ -1,6 +1,6 @@
 function fp_mimsim_ana_reduced_m
 
-DIRIN = '~/data/mim_sim2/';
+DIRIN = '~/data/mim_sim2/reg_eloreta/';
 
 
 name = {...
@@ -20,7 +20,7 @@ name = {...
     'ip5_iss1';...
     'ip6_lag1';...
     'ip7_dics';...
-    'ip7_eloreta';...
+    'ip7_eloreta_reg';...
     'ip8_hemisym1'};
 
 %%
@@ -43,8 +43,6 @@ for iname = 1:numel(name)
         iInt = iname;
     else
         switch iname
-            case iname>1 && iname<6
-                iInt = iname;
             case 6
                 iReg = 2;
             case 7
@@ -97,13 +95,13 @@ for iname = 1:numel(name)
             [mrr(iit,ipip,4),pr(iit,ipip,4), hk(iit,ipip,4)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
             clear c
             
-            
+
             corrs(iit,ipip,1) = to_save.fixed{ipip}.corr_voxmic;
             corrs(iit,ipip,2) = to_save.fixed{ipip}.corr_voxmim;
             corrs(iit,ipip,3) = to_save.fixed{ipip}.corr_voxmeancoh;
             corrs(iit,ipip,4) = to_save.fixed{ipip}.corr_voxmeanabscoh;
             corrs(iit,ipip,5) = corr(to_save.fixed{ipip}.npcs,to_save.nvoxroi');
-            
+
             varex(iit,ipip) = to_save.fixed{ipip}.var_explained;
             
         end
@@ -160,10 +158,10 @@ for iname = 1:numel(name)
         
         if iname == 1
             cc= sum(mic.case2,3);
-            [mrr(iit,8,1),mrrs(iit,8,1), hk(iit,8,1)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+            [mrr(iit,8,1),pr(iit,8,1), hk(iit,8,1)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
             clear cc
             cc= sum(mim.case2,3);
-            [mrr(iit,8,2),mrrs(iit,8,2), hk(iit,8,2)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+            [mrr(iit,8,2),pr(iit,8,2), hk(iit,8,2)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
             clear cc
             
             %corrected
@@ -197,8 +195,8 @@ for iname = 1:numel(name)
             cc = sum(mean_acoh.percent_corrected,3);
             [mrr(iit,11,4), pr(iit,11,4),hk(iit,11,4)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
             clear cc
-            
-            
+        
+        
             corrs(iit,11,1) = to_save.percent_corrected.corr_voxmic;
             corrs(iit,11,2) = to_save.percent_corrected.corr_voxmim;
             corrs(iit,11,3) = to_save.percent_corrected.corr_voxmeancoh;
@@ -209,46 +207,46 @@ for iname = 1:numel(name)
             
             for ipip = 1:5
                 cc = sum(mic.fixed_zs0{ipip},3);
-                [mrr(iit,12+ipip,1), pr(iit,ipip,1),hk(iit,ipip,1)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+                [mrr(iit,11+ipip,1), pr(iit,11+ipip,1),hk(iit,11+ipip,1)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
                 clear cc
                 cc = sum(mic.fixed_zs0{ipip},3);
-                [mrr(iit,12+ipip,2),pr(iit,ipip,2), hk(iit,ipip,2)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+                [mrr(iit,11+ipip,2),pr(iit,11+ipip,2), hk(iit,11+ipip,2)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
                 clear cc
                 cc = sum(mean_icoh.fixed_zs0{ipip},3);
-                [mrr(iit,12+ipip,3),pr(iit,ipip,3), hk(iit,ipip,3)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+                [mrr(iit,11+ipip,3),pr(iit,11+ipip,3), hk(iit,11+ipip,3)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
                 clear cc
                 cc = sum(mean_acoh.fixed_zs0{ipip},3);
-                [mrr(iit,12+ipip,4),pr(iit,ipip,4), hk(iit,ipip,4)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+                [mrr(iit,11+ipip,4),pr(iit,11+ipip,4), hk(iit,11+ipip,4)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
                 clear c
                 
             end
             
             %
             cc = sum(mic.max_zs0,3);
-            [mrr(iit,18,1),pr(iit,18,1), hk(iit,18,1)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+            [mrr(iit,17,1),pr(iit,17,1), hk(iit,17,1)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
             clear cc
             cc = sum(mim.max_zs0,3);
-            [mrr(iit,18,2),pr(iit,18,2), hk(iit,18,2)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+            [mrr(iit,17,2),pr(iit,17,2), hk(iit,17,2)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
             clear cc
             cc = sum(mean_icoh.max_zs0,3);
-            [mrr(iit,18,3),pr(iit,18,3), hk(iit,18,3)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+            [mrr(iit,17,3),pr(iit,17,3), hk(iit,17,3)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
             clear cc
             cc = sum(mean_acoh.max_zs0,3);
-            [mrr(iit,18,4),pr(iit,18,4), hk(iit,18,4)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+            [mrr(iit,17,4),pr(iit,17,4), hk(iit,17,4)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
             clear cc
             
             %
             cc = sum(mic.percent_zs0,3);
-            [mrr(iit,19,1), pr(iit,19,1),hk(iit,19,1)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+            [mrr(iit,18,1), pr(iit,18,1),hk(iit,18,1)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
             clear cc
             cc = sum(mim.percent_zs0,3);
-            [mrr(iit,19,2), pr(iit,19,2),hk(iit,19,2)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+            [mrr(iit,18,2), pr(iit,18,2),hk(iit,18,2)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
             clear cc
             cc = sum(mean_icoh.percent_zs0,3);
-            [mrr(iit,19,3), pr(iit,19,3),hk(iit,19,3)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+            [mrr(iit,18,3), pr(iit,18,3),hk(iit,18,3)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
             clear cc
             cc = sum(mean_acoh.percent_zs0,3);
-            [mrr(iit,19,4), pr(iit,19,4),hk(iit,19,4)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+            [mrr(iit,18,4), pr(iit,18,4),hk(iit,18,4)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
             clear cc
             
         end
@@ -293,12 +291,12 @@ end
 %         hist(hk(:,ii,jj))
 %         title(['hits at 2 ' a{ii} ' ' b{jj}])
 %         ylim([0 100])
-%
+%         
 %     end
 % %     saveas(gcf,['../figures/mimsim_ana/hk_' b{jj}],'png')
 % %     close all
 % end
-%
+%     
 % %     cc = sum(mic.max_corrected,3);
 % %     [~,~,~, auc(iit,10,1)] = ...
 % %         perfcurve(label(:),cc(:),1);
@@ -312,10 +310,10 @@ end
 % %         perfcurve(label(:),cc(:),1);
 % %     clear cc
 % %     corrs(iit,10,1) = to_save.max_corrected.corr_voxmic;
-% %     corrs(iit,10,2) = to_save.max_corrected.corr_voxmim;
+% %     corrs(iit,10,2) = to_save.max_corrected.corr_voxmim; 
 % %     corrs(iit,10,3) = to_save.max_corrected.corr_voxmeancoh;
 % %     corrs(iit,10,4) = corr(to_save.max.npcs',to_save.nvoxroi');
-% %
+% %     
 % %     cc = sum(mic.percent_corrected,3);
 % %     [~,~,~, auc(iit,11,1)] = ...
 % %         perfcurve(label(:),cc(:),1);
@@ -323,17 +321,17 @@ end
 % %     cc = sum(mim.percent_corrected,3);
 % %     [~,~,~, auc(iit,11,2)] = ...
 % %         perfcurve(label(:),cc(:),1);
-% %     clear cc
+% %     clear cc 
 % %     cc = sum(mean_icoh.percent_corrected,3);
 % %     [~,~,~, auc(iit,11,3)] = ...
 % %         perfcurve(label(:),cc(:),1);
-% %     clear cc
+% %     clear cc 
 % %     corrs(iit,11,1) = to_save.percent_corrected.corr_voxmic;
-% %     corrs(iit,11,2) = to_save.percent_corrected.corr_voxmim;
+% %     corrs(iit,11,2) = to_save.percent_corrected.corr_voxmim; 
 % %     corrs(iit,11,3) = to_save.percent_corrected.corr_voxmeancoh;
 % %     corrs(iit,11,4) = corr(to_save.percent.npcs',to_save.nvoxroi');
-%
-%
+%     
+%     
 % %     for ipip = 1:5
 % %         cc = sum(mic.fixed_zs0{ipip},3);
 % %         [~, ~,~, auc(iit,11+ipip,1)] = ...
@@ -347,10 +345,10 @@ end
 % %         [~,~,~, auc(iit,11+ipip,3)] = ...
 % %             perfcurve(label(:),cc(:),1);
 % %         clear cc
-% %
-% %
+% %         
+% %        
 % %     end
-% %
+% %      
 % %     cc = sum(mic.max_zs0,3);
 % %     [~,~,~, auc(iit,17,1)] = ...
 % %         perfcurve(label(:),cc(:),1);
@@ -363,7 +361,7 @@ end
 % %     [~,~,~, auc(iit,17,3)] = ...
 % %         perfcurve(label(:),cc(:),1);
 % %     clear cc
-% %
+% %     
 % %     cc = sum(mic.percent_zs0,3);
 % %     [~,~,~, auc(iit,18,1)] = ...
 % %         perfcurve(label(:),cc(:),1);
@@ -371,29 +369,29 @@ end
 % %     cc = sum(mim.percent_zs0,3);
 % %     [~,~,~, auc(iit,18,2)] = ...
 % %         perfcurve(label(:),cc(:),1);
-% %     clear cc
+% %     clear cc 
 % %     cc = sum(mean_icoh.percent_zs0,3);
 % %     [~,~,~, auc(iit,18,3)] = ...
 % %         perfcurve(label(:),cc(:),1);
-% %     clear cc
-%
-%
+% %     clear cc 
+%     
+% 
 % end
-%
-% %% save auc
+% 
+% %% save auc 
 % outname = '/home/bbci/data/haufe/Franziska/data/mim_sim1_auc_ip8_hemisym1';
 % save(outname,'auc','-v7.3')
-%
-% %% mean and std of AUC
+% 
+% %% mean and std of AUC 
 % for ip = 1:8
 %     for im = 1:4
 %         median_auc(ip,im) = mean(auc(:,ip,im));
-%         std_auc(ip,im) = std(auc(:,ip,im));
+%         std_auc(ip,im) = std(auc(:,ip,im)); 
 %         [p_auc(ip,im),h_auc(ip,im),stats] = signrank(auc(:,ip,im),0.5,'tail','right');
 %         t_auc(ip,im) = stats.signedrank;
 %     end
 % end
-%
+% 
 % figure
 % bar(median_auc)
 % xTicks = 1:8;
@@ -402,41 +400,41 @@ end
 % ylabel('auc')
 % set(gca,'XTick', xTicks, 'XTickLabel',xticklabels)
 % legend('mic','mim','mean icoh', 'mean abscoh')
-% grid on
+% grid on 
 % title('same number of PCs in regions of both hemispheres')
 % % subplot(2,1,2)
 % % bar(-log10(p_auc))
 % % set(gca,'XTick', xTicks, 'XTickLabel',xticklabels)
 % % ylabel('-log10(p)')
 % % legend('mic','mim','mean coh')
-% % grid on
-%
-% %% corrs
+% % grid on 
+% 
+% %% corrs  
 % corrs(:,8,3:5)=nan;
 % %%
 % for ip = 1:8
 %     for im = 1:5
 %         median_corrs(ip,im) = nanmedian(corrs(:,ip,im));
-%
+%         
 %     end
 % end
-%
+% 
 % bar(median_corrs)
 % xTicks = 1:11;
 % xticklabels = {'1 pc','2 pc', '3 pc','4 pc','5 pc',...
 %     '99%','90%','baseline'};
-%
+% 
 % ylabel('Pearson correlations')
 % set(gca,'XTick', xTicks, 'XTickLabel',xticklabels)
 % legend('voxmim','voxmic','voxmeanicoh','voxmean abscoh','voxnpcs')
 % title('3 interactions')
-%
+% 
 % %% variance explained
 % %%
-% for ipip = 1:5
+% for ipip = 1:5 
 %     median_varex(ipip) = median(varex(:,ipip));
-% end
-%
+% end 
+% 
 % plot(median_varex)
 % grid on
 % xlabel('Number of fixed PCs')
