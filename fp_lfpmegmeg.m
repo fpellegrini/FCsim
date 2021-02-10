@@ -18,7 +18,7 @@ nit= 100;
 myrois = [1 15 3 17 8 22 13 14]; 
 
 fixed_npcs = 5;
-
+%
 
 %%
 for id = 1:numel(patientID)
