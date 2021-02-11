@@ -67,16 +67,16 @@ elseif ip == 7
     SNR = 0.5;
     noise_mix = 0.5;
     nlag = 2;
-    filtertype= {'d';'e'};
+    filtertype= {'e'};
     hemisym = 0;
     
-elseif ip == 8
-    %vary hemisphere symmetry
-    nInteractions = 1;
-    nRegionInts = 1;
-    SNR = 0.5;
-    noise_mix = 0.5;
-    nlag = 2;
-    filtertype= {'l'}; %lcmv
-    hemisym = 1; %symmetrize hemispheres
+% elseif ip == 8
+%     %vary hemisphere symmetry
+%     nInteractions = 1;
+%     nRegionInts = 1;
+%     SNR = 0.5;
+%     noise_mix = 0.5;
+%     nlag = 2;
+%     filtertype= {'l'}; %lcmv
+%     hemisym = 1; %symmetrize hemispheres
 end

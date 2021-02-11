@@ -87,7 +87,8 @@ ni = size(L_backward,3);
 
 %construct source filter
 if strcmp(params.ifilt,'e')
-    A = squeeze(mkfilt_eloreta_v2(L_backward));
+    reg_param = fp_eloreta_crossval(signal_sensor,L_backward,5);
+    A = squeeze(mkfilt_eloreta_v2(L_backward,reg_param));
     A = permute(A,[1, 3, 2]);
     fqA = ones(1,nfreq);%only one filter for all freqs.
     nfqA = 1;

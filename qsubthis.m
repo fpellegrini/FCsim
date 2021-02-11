@@ -255,15 +255,13 @@ mgsub({},@fp_megmeg_pipeline,{[],DIROUT},'qsub_opts','-l h_vmem=16G')
 
 %% mim struct sim 
 clear all
-fp_addpath
+% fp_addpath
 cd ~/matlab/fp/
-DIROUT = '/home/bbci/data/haufe/Franziska/data/';
 nit = 100;
-varyParam = 1:8;
+varyParam = [1:7];%defaults, snr, interactions, everything else 
 
-for ip = varyParam
-    mgsub({},@fp_eval_mim_struct_sim,{ip},'qsub_opts',['-l h_vmem=128G -t 1-' num2str(nit)])
-%     mgsub({},@fp_eval_mim_struct_sim,{},'qsub_opts',['-l h_vmem=32G'])
+for ip =7
+    mgsub({},@fp_eval_mim_struct_sim,{ip},'qsub_opts',['-l h_vmem=16G -t 1-' num2str(nit) ]) %' -q 2jobs'
     pause(2)
 end
 
