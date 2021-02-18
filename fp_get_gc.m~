@@ -1,7 +1,7 @@
-function [TRGC,GC,DIFFGC,to_save,t] = fp_get_gc_reduced(A,CS,fqA,nfqA, D,mode1,zs,t)
+function [TRGC, GC,DIFFGC,to_save,t] = fp_get_gc(A,data, D,mode1,zs,t)
 %mode1 is either a number for fixed pcs, or 'max' (select npcs = rank of
 %region data), or 'percent' (select npcs that 90% of the variance is
-%preserved), or 'case2' (mvgc only to pool dimensions, then summation), or
+%preserved), or 'case2' (only to pool dimensions, then summation), or
 %'baseline', or 'all'
 [nmeg, ni, nvox,~] = size(A);
 nfreq = size(CS,3); 
@@ -20,37 +20,34 @@ for aroi = 1:D.nroi
     
     if ~strcmp(mode1,'case2')&& ~strcmp(mode1,'baseline')&& ~strcmp(mode1,'bandc')
         
-        %project CS to voxel space
-        for ifq = 1: nfreq
-            CSv(:,:,ifq) = squeeze(A2{aroi}(:,:,fqA(ifq)))' * CS(:,:,ifq)...
-                * squeeze(A2{aroi}(:,:,fqA(ifq)));
-        end
+        %%%%%%test if I have to do this trial wise! 
+        datav = A2{aroi}' * data;
         
         %zscoring
         clear CSz
         if zs
-            ZS{aroi} = diag(sqrt(mean(diag(squeeze(sum(real(CSv), 3))))./diag(squeeze(sum(real(CSv), 3)))));
+            dataz = zscore(datav(:,:)'); %%%test this! 
         else 
-            ZS{aroi} = eye(size(CSv,1));
+            dataz = datav';
         end
         
-        %apply ZS
-        for ifreq = 1:nfreq
-            CSz(:,:, ifreq) = ZS{aroi}'*squeeze(CSv(:, :,ifreq))*ZS{aroi};
-        end
+        %SVD
+        clear data_ S_ %%%%%%check this!
+        [data_, S_,~] = svds(double(dataz(:, :)));
         
-        %PCA
-        clear CSs v v5 in V_ D_
-        CSs = squeeze(sum(real(CSz),3)); %covariance
-        [V_, D_] = eig(CSs);
-        [D_, in] = sort(real(diag(D_)), 'descend');
-        V{aroi} = V_(:,in);
-        vx_ = cumsum(D_)./sum(D_);
+        % variance explained
+        vx_ = cumsum(diag(S_).^2)./sum(diag(S_).^2);
+        
+        % keep nPCA components with correct unit and scaling
+        source_roi_data(:, :, iROI) = data_(:, 1:settings.nPCA)*S_(1:settings.nPCA, 1:settings.nPCA);
+        
         
         %npcs
         if isnumeric(mode1)
             %fixed number of pcs for every roi
             npcs(aroi) = mode1;
+            invx = 1:min(length(vx_), EEG.nbchan);
+        varex(iROI, invx) = vx_(invx);
             var_explained(aroi) = vx_(npcs(aroi));
             
         elseif strcmp(mode1,'max')
@@ -101,72 +98,84 @@ if strcmp(mode1,'all')
     [TRGC90,GC90,DIFFGC90,to_save90] = fp_compute_mode_gc('percent', D, npcs.percent, V, A2, ZS, CS,fqA,nfqA);
     t.ninety = toc;
     
-    fprintf('baseline \n')
+    fprintf('case2 and baseline \n')
     tic
-    [TRGC_b,GC_b,DIFFGC_b, to_save_b] = fp_compute_mode_gc('baseline', D, [], [], A2, [], CS,fqA,nfqA);
+    [TRGC_bandc,GC_bandc,DIFFGC_bandc, to_save_bandc] = fp_compute_mode_gc('bandc', D, [], [], A2, [], CS,fqA,nfqA);
     t.bandc = toc;
     
     TRGC.fixed = TRGC_fixed;
     TRGC.max = TRGC_max;
     TRGC.percent = TRGC90;
-    TRGC.baseline = TRGC_b;
+    TRGC.case2 = TRGC_bandc.case2;
+    TRGC.baseline = TRGC_bandc.baseline;
     GC.fixed = GC_fixed;
     GC.max = GC_max;
     GC.percent = GC90;
-    GC.baseline = GC_b;
+    GC.case2 = GC_bandc.case2;
+    GC.baseline = GC_bandc.baseline;
     DIFFGC.fixed = DIFFGC_fixed;
     DIFFGC.max = DIFFGC_max;
     DIFFGC.percent = DIFFGC90;
-    DIFFGC.baseline = DIFFGC_b;
-    
+    DIFFGC.case2 = DIFFGC_bandc.case2;
+    DIFFGC.baseline = DIFFGC_bandc.baseline;
+
     to_save.fixed = to_save_fixed;
     for ii = 1:5
         to_save.fixed{ii}.var_explained = var_explained(ii);
     end
     to_save.max = to_save_max;
     to_save.percent = to_save90;
-    to_save.bandc = to_save_b; %too large to be saved?
+    to_save.bandc = to_save_bandc; %too large to be saved?
     to_save.nvoxroi = nvoxroi;
     
     %% Correlations 
-    tic
+   tic
     nvoxroi_all = nvoxroi'*nvoxroi;
     nvoxroi_all = nvoxroi_all(:);
     for ii = 1:5
-        c1 = sum(GC.fixed{ii},3);
-        c2 = sum(TRGC.fixed{ii},3);
+        c1 = sum(TRGC.fixed{ii},3);
+        c2 = sum(GC.fixed{ii},3);
         c3 = sum(DIFFGC.fixed{ii},3);
         to_save.fixed{ii}.corr_voxtrgc = corr(nvoxroi_all,c1(:));
         to_save.fixed{ii}.corr_voxgc = corr(nvoxroi_all,c2(:));
         to_save.fixed{ii}.corr_voxdiffgc = corr(nvoxroi_all,c3(:));    
         
     end
-    c1 = sum(GC.max,3);
-    c2 = sum(TRGC.max,3);
+    c1 = sum(TRGC.max,3);
+    c2 = sum(GC.max,3);
     c3 = sum(DIFFGC.max,3);
     to_save.max.corr_voxtrgc = corr(nvoxroi_all,c1(:));
     to_save.max.corr_voxgc = corr(nvoxroi_all ,c2(:));
     to_save.max.corr_voxnpcs = corr(nvoxroi', to_save.max.npcs');
     to_save.max.corr_voxdiffgc = corr(nvoxroi_all,c3(:));
                 
-    c1 = sum(GC.percent,3);
-    c2 = sum(TRGC.percent,3);
+    c1 = sum(TRGC.percent,3);
+    c2 = sum(GC.percent,3);
     c3 = sum(DIFFGC.percent,3);
     to_save.percent.corr_voxtrgc = corr(nvoxroi_all,c1(:));
     to_save.percent.corr_voxgc = corr(nvoxroi_all,c2(:));
     to_save.percent.corr_voxnpcs = corr(nvoxroi', to_save.percent.npcs');
-    to_save.percent.corr_voxdi = corr(nvoxroi_all,c3(:));
+    to_save.percent.corr_voxdiffgc = corr(nvoxroi_all,c3(:));
+            
+    c1 = sum(TRGC.case2,3);
+    c2 = sum(GC.case2,3);
+    c3 = sum(DIFFGC.case2,3);
+    to_save.case2.corr_voxtrgc = corr(nvoxroi_all,c1(:));
+    to_save.case2.corr_voxgc = corr(nvoxroi_all,c2(:));
+    to_save.case3.corr_voxdiffgc = corr(nvoxroi_all,c3(:));
     
-    c1 = sum(GC.baseline,3);
-    c2 = sum(TRGC.baseline,3);
-    to_save.baseline.corr_voxmim = corr(nvoxroi_all,c1(:));
-    to_save.baseline.corr_voxmic = corr(nvoxroi_all,c2(:));
+    c1 = sum(TRGC.baseline,3);
+    c2 = sum(GC.baseline,3);
+    c3 = sum(DIFFGC.baseline,3);
+    to_save.baseline.corr_voxtrgc = corr(nvoxroi_all,c1(:));
+    to_save.baseline.corr_voxgc = corr(nvoxroi_all,c2(:));
+    to_save.baseline.corr_voxdiffgc = corr(nvoxroi_all,c3(:));
 
     t.corrs = toc;
     
     
 else
-    tic    
+    tic
     [TRGC,GC,DIFFGC, to_save] = fp_compute_mode_gc(mode1, D, npcs, V, A2, ZS, CS,fqA,nfqA);
     t.gc = toc;
 end

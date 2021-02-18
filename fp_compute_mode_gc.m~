@@ -1,4 +1,4 @@
-function [TRGC,GC,DIFFGC, to_save] = fp_compute_mode_gc(mode1, D, npcs, data)
+function [TRGC,GC,DIFFGC, to_save] = fp_compute_mode_gc(mode1, D, npcs, V, A2, ZS, data)
 
 ndim = 3; 
 
