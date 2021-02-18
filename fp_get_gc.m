@@ -3,25 +3,23 @@ function [TRGC, GC,DIFFGC,to_save,t] = fp_get_gc(A,data, D,mode1,zs,t)
 %region data), or 'percent' (select npcs that 90% of the variance is
 %preserved), or 'case2' (only to pool dimensions, then summation), or
 %'baseline', or 'all'
-[n_sensors, ni, nvox,~] = size(A);
-nfreq = size(CS,3); 
+[n_sensors, ni, nvox] = size(A); 
 
 tic
 fprintf('Working on first part of gc_pca. \n')
 %%
-for aroi = 1:D.nroi
+for aroi = 1:2%D.nroi
     
     %filter at current roi
-    clear A_ CSv
-    A_ = A(:, :,D.ind_roi_cortex{aroi},:);
+    clear A_ datav
+    A_ = A(:, :,D.ind_roi_cortex{aroi});
     nvoxroi(aroi) = size(A_,3); %voxels in the current roi
-    A2{aroi} = reshape(A_, [n_sensors, ni*nvoxroi(aroi), nfqA]);
-    
-    
-    if ~strcmp(mode1,'case2')&& ~strcmp(mode1,'baseline')&& ~strcmp(mode1,'bandc')
+    A2{aroi} = reshape(A_, [n_sensors, ni*nvoxroi(aroi)]);
+ 
+    %project to source space
+    datav = A2{aroi}' * data(:,:);
         
-        %%%%%%test if I have to do this trial wise! 
-        datav = A2{aroi}' * data;
+   if ~strcmp(mode1,'case2')&& ~strcmp(mode1,'baseline')&& ~strcmp(mode1,'bandc')
         
         %zscoring
         clear CSz
@@ -33,7 +31,7 @@ for aroi = 1:D.nroi
         
         %SVD
         clear data_ S_
-        [data_, S_,~] = svds(double(dataz(:, :)));
+        [data_, S_,~] = svds(double(dataz(:, :)),nvoxroi(aroi)*ni);
         
         % variance explained
         vx_ = cumsum(diag(S_).^2)./sum(diag(S_).^2);
@@ -53,22 +51,23 @@ for aroi = 1:D.nroi
             %pipeline 7)
             npcs(aroi) = min(find(vx_>0.9));
             
-        elseif strcmp(mode1,'all')
-            
-            npcs.max(aroi) = min(find(vx_>0.99));           
-            npcs.percent(aroi) = min(find(vx_>0.9));
-            for ii = 1:5 
-                var_explained(ii) = vx_(ii);
-            end
-            
+%         elseif strcmp(mode1,'all')
+%             
+%             npcs.max(aroi) = min(find(vx_>0.99));           
+%             npcs.percent(aroi) = min(find(vx_>0.9));
+%             for ii = 1:5 
+%                 var_explained(ii) = vx_(ii);
+%             end
+%             
         end
         
-         % keep nPCA components with correct unit and scaling
-        source_roi_data(:, :, aroi) = data_(:, 1:npcs(aroi))*S_(1:npcs(aroi), 1:npcs(aroi));
+        % keep nPCA components with correct unit and scaling
+       dataroi{aroi} = data_(:, 1:npcs(aroi))*S_(1:npcs(aroi), 1:npcs(aroi));
         
        
     else
         npcs=[];
+        dataroi{aroi} = datav';
     end
 end
 t.pca = toc;

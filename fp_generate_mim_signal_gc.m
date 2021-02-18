@@ -1,4 +1,4 @@
-function [sig,brain_noise,sensor_noise, gt,L_save,iroi_seed,iroi_tar,D, fres, n_trials] = fp_generate_mim_signal_gc...
+function [sig,brain_noise,sensor_noise,L_save,iroi_seed,iroi_tar,D, fres, n_trials] = fp_generate_mim_signal_gc...
     (params,D,DIROUT1)
 
 %if second condition of lag, then load parameters of first condition 
@@ -37,10 +37,8 @@ end
 
 if flag
     %random signal generation and filtering 
-    s11 = randn(D.nroi,params.iReg, N);
-    low = 5; 
-    high = 50; 
-    [b a] = butter(5, [low/fs*2 high/fs*2]);
+    s11 = randn(D.nroi,params.iReg, N); 
+    [b a] = butter(2, [0.1 0.3]);
     for ii = 1:D.nroi
         for jj = 1:params.iReg
             s1(ii,jj,:) = filtfilt(b, a, squeeze(s11(ii,jj,:)));
@@ -62,24 +60,24 @@ end
 signal_gt = reshape(permute(s1,[2 1 3]), params.iReg*D.nroi, Lepo*n_trials);
 
 %% generate ground truth imaginary coherence
-signal_gt_trials = reshape(permute(s1,[2 1 3]), params.iReg*D.nroi, Lepo, n_trials);
-CS_gt = fp_tsdata_to_cpsd(signal_gt_trials,fres,'WELCH',...
-    1:D.nroi*params.iReg, 1:D.nroi*params.iReg, id_trials_1, id_trials_2);
-CS_gt(:,:,[1])=[];
-for ifreq = 1: fres
-    clear pow
-    pow = real(diag(CS_gt(:,:,ifreq)));
-    gt1(:,:,ifreq) = CS_gt(:,:,ifreq)./ sqrt(pow*pow');
-end
-if params.iReg~=1 %mim across two voxels of one region 
-    [gt_mic,gt_mim]= fp_mim(gt1,repmat(params.iReg,D.nroi,1));
-    gt.mic = gt_mic; 
-    gt.mim = gt_mim; 
-else 
-    gt.mic = abs(imag(gt1));
-    gt.mim = abs(imag(gt1)); 
-end
-clear gt1 gt_mic gt_mim
+% signal_gt_trials = reshape(permute(s1,[2 1 3]), params.iReg*D.nroi, Lepo, n_trials);
+% CS_gt = fp_tsdata_to_cpsd(signal_gt_trials,fres,'WELCH',...
+%     1:D.nroi*params.iReg, 1:D.nroi*params.iReg, id_trials_1, id_trials_2);
+% CS_gt(:,:,[1])=[];
+% for ifreq = 1: fres
+%     clear pow
+%     pow = real(diag(CS_gt(:,:,ifreq)));
+%     gt1(:,:,ifreq) = CS_gt(:,:,ifreq)./ sqrt(pow*pow');
+% end
+% if params.iReg~=1 %mim across two voxels of one region 
+%     [gt_mic,gt_mim]= fp_mim(gt1,repmat(params.iReg,D.nroi,1));
+%     gt.mic = gt_mic; 
+%     gt.mim = gt_mim; 
+% else 
+%     gt.mic = abs(imag(gt1));
+%     gt.mim = abs(imag(gt1)); 
+% end
+% clear gt1 gt_mic gt_mim
 
 %% leadfield for forward model
 L_save = D.leadfield;

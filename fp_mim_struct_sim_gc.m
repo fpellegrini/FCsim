@@ -29,7 +29,7 @@ else
         
         %signal generation
         fprintf('Signal generation... \n')
-        [sig,brain_noise,sensor_noise,gt,L,iroi_seed, iroi_tar,D, fres, n_trials] = ...
+        [sig,brain_noise,sensor_noise,L,iroi_seed, iroi_tar,D, fres, n_trials] = ...
             fp_generate_mim_signal_gc(params,D,DIROUT1);
      
         if params.ip==1
@@ -77,7 +77,7 @@ if strcmp(params.ifilt,'e')
     
     
 elseif strcmp(params.ifilt,'l')
-    cov_ = cov(data(:,:)');
+    cov_ = cov(signal_sensor(:,:)');
     reg = 0.05*trace(cov_)/length(cov_);
     Cr = cov_ + reg*eye(size(cov_,1));
     
