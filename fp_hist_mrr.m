@@ -23,12 +23,14 @@ name = {...
     'ip8_hemisym1'};
 
 labs = {'MIC','MIM','Mean icoh','mean abscoh'};
+[cb] = cbrewer2('spectral', 11);
+cb1 = cbrewer2('Set1',9);
 
 
-
-for iname = 1:5%numel(name)
+%%
+for iname = 1:numel(name)
     
-    clearvars -except mdefault DIRDATA DIRFIG name iname labs
+    clearvars -except mdefault DIRDATA DIRFIG name iname labs cb cb1
     load([DIRDATA 'mrr_mim2_' name{iname} '.mat']);
     
     for imim = 1:4
@@ -51,23 +53,59 @@ for iname = 1:5%numel(name)
             if (imim == 1 || imim ==2)
                 npips = size(data,2);
             elseif iname ==1 && imim>2
-                data(:,8:9,:)=[];%no baseline, no sumVox, but corrected % pipelines 
+                data(:,8:9,:)=[];%no baseline, no sumVox, but corrected % pipelines
                 npips = size(data,2);
             else
                 npips = size(data,2)-1; %no baseline
             end
-            
+            %%
             figure
             figone(15,50)
+            if iname == 1 && imim<3
+                pips = [1:7 10 11 8 9];
+            else
+                pips = 1:npips;
+            end
+            count = 1;
             
-            for ipip = 1:npips
+            for ipip = pips
                 
                 data1 = squeeze(data(:,ipip));
-                xbins =linspace(0.05,0.95,10);
-                [counts,bins] = hist(data1,xbins);
-                subplot(1,npips,ipip)
-                barh(bins,counts)
-                grid on
+                subplot(1,npips,count)
+                
+                %                 xbins =linspace(0.05,0.95,10);
+                %                 [counts,bins] = hist(data1,xbins);
+                %  barh(bins,counts)
+                if ipip<6
+                    cl = cb(6-ipip,:);
+                elseif ipip <8
+                    cl = cb(ipip+2,:);
+                else
+                    if iname ==1
+                        if imim <3
+                            if ipip == 8 
+                                cl = cb1(2,:);
+                            elseif ipip==9
+                                cl = cb1(end,:);
+                            elseif ipip > 9
+                                cl = cb(ipip-2,:);
+                            end
+                        else 
+                            if ipip >7
+                               cl = cb(ipip,:);
+                            end
+                        end 
+                    else
+                        cl = cb1(end,:);
+                    end
+                end
+                [h, u] = fp_raincloud_plot(data1, cl, 1,0.2, 'ks');
+                view([-90 -90]);
+                set(gca, 'Xdir', 'reverse');
+                set(gca, 'XLim', [0 1]);
+
+                
+                %                 grid on
                 
                 if iname == 1
                     if imim <3
@@ -82,18 +120,23 @@ for iname = 1:5%numel(name)
                 end
                 
                 title(xtitles(ipip))
-                
-                if imsr==1
-                    ylabel([labs{imim} ' MRR'])
-                else
-                    ylabel([labs{imim} ' PR'])
+                if count ~= 1
+                    set(gca,'xtick',[])
                 end
                 
-                xlim([0 103])
-                ylim([0 1])
+                if count == 1
+                    if imsr==1
+                        xlabel([labs{imim} ' MRR'])
+                    else
+                        xlabel([labs{imim} ' PR'])
+                    end
+                end
                 
+                %                 xlim([0 103])
+                ylim([-0.75 2])
+                count = count+1;
             end
-            
+            %%
             if imsr ==1
                 outname = [DIRFIG name{iname} '_' labs{imim} '_mrr'];
             else
@@ -106,7 +149,7 @@ for iname = 1:5%numel(name)
             %% ZS pipeline
             if iname ==1
                 if imsr==1
-                    data = mrr(:,1:7,imim); %zs pipelines 
+                    data = mrr(:,1:7,imim); %zs pipelines
                 elseif imsr == 2
                     data = pr(:,1:7,imim);
                 end
@@ -118,23 +161,45 @@ for iname = 1:5%numel(name)
                 for ipip = 1:npips
                     
                     data1 = squeeze(data(:,ipip));
-                    xbins =linspace(0.05,0.95,10);
-                    [counts,bins] = hist(data1,xbins);
+                    %                     xbins =linspace(0.05,0.95,10);
+                    %                     [counts,bins] = hist(data1,xbins);
+                    %                     subplot(1,npips,ipip)
+                    %                     barh(bins,counts)
+                    %                     grid on
+                    
                     subplot(1,npips,ipip)
-                    barh(bins,counts)
-                    grid on
+                    if ipip<6
+                        cl = cb(6-ipip,:);
+                    elseif ipip <8
+                        cl = cb(ipip+2,:);
+                    elseif ipip > 9
+                        cl = cb(ipip-2,:);
+                    elseif ipip==8
+                        cl = cb1(end,:);
+                    else
+                        cl = cb1(2,:);
+                    end
+                    [h, u] = fp_raincloud_plot(data1, cl, 1,0.2, 'ks');
+                    view([-90 -90]);
+                    set(gca, 'Xdir', 'reverse');
+                    set(gca, 'XLim', [0 1]);
                     
                     xtitles = {'1PC','2PCs', '3PCs','4PCs','5PCs','99%', '90%'};
                     title(xtitles(ipip))
                     
-                    if imsr==1
-                        ylabel([labs{imim} ' MRR'])
-                    else
-                        ylabel([labs{imim} ' PR'])
+                    if ipip ~= 1
+                        set(gca,'xtick',[])
                     end
                     
-                    xlim([0 103])
-                    ylim([0 1])
+                    if ipip ==1 
+                        if imsr==1
+                            xlabel([labs{imim} ' MRR'])
+                        else
+                            xlabel([labs{imim} ' PR'])
+                        end
+                    end
+                    
+                    ylim([-0.75 2])
                     
                 end
                 
