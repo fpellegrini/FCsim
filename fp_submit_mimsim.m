@@ -1,7 +1,7 @@
 function fp_submit_mimsim
 
 fp_addpath
-cd ~/matlab/fp/
+cd ~/matlab/fp/meg_lfp/
 nit = 100;
 varyParam = [1:7];%defaults, snr, interactions, everything else 
 
