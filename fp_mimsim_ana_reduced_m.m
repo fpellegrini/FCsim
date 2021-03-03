@@ -1,6 +1,6 @@
 function fp_mimsim_ana_reduced_m
 
-DIRIN = '~/data/mim_sim2/reg_eloreta/';
+DIRIN = '~/data/mim_sim2/';
 
 
 name = {...
@@ -148,7 +148,7 @@ for iname = 1:numel(name)
         
         cc = sum(mic.baseline,3);
         [mrr(iit,9,1), pr(iit,9,1),hk(iit,9,1)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
-        clear ccii
+        clear cc
         cc = sum(mim.baseline,3);
         [mrr(iit,9,2),pr(iit,9,2), hk(iit,9,2)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
         clear cc
