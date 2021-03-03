@@ -1,4 +1,4 @@
-function fp_submit_mimsim
+
 
 fp_addpath
 cd ~/matlab/fp/meg_lfp/
