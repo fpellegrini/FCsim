@@ -112,8 +112,7 @@ elseif strcmp(params.ifilt,'d')
     
     
 elseif strcmp(params.ifilt,'l')
-%     cCS = sum(real(CS),3);
-    cCS = cov(signal_sensor(:,:)');
+    cCS = sum(CS,3);
     reg = 0.05*trace(cCS)/length(cCS);
     Cr = cCS + reg*eye(size(cCS,1));
     
@@ -144,7 +143,7 @@ if params.ip ==1
     %% without ZS standardisation
     fprintf('Calculating fix, max and percent without ZS standardisation... \n')
     zs=0;
-    for ii = 1:6
+    for ii = 1:5
         [mic_fixed_zs{ii}, mim_fixed_zs{ii}, to_save_fixed_zs{ii},...
             mean_icoh_fixed_zs{ii},mean_acoh_fixed_zs{ii},t1] = ...
             fp_get_mim(A,CS,fqA,nfqA, D,params.ihemi,ii,zs,[]);

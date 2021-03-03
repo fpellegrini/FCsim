@@ -31,18 +31,22 @@ for iname = 1:numel(name)
     
     %default paramenters
     nit = 100;
-    iInt = 1;
+    iInt = 2;
     iReg=1;
-    isnr=0.5;
+    isnr=0.7;
     iss = 0.5;
     ilag=2;
     ihemi=0;
     ifilt='l';
     
-    if iname>1 && iname<6
+    if iname>2 && iname<6
         iInt = iname;
     else
         switch iname
+            case 1
+                iInt = 2;
+            case 2
+                iInt = 1;
             case 6
                 iReg = 2;
             case 7
@@ -50,7 +54,7 @@ for iname = 1:numel(name)
             case 8
                 isnr = 0.3;
             case 9
-                isnr = 0.7;
+                isnr = 0.5;
             case 10
                 isnr = 0.9;
             case 11
@@ -81,7 +85,7 @@ for iname = 1:numel(name)
         load([DIRIN inname '.mat'])
         
         
-        for ipip = 1:5
+        for ipip = 1:6
             cc = sum(mic.fixed{ipip},3);
             [mrr(iit,ipip,1), pr(iit,ipip,1),hk(iit,ipip,1)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
             clear cc
@@ -205,7 +209,7 @@ for iname = 1:numel(name)
             
             %zs0
             
-            for ipip = 1:5
+            for ipip = 1:6
                 cc = sum(mic.fixed_zs0{ipip},3);
                 [mrr(iit,11+ipip,1), pr(iit,11+ipip,1),hk(iit,11+ipip,1)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
                 clear cc
