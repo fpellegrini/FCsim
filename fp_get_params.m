@@ -2,9 +2,9 @@ function [nInteractions, nRegionInts,SNR,noise_mix,nlag,filtertype,hemisym] = fp
 
 if ip == 1
     %defaults
-    nInteractions = 2;
+    nInteractions = 1;
     nRegionInts = 1;
-    SNR = 0.7;
+    SNR = 0.9;
     noise_mix = 0.5;
     nlag = 2;
     filtertype= {'l'}; %lcmv
