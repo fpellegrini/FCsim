@@ -29,7 +29,7 @@ else
         
         %signal generation
         fprintf('Signal generation... \n')
-        [sig,brain_noise,sensor_noise,gt,L,iroi_seed, iroi_tar,D, fres, n_trials,filt] = ...
+        [sig,brain_noise,sensor_noise,L,iroi_seed, iroi_tar,D, fres, n_trials,filt] = ...
             fp_generate_signal_with_timestructure(params,D,DIROUT1);
      
         if params.ip==1
@@ -60,8 +60,7 @@ else
     %% get CS and filter A
     tic
     %parameters
-    id_meg_chan = 1:size(signal_sensor,1);
-    nmeg = numel(id_meg_chan);
+    n_sensors = size(signal_sensor,1);
     
     %cross spectrum
     fprintf('Calculating cross spectrum... \n')
@@ -94,7 +93,7 @@ if strcmp(params.ifilt,'e')
     
 elseif strcmp(params.ifilt,'d')
     
-    A=zeros(nmeg,ni,D.nvox,nfreq);
+    A=zeros(n_sensors,ni,D.nvox,nfreq);
     
     for ifrq = 1:nfreq
         cCS = CS(:,:,ifrq);
@@ -121,13 +120,30 @@ elseif strcmp(params.ifilt,'l')
     A = permute(A,[1, 3, 2]);
     fqA = ones(1,nfreq);%only one filter for all freqs.
     nfqA = 1;   
+    
+elseif strcmp(params.ifilt,'c')
+    
+%     sigma2_total = mean(diag(cov(signal_sensor(:, :)')));    
+%     regu = sigma2_total*0.2;
+%     sigu = regu*eye(n_sensors);
+    sigu = cov(sensor_noise');
+    tic
+    [~,~,w] = awsm_champ(signal_sensor(:, :), L_backward(:, :) ,...
+        sigu, 200, 3, 2, 0);
+    toc
+    
+    A = reshape(w',size(L_backward));
+    A = permute(A,[1, 3, 2]);
+    
+    fqA = ones(1,nfreq);%only one filter for all freqs.
+    nfqA = 1; 
 end
 
 t.filter = toc;
 
 %% calculate MIM
 
-if params.ip ==1
+if 0%params.ip ==1
     
     %pca pipeline ('all' 8 pipelines + baseline)
     zs=1;
