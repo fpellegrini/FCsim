@@ -3,7 +3,7 @@ function [mic, mim,to_save, mean_icoh, mean_acoh,t] = fp_get_mim(A,CS,fqA,nfqA, 
 %region data), or 'percent' (select npcs that 90% of the variance is
 %preserved), or 'case2' (mim only to pool dimensions, then summation), or
 %'baseline', or 'all'
-[nmeg, ni, nvox,~] = size(A);
+[n_sensors, ni, nvox,~] = size(A);
 nfreq = size(CS,3); 
 
 tic
@@ -15,7 +15,7 @@ for aroi = 1:D.nroi
     clear A_ CSv
     A_ = A(:, :,D.ind_roi_cortex{aroi},:);
     nvoxroi(aroi) = size(A_,3); %voxels in the current roi
-    A2{aroi} = reshape(A_, [nmeg, ni*nvoxroi(aroi), nfqA]);
+    A2{aroi} = reshape(A_, [n_sensors, ni*nvoxroi(aroi), nfqA]);
     
     
     if ~strcmp(mode1,'case2')&& ~strcmp(mode1,'baseline')&& ~strcmp(mode1,'bandc')
