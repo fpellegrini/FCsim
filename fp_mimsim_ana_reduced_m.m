@@ -40,10 +40,14 @@ for iname = 1
     ihemi=0;
     ifilt='l';
     
-    if iname>1 && iname<6
+    if iname>2 && iname<6
         iInt = iname;
     else
         switch iname
+            case 1
+                iInt = 2;
+            case 2
+                iInt = 1;
             case 6
                 iReg = 2;
             case 7
@@ -51,7 +55,7 @@ for iname = 1
             case 8
                 isnr = 0.3;
             case 9
-                isnr = 0.7;
+                isnr = 0.5;
             case 10
                 isnr = 0.9;
             case 11
@@ -87,8 +91,13 @@ for iname = 1
         load([DIRIN inname '.mat'])
         
         
+<<<<<<< HEAD
         for ipip = 1:np
             cc = sum(mic.fixed{ipip}(:,:,band),3);
+=======
+        for ipip = 1:6
+            cc = sum(mic.fixed{ipip},3);
+>>>>>>> 3374706c86a57d7bbb72cf2df6112dff552190ab
             [mrr(iit,ipip,1), pr(iit,ipip,1),hk(iit,ipip,1)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
             clear cc
             cc = sum(mic.fixed{ipip}(:,:,band),3);
@@ -211,9 +220,15 @@ for iname = 1
             
             %zs0
             
+<<<<<<< HEAD
             for ipip = 1:np
                 cc = sum(mic.fixed_zs0{ipip}(:,:,band),3);
                 [mrr(iit,np+6+ipip,1), pr(iit,np+6+ipip,1),hk(iit,np+6+ipip,1)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+=======
+            for ipip = 1:6
+                cc = sum(mic.fixed_zs0{ipip},3);
+                [mrr(iit,11+ipip,1), pr(iit,11+ipip,1),hk(iit,11+ipip,1)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);
+>>>>>>> 3374706c86a57d7bbb72cf2df6112dff552190ab
                 clear cc
                 cc = sum(mic.fixed_zs0{ipip}(:,:,band),3);
                 [mrr(iit,np+6+ipip,2),pr(iit,np+6+ipip,2), hk(iit,np+6+ipip,2)] = fp_mrr_hk(cc, iroi_seed,iroi_tar);

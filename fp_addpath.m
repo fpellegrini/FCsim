@@ -5,6 +5,6 @@ rehash toolboxcache
 
 addpath(genpath('/home/bbci/data/haufe/Franziska'))
 addpath(genpath('~/matlab/'))
-spm eeg
+% spm eeg
 close all 
 cd '/home/bbci/data/haufe/Franziska/data/'

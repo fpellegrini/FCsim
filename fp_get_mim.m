@@ -3,7 +3,7 @@ function [mic, mim,to_save, mean_icoh, mean_acoh,t] = fp_get_mim(A,CS,fqA,nfqA, 
 %region data), or 'percent' (select npcs that 90% of the variance is
 %preserved), or 'case2' (mim only to pool dimensions, then summation), or
 %'baseline', or 'all'
-[nmeg, ni, nvox,~] = size(A);
+[n_sensors, ni, nvox,~] = size(A);
 nfreq = size(CS,3); 
 
 tic
@@ -15,7 +15,7 @@ for aroi = 1:D.nroi
     clear A_ CSv
     A_ = A(:, :,D.ind_roi_cortex{aroi},:);
     nvoxroi(aroi) = size(A_,3); %voxels in the current roi
-    A2{aroi} = reshape(A_, [nmeg, ni*nvoxroi(aroi), nfqA]);
+    A2{aroi} = reshape(A_, [n_sensors, ni*nvoxroi(aroi), nfqA]);
     
     
     if ~strcmp(mode1,'case2')&& ~strcmp(mode1,'baseline')&& ~strcmp(mode1,'bandc')
@@ -65,7 +65,7 @@ for aroi = 1:D.nroi
             
             npcs.max(aroi) = min(find(vx_>0.99));           
             npcs.percent(aroi) = min(find(vx_>0.9));
-            for ii = 1:5 
+            for ii = 1:6 
                 var_explained(ii) = vx_(ii);
             end
             
@@ -82,9 +82,9 @@ t.pca = toc;
 fprintf('Working on compute_mode. \n')
 if strcmp(mode1,'all')
     
-    fprintf('fixed 1 to 5 \n')
+    fprintf('fixed 1 to 6 \n')
     tic
-    for ifi = 1:5
+    for ifi = 1:6
         npcs.fixed = repmat(ifi,D.nroi,1);
         [mic_fixed{ifi},mim_fixed{ifi},to_save_fixed{ifi},mean_icoh_fixed{ifi}, mean_acoh_fixed{ifi}] = fp_compute_mode_mim(ifi, D, npcs.fixed, V, A2, ZS, CS,fqA,nfqA,ihemi);
     end
@@ -117,7 +117,7 @@ if strcmp(mode1,'all')
     mim.baseline = mim_bandc.baseline;
 
     to_save.fixed = to_save_fixed;
-    for ii = 1:5
+    for ii = 1:6
         to_save.fixed{ii}.var_explained = var_explained(ii);
     end
     to_save.max = to_save_max;
@@ -138,7 +138,7 @@ if strcmp(mode1,'all')
     tic
     nvoxroi_all = nvoxroi'*nvoxroi;
     nvoxroi_all = nvoxroi_all(:);
-    for ii = 1:5
+    for ii = 1:6
         c1 = sum(mim.fixed{ii},3);
         c2 = sum(mic.fixed{ii},3);
         c3 = sum(mean_icoh.fixed{ii},3);

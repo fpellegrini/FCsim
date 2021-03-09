@@ -1,8 +1,8 @@
 function fp_mim_struct_sim(params)
 
-DIROUT = '/home/bbci/data/haufe/Franziska/data/mim_sim2/';
+DIROUT = '/home/bbci/data/haufe/Franziska/data/mim_sim3/';
 if ~exist(DIROUT);mkdir(DIROUT); end
-DIROUT1 = '/home/bbci/data/haufe/Franziska/data/mim_save2/';
+DIROUT1 = '/home/bbci/data/haufe/Franziska/data/mim_save3/';
 if ~exist(DIROUT1);mkdir(DIROUT1); end
 
 if params.ip==7 || params.ip==8
@@ -29,8 +29,8 @@ else
         
         %signal generation
         fprintf('Signal generation... \n')
-        [sig,brain_noise,sensor_noise,gt,L,iroi_seed, iroi_tar,D, fres, n_trials] = ...
-            fp_generate_mim_signal(params,D,DIROUT1);
+        [sig,brain_noise,sensor_noise,L,iroi_seed, iroi_tar,D, fres, n_trials,filt] = ...
+            fp_generate_signal_with_timestructure(params,D,DIROUT1);
      
         if params.ip==1
             dir1 =  sprintf('%s/mim_sig/',DIROUT1);
@@ -45,10 +45,12 @@ else
     tic
     %combine noise sources
     noise = params.iss*brain_noise + (1-params.iss)*sensor_noise;
-    noise = noise ./ norm(noise, 'fro');
+    noise_f = (filtfilt(filt.bband, filt.aband, noise'))';
+    noise = noise ./ norm(noise_f, 'fro');
     %combine signal and noise
     signal_sensor1 = params.isnr*sig + (1-params.isnr)*noise;
-    signal_sensor = signal_sensor1 ./ norm(signal_sensor1, 'fro');
+    signal_sensor_f = (filtfilt(filt.bband, filt.aband, signal_sensor1'))';
+    signal_sensor = signal_sensor1 ./ norm(signal_sensor_f, 'fro');
     
     %reshape
     signal_sensor = reshape(signal_sensor,[],size(signal_sensor,2)/n_trials,n_trials);
@@ -58,15 +60,11 @@ else
     %% get CS and filter A
     tic
     %parameters
-    id_trials_1 = 1:n_trials;
-    id_trials_2 = 1:n_trials;
-    id_meg_chan = 1:size(signal_sensor,1);
-    nmeg = numel(id_meg_chan);
+    n_sensors = size(signal_sensor,1);
     
     %cross spectrum
     fprintf('Calculating cross spectrum... \n')
-    CS = fp_tsdata_to_cpsd(signal_sensor,fres,'WELCH',...
-        [id_meg_chan], [id_meg_chan], id_trials_1, id_trials_2);
+    CS = tsdata_to_cpsd_fast(signal_sensor,fres,'WELCH');
     CS(:,:,1)=[];
     nfreq = size(CS,3);
     
@@ -95,7 +93,7 @@ if strcmp(params.ifilt,'e')
     
 elseif strcmp(params.ifilt,'d')
     
-    A=zeros(nmeg,ni,D.nvox,nfreq);
+    A=zeros(n_sensors,ni,D.nvox,nfreq);
     
     for ifrq = 1:nfreq
         cCS = CS(:,:,ifrq);
@@ -113,7 +111,8 @@ elseif strcmp(params.ifilt,'d')
     
     
 elseif strcmp(params.ifilt,'l')
-    cCS = sum(CS,3);
+%     cCS = sum(real(CS),3);
+    cCS = cov(signal_sensor(:,:)');
     reg = 0.05*trace(cCS)/length(cCS);
     Cr = cCS + reg*eye(size(cCS,1));
     
@@ -121,13 +120,30 @@ elseif strcmp(params.ifilt,'l')
     A = permute(A,[1, 3, 2]);
     fqA = ones(1,nfreq);%only one filter for all freqs.
     nfqA = 1;   
+    
+elseif strcmp(params.ifilt,'c')
+    
+%     sigma2_total = mean(diag(cov(signal_sensor(:, :)')));    
+%     regu = sigma2_total*0.2;
+%     sigu = regu*eye(n_sensors);
+    sigu = cov(sensor_noise');
+    tic
+    [~,~,w] = awsm_champ(signal_sensor(:, :), L_backward(:, :) ,...
+        sigu, 200, 3, 2, 0);
+    toc
+    
+    A = reshape(w',size(L_backward));
+    A = permute(A,[1, 3, 2]);
+    
+    fqA = ones(1,nfreq);%only one filter for all freqs.
+    nfqA = 1; 
 end
 
 t.filter = toc;
 
 %% calculate MIM
 
-if params.ip ==1
+if 0%params.ip ==1
     
     %pca pipeline ('all' 8 pipelines + baseline)
     zs=1;
@@ -144,7 +160,7 @@ if params.ip ==1
     %% without ZS standardisation
     fprintf('Calculating fix, max and percent without ZS standardisation... \n')
     zs=0;
-    for ii = 1:5
+    for ii = 1:6
         [mic_fixed_zs{ii}, mim_fixed_zs{ii}, to_save_fixed_zs{ii},...
             mean_icoh_fixed_zs{ii},mean_acoh_fixed_zs{ii},t1] = ...
             fp_get_mim(A,CS,fqA,nfqA, D,params.ihemi,ii,zs,[]);
