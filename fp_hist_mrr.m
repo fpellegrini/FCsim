@@ -1,5 +1,5 @@
-DIRDATA = './mim_sim2/';
-DIRFIG = './figures/mimsim_ana/mim_sim2/';
+DIRDATA = './mim_sim3/';
+DIRFIG = './figures/mimsim_ana/mim_sim3/';
 if ~exist(DIRFIG); mkdir(DIRFIG); end
 
 name = {...
@@ -26,25 +26,26 @@ labs = {'MIC','MIM','Mean icoh','mean abscoh'};
 [cb] = cbrewer2('spectral', 11);
 cb1 = cbrewer2('Set1',9);
 
+np = 6;
 
 %%
 for iname = 1:numel(name)
     
-    clearvars -except mdefault DIRDATA DIRFIG name iname labs cb cb1
-    load([DIRDATA 'mrr_mim2_' name{iname} '.mat']);
+    clearvars -except mdefault DIRDATA DIRFIG name iname labs cb cb1 np
+    load([DIRDATA 'mrr_mim3_' name{iname} '.mat']);
     
     for imim = 1:4
         
         for imsr = 1:2
             if imsr==1
                 if iname == 1
-                    data = cat(2,mrr(:,12:end,imim),mrr(:,8:11,imim)); %zs0 + sumVox + baseline + 2 corrected pips
+                    data = cat(2,mrr(:,np+7:end,imim),mrr(:,np+3:np+6,imim)); %zs0 + sumVox + baseline + 2 corrected pips
                 else
                     data = mrr(:,:,imim);
                 end
             elseif imsr == 2
                 if iname==1
-                    data = cat(2,pr(:,12:end,imim),pr(:,8:11,imim));
+                    data = cat(2,pr(:,np+7:end,imim),pr(:,np+3:np+6,imim));
                 else
                     data = pr(:,:,imim);
                 end
@@ -53,7 +54,7 @@ for iname = 1:numel(name)
             if (imim == 1 || imim ==2)
                 npips = size(data,2);
             elseif iname ==1 && imim>2
-                data(:,8:9,:)=[];%no baseline, no sumVox, but corrected % pipelines
+                data(:,np+3:np+4,:)=[];%no baseline, no sumVox, but corrected % pipelines
                 npips = size(data,2);
             else
                 npips = size(data,2)-1; %no baseline
@@ -62,7 +63,7 @@ for iname = 1:numel(name)
             figure
             figone(15,50)
             if iname == 1 && imim<3
-                pips = [1:7 10 11 8 9];
+                pips = [1:np+2 np+5 np+6 np+3 np+4];
             else
                 pips = 1:npips;
             end
@@ -72,26 +73,23 @@ for iname = 1:numel(name)
                 
                 data1 = squeeze(data(:,ipip));
                 subplot(1,npips,count)
-                
-                %                 xbins =linspace(0.05,0.95,10);
-                %                 [counts,bins] = hist(data1,xbins);
-                %  barh(bins,counts)
-                if ipip<6
-                    cl = cb(6-ipip,:);
-                elseif ipip <8
+   
+                if ipip<=np
+                    cl = cb(np+1-ipip,:);
+                elseif ipip <np+3
                     cl = cb(ipip+2,:);
                 else
                     if iname ==1
                         if imim <3
-                            if ipip == 8 
-                                cl = cb1(2,:);
-                            elseif ipip==9
+                            if ipip == np+3
+                                cl = cb1(8,:);
+                            elseif ipip==np+4
                                 cl = cb1(end,:);
-                            elseif ipip > 9
+                            elseif ipip > np+4
                                 cl = cb(ipip-2,:);
                             end
                         else 
-                            if ipip >7
+                            if ipip >np+2
                                cl = cb(ipip,:);
                             end
                         end 
@@ -109,14 +107,14 @@ for iname = 1:numel(name)
                 
                 if iname == 1
                     if imim <3
-                        xtitles = {'1PC','2PCs', '3PCs','4PCs','5PCs','99%',...
+                        xtitles = {'1PC','2PCs', '3PCs','4PCs','5PCs','6PCs','99%',...
                             '90%','sumVox','baseline','99% corrected','90% corrected'};
                     else
-                        xtitles = {'1PC','2PCs', '3PCs','4PCs','5PCs','99%',...
+                        xtitles = {'1PC','2PCs', '3PCs','4PCs','5PCs','6PCs','99%',...
                             '90%','99% corrected','90% corrected'};
                     end
                 else
-                    xtitles = {'1PC','2PCs', '3PCs','4PCs','5PCs','99%', '90%','baseline'};
+                    xtitles = {'1PC','2PCs', '3PCs','4PCs','5PCs','6PCs','99%', '90%','baseline'};
                 end
                 
                 title(xtitles(ipip))
@@ -142,16 +140,16 @@ for iname = 1:numel(name)
             else
                 outname = [DIRFIG name{iname} '_' labs{imim} '_pr'];
             end
-            saveas(gcf,outname, 'png')
-            close all
+            %saveas(gcf,outname, 'png')
+            %close all
             
             
             %% ZS pipeline
             if iname ==1
                 if imsr==1
-                    data = mrr(:,1:7,imim); %zs pipelines
+                    data = mrr(:,1:np+2,imim); %zs pipelines
                 elseif imsr == 2
-                    data = pr(:,1:7,imim);
+                    data = pr(:,1:np+2,imim);
                 end
                 npips = size(data,2);
                 
@@ -161,20 +159,15 @@ for iname = 1:numel(name)
                 for ipip = 1:npips
                     
                     data1 = squeeze(data(:,ipip));
-                    %                     xbins =linspace(0.05,0.95,10);
-                    %                     [counts,bins] = hist(data1,xbins);
-                    %                     subplot(1,npips,ipip)
-                    %                     barh(bins,counts)
-                    %                     grid on
                     
                     subplot(1,npips,ipip)
-                    if ipip<6
-                        cl = cb(6-ipip,:);
-                    elseif ipip <8
+                    if ipip<=np
+                        cl = cb(np+1-ipip,:);
+                    elseif ipip <np+3
                         cl = cb(ipip+2,:);
-                    elseif ipip > 9
+                    elseif ipip > np+4
                         cl = cb(ipip-2,:);
-                    elseif ipip==8
+                    elseif ipip==np+4
                         cl = cb1(end,:);
                     else
                         cl = cb1(2,:);
@@ -184,7 +177,7 @@ for iname = 1:numel(name)
                     set(gca, 'Xdir', 'reverse');
                     set(gca, 'XLim', [0 1]);
                     
-                    xtitles = {'1PC','2PCs', '3PCs','4PCs','5PCs','99%', '90%'};
+                    xtitles = {'1PC','2PCs', '3PCs','4PCs','5PCs','6PCs','99%', '90%'};
                     title(xtitles(ipip))
                     
                     if ipip ~= 1
@@ -209,8 +202,8 @@ for iname = 1:numel(name)
                     outname = [DIRFIG 'ip9_ZS_' labs{imim} '_pr'];
                 end
                 
-                saveas(gcf,outname, 'png')
-                close all
+                %saveas(gcf,outname, 'png')
+                %close all
             end
             %%
             
