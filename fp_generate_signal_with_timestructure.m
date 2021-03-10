@@ -30,7 +30,7 @@ Lepo = 2*fres; % epoch length, should be consistent with fres
 n_trials = N/Lepo; % number of epochs
 % frqs = sfreqs(fres, fs); % freqs in Hz
 iband = [8 12]; % frequency band of interaction in Hz
-coupling_snr = 0.9; % coupling strength = SNR in interacting frequency band 
+coupling_snr = 0.6; % coupling strength = SNR in interacting frequency band 
 % ar_order = fres/5; % AR model order for TRGC estimation
 %nboot = 30; % number of bootstrap iterations
 
@@ -42,6 +42,8 @@ coupling_snr = 0.9; % coupling strength = SNR in interacting frequency band
 [bhigh, ahigh] = butter(2, 1/fs*2, 'high');
 filt.aband = aband;
 filt.bband = bband;
+filt.ahigh = ahigh;
+filt.bhigh = bhigh;
 filt.iband = iband;
 
 %set random small or large lag
@@ -140,7 +142,7 @@ end
 L_sig = L_mix(:,sig_ind);
 L_noise = L_mix(:,noise_ind);
 
-%% project to sensors and add white noise 
+%% project to sensors and generate white noise 
 
 %signal
 sig = L_mix(:,sig_ind) * signal_sources';

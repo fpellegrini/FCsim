@@ -50,7 +50,10 @@ else
     %combine signal and noise
     signal_sensor1 = params.isnr*sig + (1-params.isnr)*noise;
     signal_sensor_f = (filtfilt(filt.bband, filt.aband, signal_sensor1'))';
-    signal_sensor = signal_sensor1 ./ norm(signal_sensor_f, 'fro');
+    signal_sensor1 = signal_sensor1 ./ norm(signal_sensor_f, 'fro');
+    
+    signal_sensor = filtfilt(bhigh, ahigh, signal_sensor1);
+    signal_sensor = signal_sensor / norm(signal_sensor, 'fro');
     
     %reshape
     signal_sensor = reshape(signal_sensor,[],size(signal_sensor,2)/n_trials,n_trials);
