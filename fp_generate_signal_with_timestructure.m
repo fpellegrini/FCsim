@@ -30,7 +30,7 @@ Lepo = 2*fres; % epoch length, should be consistent with fres
 n_trials = N/Lepo; % number of epochs
 % frqs = sfreqs(fres, fs); % freqs in Hz
 iband = [8 12]; % frequency band of interaction in Hz
-coupling_snr = 0.6; % coupling strength = SNR in interacting frequency band 
+coupling_snr = 0.9; % coupling strength = SNR in interacting frequency band 
 % ar_order = fres/5; % AR model order for TRGC estimation
 %nboot = 30; % number of bootstrap iterations
 
