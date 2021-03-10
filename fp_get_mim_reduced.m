@@ -82,9 +82,9 @@ t.pca = toc;
 fprintf('Working on compute_mode. \n')
 if strcmp(mode1,'all')
     
-    fprintf('fixed 1 to 5 \n')
+    fprintf('fixed 1 to 6 \n')
     tic
-    for ifi = 1:5
+    for ifi = 1:6
         npcs.fixed = repmat(ifi,D.nroi,1);
         [mic_fixed{ifi},mim_fixed{ifi},to_save_fixed{ifi},mean_icoh_fixed{ifi}, mean_acoh_fixed{ifi}] = fp_compute_mode_mim(ifi, D, npcs.fixed, V, A2, ZS, CS,fqA,nfqA,ihemi);
     end

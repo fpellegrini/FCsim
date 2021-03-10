@@ -26,7 +26,7 @@ labs = {'MIC','MIM','Mean icoh','mean abscoh'};
 [cb] = cbrewer2('spectral', 11);
 cb1 = cbrewer2('Set1',9);
 
-np = 6;
+np = 5;
 
 %%
 for iname = 1:numel(name)
