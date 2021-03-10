@@ -136,7 +136,7 @@ if strcmp(mode1,'all')
     tic
     nvoxroi_all = nvoxroi'*nvoxroi;
     nvoxroi_all = nvoxroi_all(:);
-    for ii = 1:5
+    for ii = 1:6
         c1 = sum(mim.fixed{ii},3);
         c2 = sum(mic.fixed{ii},3);
         c3 = sum(mean_icoh.fixed{ii},3);

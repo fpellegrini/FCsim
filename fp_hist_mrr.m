@@ -1,5 +1,5 @@
-DIRDATA = './mim_sim3/';
-DIRFIG = './figures/mimsim_ana/mim_sim3/';
+DIRDATA = './mim_sim4/';
+DIRFIG = './figures/mimsim_ana/mim_sim4/';
 if ~exist(DIRFIG); mkdir(DIRFIG); end
 
 name = {...
@@ -26,13 +26,13 @@ labs = {'MIC','MIM','Mean icoh','mean abscoh'};
 [cb] = cbrewer2('spectral', 11);
 cb1 = cbrewer2('Set1',9);
 
-np = 5;
+np = 6;
 
 %%
-for iname = 1:numel(name)
+for iname = 1%:numel(name)
     
     clearvars -except mdefault DIRDATA DIRFIG name iname labs cb cb1 np
-    load([DIRDATA 'mrr_mim3_' name{iname} '.mat']);
+    load([DIRDATA 'mrr_mim4_' name{iname} '.mat']);
     
     for imim = 1:4
         
