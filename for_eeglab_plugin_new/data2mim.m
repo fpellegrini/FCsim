@@ -75,7 +75,7 @@ end
 
 %loop over all roi combinations
 tic
-for oroi = 50:nroi-1
+for oroi = 1:nroi-1
     for uroi = oroi+1:nroi
         
         fprintf(['Calculating regions ' num2str(oroi) ' and ' num2str(uroi) '.\n'])

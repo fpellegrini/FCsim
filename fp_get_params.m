@@ -7,7 +7,7 @@ if ip == 1
     SNR = 0.9;
     noise_mix = 0.5;
     nlag = 2;
-    filtertype= {'l'}; %lcmv
+    filtertype= {'e'}; %lcmv
     hemisym = 0;
     
 elseif ip == 2
