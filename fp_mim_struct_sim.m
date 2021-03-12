@@ -1,8 +1,8 @@
 function fp_mim_struct_sim(params)
 
-DIROUT = '/home/bbci/data/haufe/Franziska/data/mim_sim4/';
+DIROUT = '/home/bbci/data/haufe/Franziska/data/mim_sim3/';
 if ~exist(DIROUT);mkdir(DIROUT); end
-DIROUT1 = '/home/bbci/data/haufe/Franziska/data/mim_save4/';
+DIROUT1 = '/home/bbci/data/haufe/Franziska/data/mim_save3/';
 if ~exist(DIROUT1);mkdir(DIROUT1); end
 
 if params.ip==7 || params.ip==8
@@ -114,8 +114,8 @@ elseif strcmp(params.ifilt,'d')
     
     
 elseif strcmp(params.ifilt,'l')
-%     cCS = sum(real(CS),3);
-    cCS = cov(signal_sensor(:,:)');
+    cCS = sum(real(CS),3);
+%     cCS = cov(signal_sensor(:,:)');
     reg = 0.05*trace(cCS)/length(cCS);
     Cr = cCS + reg*eye(size(cCS,1));
     
@@ -131,12 +131,13 @@ elseif strcmp(params.ifilt,'c')
 %     sigu = regu*eye(n_sensors);
     sigu = cov(sensor_noise');
     tic
+    L_backward = permute(L_backward,[1 3 2]);
     [~,~,w] = awsm_champ(signal_sensor(:, :), L_backward(:, :) ,...
         sigu, 200, 3, 2, 0);
     toc
     
-    A = reshape(w',size(L_backward));
-    A = permute(A,[1, 3, 2]);
+    A = real(reshape(w',size(L_backward)));
+%     A = permute(A,[1, 3, 2]);
     
     fqA = ones(1,nfreq);%only one filter for all freqs.
     nfqA = 1; 
