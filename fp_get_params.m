@@ -4,10 +4,10 @@ if ip == 1
     %defaults
     nInteractions = 1;
     nRegionInts = 1;
-    SNR = 0.9;
+    SNR = 0.95;
     noise_mix = 0.5;
     nlag = 2;
-    filtertype= {'e'}; %lcmv
+    filtertype= {'l'}; %lcmv
     hemisym = 0;
     
 elseif ip == 2

@@ -28,14 +28,14 @@ Nmin = 3; % length of recording in minutes
 N = Nmin*60*fs; % total number of samples
 Lepo = 2*fres; % epoch length, should be consistent with fres
 n_trials = N/Lepo; % number of epochs
-% frqs = sfreqs(fres, fs); % freqs in Hz
+frqs = sfreqs(fres, fs); % freqs in Hz
 iband = [8 12]; % frequency band of interaction in Hz
-coupling_snr = 0.6; % coupling strength = SNR in interacting frequency band 
+coupling_snr = 1% 0.6; % coupling strength = SNR in interacting frequency band 
 % ar_order = fres/5; % AR model order for TRGC estimation
 %nboot = 30; % number of bootstrap iterations
 
 % indices of interacting frequencies
-% band_inds = find(frqs >= iband(1) & frqs <= iband(2));
+band_inds = find(frqs >= iband(1) & frqs <= iband(2));
 
 % filters for band and highpass
 [bband, aband] = butter(2, iband/fs*2);
@@ -44,13 +44,13 @@ filt.aband = aband;
 filt.bband = bband;
 filt.ahigh = ahigh;
 filt.bhigh = bhigh;
-filt.iband = iband;
+filt.band_inds = band_inds;
 
 %set random small or large lag
 if params.ilag == 1
-    lag = randi([0, 5],params.iInt*params.iReg,1);
+    lag = randi([0, 20],params.iInt*params.iReg,1);
 else
-    lag = randi([5, 20],params.iInt*params.iReg,1);
+    lag = 50%randi([20, 80],params.iInt*params.iReg,1);
 end
 % lag_ms = fs/lag; % lag in ms
 
@@ -145,13 +145,13 @@ L_noise = L_mix(:,noise_ind);
 %% project to sensors and generate white noise 
 
 %signal
-sig = L_mix(:,sig_ind) * signal_sources';
+sig = L_sig * signal_sources';
 sig_f = (filtfilt(bband, aband, sig'))';
 sig = sig ./ norm(sig_f, 'fro'); 
 
 %brain noise
 if flag
-    brain_noise = L_mix(:,noise_ind) * noise_sources';
+    brain_noise = L_noise * noise_sources';
     brain_noise_f = (filtfilt(bband, aband, brain_noise'))';
     brain_noise = brain_noise ./ norm(brain_noise_f, 'fro');
 end
