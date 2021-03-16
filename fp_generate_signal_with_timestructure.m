@@ -103,38 +103,6 @@ if no_reload
     noise_sources = mkpinknoise(N, params.iReg*D.nroi-(params.iReg*params.iInt*2), 1);
 end
 
-%% combine interacting and non-interacting sources and generate ground truth imaginary coherence
-
-% signal_gt = zeros(N,params.iReg*D.nroi);
-% 
-% signal_gt(:,sig_ind(:,1)) = signal_sources(:,1:params.iReg*params.iInt); %seed voxels
-% signal_gt(:,sig_ind(:,2)) = signal_sources(:,params.iReg*params.iInt+1:end);%target voxels 
-% 
-% noise_sources_f = filtfilt(bband, aband, noise_sources);
-% noise_sources1 = noise_sources / norm(noise_sources_f, 'fro');
-% signal_gt(:,noise_ind) = noise_sources1;
-% 
-% signal_gt = permute(signal_gt,[2 1]);
-% 
-% % generate ground truth imaginary coherence
-% signal_gt_trials = reshape(signal_gt, params.iReg*D.nroi, Lepo, n_trials);
-% CS_gt = tsdata_to_cpsd_fast(signal_gt_trials,fres,'WELCH');
-% CS_gt(:,:,[1])=[];
-% for ifreq = 1: fres
-%     clear pow
-%     pow = real(diag(CS_gt(:,:,ifreq)));
-%     gt1(:,:,ifreq) = CS_gt(:,:,ifreq)./ sqrt(pow*pow');
-% end
-% if params.iReg~=1 %mim across two voxels of one region 
-%     [gt_mic,gt_mim]= fp_mim(gt1,repmat(params.iReg,D.nroi,1));
-%     gt.mic = gt_mic; 
-%     gt.mim = gt_mim; 
-% else 
-%     gt.mic = abs(imag(gt1));
-%     gt.mim = abs(imag(gt1)); 
-% end
-% clear gt1 gt_mic gt_mim
-
 %% leadfield for forward model
 
 L_save = D.leadfield;
