@@ -24,8 +24,37 @@ fres = l_epoch/2;
 for aroi = 1:nroi 
     nvoxroi(aroi) = numel(ind_roi_cortex{aroi});
 end
-npcs = min(nvoxroi)*ndim;
-inds = fp_npcs2inds([npcs npcs]);
+
+empty_rois = find(nvoxroi==0);
+nvoxroi1 = nvoxroi;
+nvoxroi1(empty_rois)=[];
+
+active_rois = 1:nroi;
+active_rois(empty_rois)=[];
+
+%% indeces 
+
+npcs = repmat(min(nvoxroi1)*ndim,1,nroi);
+beg_inds = cumsum([1 npcs(1:end-1)]);
+end_inds = cumsum([npcs]);
+
+for iroi = 1:nroi
+  PCA_inds{iroi} = beg_inds(iroi):end_inds(iroi);
+end
+
+inds = {}; ninds = 0;
+for iroi = 1:nroi
+    if ismember(iroi,active_rois)
+      for jroi = (iroi+1):nroi
+          if ismember(jroi,active_rois)
+            inds{ninds+1} = {PCA_inds{iroi}, PCA_inds{jroi}};    
+        %     inds{ninds+2} = {PCA_inds{jroi}, PCA_inds{iroi}};  
+            ninds = ninds + 1;
+          end
+      end
+    end
+end
+
 
 %% calculate lcmv for source projection 
 
@@ -45,52 +74,86 @@ A = permute(A,[1, 3, 2]);
 
 %% PCA
 
+signal_roi = []; 
 %loop over regions 
 for aroi = 1:nroi
     
-    clear A_ signal_source
+    if ismember(aroi,active_rois)
+        clear A_ signal_source
+
+        %A_ is the lcmv filter at aroi
+        A_ = A(:, :,ind_roi_cortex{aroi},:);
+        %A_ = A_(:,:,D.sub_ind_roi_region{aroi});
+        %number of voxels at the current roi
+        nvoxroi(aroi) = size(A_,3);
+
+        A2{aroi} = reshape(A_, [n_sensors, ndim*nvoxroi(aroi)]);
+
+        %project sensor signal to voxels at the current roi (aroi)
+        signal_source = A2{aroi}' * signal_sensor(:,:);
+
+        %do PCA
+        clear signal_roi_ S_
+        [signal_roi_,S_,~] = svd(double(signal_source)','econ');
+
+        signal_roi_ = signal_roi_(:,1:npcs) * S_(1:npcs, 1:npcs);
+
+        %bring signal_roi to the shape of npcs x l_epoch x n_trials
+        signal_roi = cat(1,signal_roi,reshape(signal_roi_',[],l_epoch,n_trials));
+        %     signal_roi{aroi} = reshape(signal_source,[],l_epoch,n_trials);
+    else
+        signal_roi = cat(1,signal_roi,zeros(npcs(aroi),l_epoch,n_trials));
+    end
     
-    %A_ is the lcmv filter at aroi
-    A_ = A(:, :,ind_roi_cortex{aroi},:);
-    %number of voxels at the current roi
-    nvoxroi(aroi) = size(A_,3); 
-    
-    A2{aroi} = reshape(A_, [n_sensors, ndim*nvoxroi(aroi)]);
-    
-    %project sensor signal to voxels at the current roi (aroi)
-    signal_source = A2{aroi}' * signal_sensor(:,:);
-    
-    %do PCA 
-    clear signal_roi_ S_
-    [signal_roi_,~,~] = svd(double(signal_source)','econ');
-    
-    %bring signal_roi to the shape of npcs x l_epoch x n_trials
-    signal_roi{aroi} = reshape(signal_roi_(:,1:npcs)',[],l_epoch,n_trials);
     
 end
 
 
 
 %% calculate MIM/MIC
-
-%loop over all roi combinations
 tic
-for oroi = 1:nroi-1
-    for uroi = oroi+1:nroi
-        
-        fprintf(['Calculating regions ' num2str(oroi) ' and ' num2str(uroi) '.\n'])
-        
-        clear data
-        data = cat(1,signal_roi{oroi},signal_roi{uroi});
+conn = data2sctrgcmim(signal_roi, fres, 20, 0,0, [], inds, {'MIC', 'MIM'});
+toc
+%%
 
-        clear mim mic trgc
-        [trgc,~,mim,mic, ~, inds] = data2sctrgcmim(data, fres, [], 0, 0, [], inds);
-        
-        %so far, mim{1} is equal to mim{2} 
-        MIM([oroi, uroi],[oroi, uroi],:)=mim{1};
-        MIC([oroi, uroi],[oroi, uroi],:)=mic{1};
-        DIFFGC(oroi,uroi,:) = squeeze(trgc(:,1) - trgc(:,2));
-        
+iinds = 0;
+for iroi = 1:nroi
+    if ismember(iroi,active_rois)
+        for jroi = (iroi+1):nroi
+            if ismember(jroi,active_rois)
+                iinds = iinds + 1;
+                MIM( iroi, jroi,:) = conn.MIM(:, iinds)';
+                MIC(iroi, jroi,:) = conn.MIC(:, iinds)';
+            end
+        end
     end
 end
-toc
+
+DIFFGC = [];
+
+
+
+%%
+% mic_ = sum(MIC(:,:,filt.band_inds),3);
+% [mrr_mic(iit), pr_mic(iit),~] = fp_mrr_hk(mic_,iroi_seed,iroi_tar);
+% 
+% mim_ = sum(MIM(:,:,filt.band_inds),3);
+% [mrr_mim(iit), pr_mim(iit),~] = fp_mrr_hk(mim_,iroi_seed,iroi_tar);
+% 
+% %% plot 
+% 
+% subplot(1,2,1)
+% fp_raincloud_plot(mrr_mic, [0.7 0.7 0.8], 1,0.2, 'ks');
+% view([-90 -90]);
+% set(gca, 'Xdir', 'reverse');
+% set(gca, 'XLim', [0 1]);
+% title('MIC')
+% 
+% subplot(1,2,2)
+% fp_raincloud_plot(mrr_mim, [0.7 0.7 0.8], 1,0.2, 'ks');
+% view([-90 -90]);
+% set(gca, 'Xdir', 'reverse');
+% set(gca, 'XLim', [0 1]);
+% title('MIM')
+
+
