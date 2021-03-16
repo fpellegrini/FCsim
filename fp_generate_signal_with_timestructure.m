@@ -30,7 +30,7 @@ Lepo = 2*fres; % epoch length, should be consistent with fres
 n_trials = N/Lepo; % number of epochs
 frqs = sfreqs(fres, fs); % freqs in Hz
 iband = [8 12]; % frequency band of interaction in Hz
-coupling_snr = 1% 0.6; % coupling strength = SNR in interacting frequency band 
+coupling_snr = 0.6; % coupling strength = SNR in interacting frequency band 
 % ar_order = fres/5; % AR model order for TRGC estimation
 %nboot = 30; % number of bootstrap iterations
 
@@ -50,7 +50,7 @@ filt.band_inds = band_inds;
 if params.ilag == 1
     lag = randi([0, 20],params.iInt*params.iReg,1);
 else
-    lag = 50%randi([20, 80],params.iInt*params.iReg,1);
+    lag = randi([20, 80],params.iInt*params.iReg,1);
 end
 % lag_ms = fs/lag; % lag in ms
 
