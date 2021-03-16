@@ -37,7 +37,7 @@ else
         [sig,brain_noise,sensor_noise,L,iroi_seed, iroi_tar,D, fres, n_trials,filt] = ...
             fp_generate_signal_with_timestructure(params,D,DIROUT1);
         
-        if params.ip==1
+        if params.ip==1 %if ip1, save sig for ip4 and ip5
             dir1 =  sprintf('%s/mim_sig/',DIROUT1);
             if ~exist(dir1); mkdir(dir1); end
             outname = sprintf('%s/mim_sig/%d.mat',DIROUT1,params.iit);
@@ -57,6 +57,7 @@ else
     signal_sensor_f = (filtfilt(filt.bband, filt.aband, signal_sensor1'))';
     signal_sensor1 = signal_sensor1 ./ norm(signal_sensor_f, 'fro');
     
+    %high-pass signal 
     signal_sensor = (filtfilt(filt.bhigh, filt.ahigh, signal_sensor1'))';
     signal_sensor = signal_sensor / norm(signal_sensor, 'fro');
     
@@ -66,7 +67,7 @@ else
     
     t.snr = toc;
     
-    if params.ip==1
+    if params.ip==1 %if ip1, save sig for ip7
         dir1 =  sprintf('%s/mim_sensorsig/',DIROUT1);
         if ~exist(dir1); mkdir(dir1); end
         outname = sprintf('%s/mim_sensorsig/%d.mat',DIROUT1,params.iit);
@@ -78,16 +79,18 @@ end
 %% leadfield and inverse solution
 
 tic
+
+%select only voxels that belong to any roi 
 L_backward = L(:, D.ind_cortex, :);
-ni = size(L_backward,3);
+ndim = size(L_backward,3);
 
 %construct source filter
-if strcmp(params.ifilt,'e')
+if strcmp(params.ifilt,'e') %eloreta 
     reg_param = fp_eloreta_crossval(signal_sensor,L_backward,5);
     A = squeeze(mkfilt_eloreta_v2(L_backward,reg_param));
     A = permute(A,[1, 3, 2]);
     
-elseif strcmp(params.ifilt,'l')
+elseif strcmp(params.ifilt,'l') %lcmv
     cCS = cov(signal_sensor(:,:)');
     reg = 0.05*trace(cCS)/length(cCS);
     Cr = cCS + reg*eye(size(cCS,1));
@@ -95,16 +98,13 @@ elseif strcmp(params.ifilt,'l')
     [~, A] = lcmv(Cr, L_backward, struct('alpha', 0, 'onedim', 0));
     A = permute(A,[1, 3, 2]);
     
-elseif strcmp(params.ifilt,'c')
-    
-    %     sigma2_total = mean(diag(cov(signal_sensor(:, :)')));
-    %     regu = sigma2_total*0.2;
-    %     sigu = regu*eye(n_sensors);
-    sigu = cov(sensor_noise');
+elseif strcmp(params.ifilt,'c') %champ   
+    sigma2_total = mean(diag(cov(signal_sensor(:, :)')));
+    regu = sigma2_total*0.2;
+    sigu = regu*eye(n_sensors);
     L_backward = permute(L_backward,[1 3 2]);
-    [~,~,w] = awsm_champ(signal_sensor(:, :), L_backward(:, :) ,...
-        sigu, 200, 3, 2, 0);
     
+    [~,~,w] = awsm_champ(signal_sensor(:, :), L_backward(:, :), sigu, 200, 3, 2, 0);    
     A = real(reshape(w',size(L_backward)));
 end
 
@@ -113,6 +113,8 @@ t.filter = toc;
 
 %% Loop over different pipelines
 
+
+%%%%%%%to do: in most of the cases only pips 1 to 9%%%%%%%%%%%%
 for ipip = 1:20
     
     %1 to 6: fixed
@@ -139,25 +141,24 @@ for ipip = 1:20
         %A_ is the lcmv filter at aroi
         A_ = A(:, :,D.ind_roi_cortex{aroi},:);
         
-        if ipip == 9
-            %baseline: pre-select voxels of true activity
+        if ipip == 9 %baseline: pre-select voxels of true activity
             A_ = A_(:,:,D.sub_ind_roi_region{aroi});
         end
         
         %number of voxels at the current roi
         nvoxroi(aroi) = size(A_,3);
         
-        A2{aroi} = reshape(A_, [n_sensors, ni*nvoxroi(aroi)]);
+        A2{aroi} = reshape(A_, [n_sensors, ndim*nvoxroi(aroi)]);
         
         %project sensor signal to voxels at the current roi (aroi)
         signal_source = A2{aroi}' * signal_sensor(:,:);
         
-        %zscoring
-        if ipip > 12
+        if ipip > 12 %zscoring pipelines 
             signal_source = zscore(signal_source)*sqrt(mean(var(signal_source)));
         end
         
         if ~(ipip == 9) && ~(ipip == 10)
+            
             %do PCA
             clear signal_roi_ S
             [signal_roi_,S,~] = svd(double(signal_source)','econ');
@@ -167,16 +168,21 @@ for ipip = 1:20
             invx = 1:min(length(vx_), n_sensors);
             varex = vx_(invx);
             
+            %save npcs and variance explained 
             if ismember(ipip,[7 11])
-                npcs(aroi) = min(find(varex> 0.9));
+                %npcs are selected in a way that 90% of the variance is preserved
+                npcs(aroi) = min(find(varex> 0.9)); 
                 var_explained=0.9;
             elseif ismember(ipip,[8 12])
+                %npcs are selected in a way that 99% of the variance is preserved
                 npcs(aroi) = min(find(varex> 0.99));
-                var_explained=0.90;
+                var_explained=0.99;
             elseif ipip <= 6
+                %fixed number of pcs 
                 npcs(aroi) = ipip;
                 var_explained(aroi) = varex(npcs(aroi));
             elseif ipip >= 13
+                %fixed number of pcs 
                 npcs(aroi) = ipip-12;
                 var_explained(aroi) = varex(npcs(aroi));
             end
@@ -187,8 +193,7 @@ for ipip = 1:20
         elseif ipip == 9
             %baseline
             signal_roi = cat(1,signal_roi,reshape(signal_source,[],l_epoch,n_trials));
-            npcs(aroi) = 3; %%%%%%%%%%%%%
-            var_explained = [];
+            npcs(aroi) = 3;
             
         elseif ipip == 10
             %sumVox
@@ -222,11 +227,12 @@ for ipip = 1:20
             end
         end
         
+        %% calculate MIM, MIC, TRGC and COH 
         
         output = {'MIM','MIC','TRGC','COH'};
         conn = data2sctrgcmim(signal_roi, fres, 20, 0,0, [], inds, output);
         
-        % extract measures out of the conn struct
+        %% extract measures out of the conn struct
         iinds = 0;
         for iroi = 1:D.nroi
             for jroi = (iroi+1):D.nroi
@@ -245,16 +251,18 @@ for ipip = 1:20
             end
         end
         
+        
     elseif ipip == 10
-        % In sumVox,trgc would take too long
+        
         output = {'MIM','MIC'};
         
-        % For memory purposes, we need to calculate this region by region
+        % For memory purposes, we need to calculate this in a
+        % region-by-region way
         for oroi = 1:D.nroi-1
             for uroi = oroi+1:D.nroi
                 clear data npcs beg_inds end_inds PCA_inds mic mim conn 
                 
-                npcs = repmat(ni,1,nvoxroi(oroi)+nvoxroi(uroi));
+                npcs = repmat(ndim,1,nvoxroi(oroi)+nvoxroi(uroi));
                 data = cat(1,signal_roi{oroi}, signal_roi{uroi});
                 
                 beg_inds = cumsum([1 npcs(1:end-1)]);
@@ -298,7 +306,7 @@ for ipip = 1:20
     
     t.pips(ipip) = toc;
     
-    %% save a few things 
+    %% save a few more things 
     
     MIM{ipip} = MIM_;
     MIC{ipip} = MIC_;
@@ -332,6 +340,7 @@ for ipip = 1:20
     
 end %pips
 
+%% Saving 
 fprintf('Saving... \n')
 outname = sprintf('%smim_%s.mat',DIROUT,params.logname);
 save(outname,'-v7.3')
@@ -344,5 +353,5 @@ save(outname,'-v7.3')
 
 %%
 
-% correct
+% correct, ALI, order pipelines 
 
