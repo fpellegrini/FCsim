@@ -135,13 +135,13 @@ for iname = 1%:numel(name)
                 count = count+1;
             end
             %%
-            if imsr ==1
+            if imsr == 1
                 outname = [DIRFIG name{iname} '_' labs{imim} '_mrr'];
             else
                 outname = [DIRFIG name{iname} '_' labs{imim} '_pr'];
             end
-            %saveas(gcf,outname, 'png')
-            %close all
+            saveas(gcf,outname, 'png')
+            close all
             
             
             %% ZS pipeline
@@ -202,8 +202,8 @@ for iname = 1%:numel(name)
                     outname = [DIRFIG 'ip9_ZS_' labs{imim} '_pr'];
                 end
                 
-                %saveas(gcf,outname, 'png')
-                %close all
+                saveas(gcf,outname, 'png')
+                close all
             end
             %%
             
