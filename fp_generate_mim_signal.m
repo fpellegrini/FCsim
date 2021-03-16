@@ -74,6 +74,7 @@ end
 clear gt1 gt_mic gt_mim
 
 %% leadfield for forward model
+
 L_save = D.leadfield;
 L3 = L_save(:, D.sub_ind_cortex, :);
 normals = D.normals(D.sub_ind_cortex,:)'; 
