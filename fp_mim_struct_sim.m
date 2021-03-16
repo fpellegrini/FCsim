@@ -52,7 +52,7 @@ else
     signal_sensor_f = (filtfilt(filt.bband, filt.aband, signal_sensor1'))';
     signal_sensor1 = signal_sensor1 ./ norm(signal_sensor_f, 'fro');
     
-    signal_sensor = filtfilt(filt.bhigh, filt.ahigh, signal_sensor1);
+    signal_sensor = (filtfilt(filt.bhigh, filt.ahigh, signal_sensor1'))';
     signal_sensor = signal_sensor / norm(signal_sensor, 'fro');
     
     %reshape
