@@ -16,11 +16,19 @@ sub_ind_cortex = []; %randomly selected active voxels of each region
 sub_ind_roi = {}; %randomly selected active voxels of each region, grouped by region
 sub_ind_roi_region = {}; %index of active voxel within region 
 
+%central voxel inds
+ctr_ind_cortex = []; %central voxels of each region
+ctr_ind_roi = {}; %central voxels of each region, grouped by region
+ctr_ind_roi_region = {}; %index of central voxel within region 
+
 for iROI = 1:nroi
     
+    %all voxels
     ind_roi{iROI} = cortex.Atlas(3).Scouts(iROI).Vertices;
     ind_cortex = cat(1, ind_cortex, ind_roi{iROI});
     [~, ind_roi_cortex{iROI}, ~] = intersect(ind_cortex, ind_roi{iROI}); 
+    
+    %active voxels
     sub_ind_roi{iROI} = cortex.Atlas(3).Scouts(iROI).Vertices(...
         randperm(numel(cortex.Atlas(3).Scouts(iROI).Vertices),iReg));    
     sub_ind_cortex = cat(1,sub_ind_cortex, sub_ind_roi{iROI});
@@ -28,6 +36,13 @@ for iROI = 1:nroi
         sub_ind_roi_region{iROI}(ii) = find(ind_roi{iROI}==sub_ind_roi{iROI}(ii));
     end
     
+    %central voxels
+    clear pos mid_point
+    pos = cortex.Vertices(ind_roi{iROI},:);
+    mid_point = mean(pos,1);
+    [~,ctr_ind_roi_region{iROI}] = min(eucl(mid_point,pos));
+    ctr_ind_roi{iROI} = ind_roi{iROI}(ctr_ind_roi_region{iROI});
+    ctr_ind_cortex(iROI) = ctr_ind_roi{iROI};
 end
 
 %maps roi indeices to voxels 
@@ -46,6 +61,9 @@ D.ind_roi_cortex = ind_roi_cortex;
 D.sub_ind_cortex = sub_ind_cortex;
 D.sub_ind_roi = sub_ind_roi;
 D.sub_ind_roi_region = sub_ind_roi_region;
+D.ctr_ind_roi = ctr_ind_roi;
+D.ctr_ind_roi_region = ctr_ind_roi_region; 
+D.ctr_ind_cortex = ctr_ind_cortex; 
 D.roi2vox = roi2vox;
 D.leadfield = leadfield;
 D.normals = cortex.VertNormals;
