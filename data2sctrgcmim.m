@@ -176,7 +176,7 @@ if abs(nboot) < 1 % no bootstrap
     % loop over sender/receiver combinations to compute time-reversed GC 
     for iind = 1:ninds  
       if ~isequal(inds{iind}{1}, inds{iind}{2})
-        disp(['testing connection ' num2str(iind) '/' num2str(ninds) ': [' num2str(inds{iind}{1}) '] <-> [' num2str(inds{iind}{2}) ']'])
+        %disp(['testing connection ' num2str(iind) '/' num2str(ninds) ': [' num2str(inds{iind}{1}) '] <-> [' num2str(inds{iind}{2}) ']'])
 
         %ind configuration 
         subset = [inds{iind}{1} inds{iind}{2}];
