@@ -1,4 +1,4 @@
-function [nInteractions, nRegionInts,SNR,noise_mix,nlag,filtertype,hemisym] = fp_get_params(ip)
+function [nInteractions, nRegionInts,SNR,noise_mix,nlag,filtertype] = fp_get_params(ip)
 
 if ip == 1
     %defaults
