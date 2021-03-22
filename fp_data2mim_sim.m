@@ -8,7 +8,7 @@ if ~exist(DIROUT1);mkdir(DIROUT1); end
 
 %define which pipelines run with this configuration 
 if params.ip == 1
-    pips = 1:21;
+    pips = 1:22;
 elseif strcmp(params.ifilt,'c') %with champaign, run only ipip1
     pips = 1:3;
 else % run only fixed, 90% and 99% pipelines 
