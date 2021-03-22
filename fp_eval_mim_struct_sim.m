@@ -27,8 +27,8 @@ for iInt = nInteractions
                         
                         iit
                         %create logfile for parallization
-                        logname = sprintf('iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_hemisym%d_iter%d'...
-                            ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,ihemi,iit);
+                        logname = sprintf('iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_iter%d'...
+                            ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,iit);
                         %
                         if ~exist(sprintf('%s%s_work',DIRLOG,logname)) & ~exist(sprintf('%s%s_done',DIRLOG,logname))
                             eval(sprintf('!touch %s%s_work',DIRLOG,logname))
