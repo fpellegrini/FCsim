@@ -20,7 +20,7 @@ for oroi = 1:nroi-1
         
         MIM_(oroi,uroi) = squeeze(mean(mean(mim(1:nvoxroi(oroi),nvoxroi(oroi):end),1),2));
         MIM_(uroi,oroi) = MIM_(oroi,uroi);
-        MIC_(oroi,uroi) = squeeze(mean(mean(mic(1:nvoxroi(oroi),nvoxoig(oroi):end),1),2));
+        MIC_(oroi,uroi) = squeeze(mean(mean(mic(1:nvoxroi(oroi),nvoxroi(oroi):end),1),2));
         MIC_(uroi,oroi) = MIC_(oroi,uroi);
         
     end
