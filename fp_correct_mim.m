@@ -4,7 +4,7 @@ nit = 50;
 [~,~, n_trials] = size(signal_roi);
 
 %% true MIM and MIC
-output = {'MIM','MIC'};
+output = {'MIM','MIC','COH'};
 conn = data2sctrgcmim(signal_roi, fres, 20, 0,0, [], inds, output);
 % extract measures out of the conn struct
 [MIM_t, MIC_t, ~, iCOH_t, aCOH_t] = fp_unwrap_conn(conn,D.nroi,filt,PCA_inds);
