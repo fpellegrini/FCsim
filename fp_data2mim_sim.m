@@ -132,6 +132,8 @@ for ipip = pips
     %11: 90% corrected
     %12: 99% corrected
     %13 to 20: equal to 1 to 8 but with zscoring
+    %21: 
+    %22: central voxel
     
     fprintf(['Testing pipeline ' num2str(ipip) '\n']) 
     tic
@@ -236,7 +238,7 @@ for ipip = pips
             
         elseif ipip == 21 
             %sum of activity, then MIM 
-            signal_roi = cat(1,signal_roi, squeeze(mean(reshape(signal_source,ndim, nvoxroi(aroi),l_epoch,n_trials),2)));
+            signal_roi = cat(1,signal_roi, squeeze(sum(reshape(signal_source,ndim, nvoxroi(aroi),l_epoch,n_trials),2)));
             npcs(aroi) = 3;
         end
     end
@@ -256,8 +258,12 @@ for ipip = pips
         clear inds PCA_inds
         [inds, PCA_inds] = fp_npcs2inds(npcs);
         
-        % calculate MIM, MIC, TRGC and COH        
-        output = {'MIM','MIC','TRGC','COH'};
+        % calculate MIM, MIC, TRGC and COH 
+        if ipip == 21
+            output = {'MIM','MIC','COH'};
+        else
+            output = {'MIM','MIC','TRGC','COH'};
+        end
         conn = data2sctrgcmim(signal_roi, fres, 20, 0,0, [], inds, output);
         
         % extract measures out of the conn struct
@@ -316,7 +322,7 @@ for ipip = pips
         aCOH{ipip} = aCOH_;
         iCOH{ipip} = iCOH_;
         
-        if ipip ~= 11 && ipip ~= 12
+        if ipip ~= 11 && ipip ~= 12 && ipip ~= 21
             DIFFGC{ipip} = DIFFGC_;
         end
         
@@ -346,7 +352,7 @@ for ipip = pips
         [mrr_aCoh(ipip), pr_aCoh(ipip),hk_aCoh(ipip)] = fp_mrr_hk(aCOH_,iroi_seed,iroi_tar,1);
         [mrr_iCoh(ipip), pr_iCoh(ipip),hk_iCoh(ipip)] = fp_mrr_hk(iCOH_,iroi_seed,iroi_tar,1);
         
-        if ipip ~= 11 && ipip ~= 12 
+        if ipip ~= 11 && ipip ~= 12  && ipip ~= 21
             %absolute value of gc and only triu is considered. Metric neglects
             %the direction of the interaction 
             [mrr_absgc(ipip), pr_absgc(ipip),hk_absgc(ipip)] = fp_mrr_hk(abs(DIFFGC_),iroi_seed,iroi_tar,1);
