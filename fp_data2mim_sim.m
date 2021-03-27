@@ -259,7 +259,7 @@ for ipip = pips
         [inds, PCA_inds] = fp_npcs2inds(npcs);
         
         % calculate MIM, MIC, TRGC and COH 
-        if ipip == 21
+        if ipip > 20
             output = {'MIM','MIC','COH'};
         else
             output = {'MIM','MIC','TRGC','COH'};
@@ -322,7 +322,7 @@ for ipip = pips
         aCOH{ipip} = aCOH_;
         iCOH{ipip} = iCOH_;
         
-        if ipip ~= 11 && ipip ~= 12 && ipip ~= 21
+        if ipip ~= 11 && ipip ~= 12 && ipip < 21
             DIFFGC{ipip} = DIFFGC_;
         end
         
@@ -352,7 +352,7 @@ for ipip = pips
         [mrr_aCoh(ipip), pr_aCoh(ipip),hk_aCoh(ipip)] = fp_mrr_hk(aCOH_,iroi_seed,iroi_tar,1);
         [mrr_iCoh(ipip), pr_iCoh(ipip),hk_iCoh(ipip)] = fp_mrr_hk(iCOH_,iroi_seed,iroi_tar,1);
         
-        if ipip ~= 11 && ipip ~= 12  && ipip ~= 21
+        if ipip ~= 11 && ipip ~= 12  && ipip < 21 
             %absolute value of gc and only triu is considered. Metric neglects
             %the direction of the interaction 
             [mrr_absgc(ipip), pr_absgc(ipip),hk_absgc(ipip)] = fp_mrr_hk(abs(DIFFGC_),iroi_seed,iroi_tar,1);
