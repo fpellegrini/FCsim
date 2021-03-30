@@ -1,4 +1,4 @@
-function [MIM,MIC,DIFFGC] = data2mim(signal_sensor,L,ind_roi_cortex)
+function [MIM,MIC,DIFFGC,active_rois] = data2mim(signal_sensor,L,ind_roi_cortex)
 %Input: 
 % signal_sensor in the shape of n_sensor x l_epoch x n_trials
 % leadfield L in the shape of n_sensors x n_voxels x 3 dimensions
@@ -24,6 +24,7 @@ fres = l_epoch/2;
 for aroi = 1:nroi 
     nvoxroi(aroi) = numel(ind_roi_cortex{aroi});
 end
+nvoxroi(117)=0;
 
 empty_rois = find(nvoxroi==0);
 nvoxroi1 = nvoxroi;
@@ -115,6 +116,8 @@ tic
 conn = data2sctrgcmim(signal_roi, fres, 20, 0,0, [], inds, {'MIC', 'MIM'});
 toc
 %%
+MIM = zeros(nroi,nroi,126);
+MIC=zeros(nroi,nroi,126);
 
 iinds = 0;
 for iroi = 1:nroi
@@ -130,6 +133,10 @@ for iroi = 1:nroi
 end
 
 DIFFGC = [];
+MIM(empty_rois,:,:)=[];
+MIM(:,empty_rois,:)=[];
+MIC(empty_rois,:,:)=[];
+MIC(:,empty_rois,:)=[];
 
 
 
