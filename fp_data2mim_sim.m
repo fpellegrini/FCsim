@@ -10,7 +10,7 @@ if ~exist(DIROUT1);mkdir(DIROUT1); end
 if params.ip == 1
     pips = 1:22;
 elseif strcmp(params.ifilt,'c') %with champaign, run only ipip1
-    pips = 1:3;
+    pips = [1:3 8];
 else % run only fixed, 90% and 99% pipelines 
     pips = 1:9;
 end
@@ -109,7 +109,7 @@ elseif strcmp(params.ifilt,'l') %lcmv
     
 elseif strcmp(params.ifilt,'c') %champ   
     sigma2_total = mean(diag(cov(signal_sensor(:, :)')));
-    regu = sigma2_total*0.2;
+    regu = sigma2_total* params.isnr;
     sigu = regu*eye(n_sensors);
     L_perm = permute(L_backward,[1 3 2]);
     
@@ -132,7 +132,7 @@ for ipip = pips
     %11: 90% corrected
     %12: 99% corrected
     %13 to 20: equal to 1 to 8 but with zscoring
-    %21: 
+    %21: sum, then MIM 
     %22: central voxel
     
     fprintf(['Testing pipeline ' num2str(ipip) '\n']) 
