@@ -36,8 +36,8 @@ filt.band_inds = band_inds;
 
 if no_reload    
     %set seed and target regions 
-    iroi_seed = randi(D.nroi,params.iInt,1);
-    iroi_tar = randi(D.nroi,params.iInt,1);
+    iroi_seed = randperm(D.nroi,params.iInt)';
+    iroi_tar = randperm(D.nroi,params.iInt)';
     
     %be sure that no region is selected twice 
     for ii = 1:params.iInt
