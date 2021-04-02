@@ -8,11 +8,11 @@ if ~exist(DIROUT1);mkdir(DIROUT1); end
 
 %define which pipelines run with this configuration 
 if params.ip == 1
-    pips = 1:22;
-elseif strcmp(params.ifilt,'c') %with champaign, run only ipip1
-    pips = [1:3 8];
+    params.pips = 1:22;
+elseif strcmp(params.ifilt,'c') %with champaign
+    params.pips = [1:3 8];
 else % run only fixed, 90% and 99% pipelines 
-    pips = 1:9;
+    params.pips = 1:9;
 end
 
 
@@ -109,7 +109,7 @@ elseif strcmp(params.ifilt,'l') %lcmv
     
 elseif strcmp(params.ifilt,'c') %champ   
     sigma2_total = mean(diag(cov(signal_sensor(:, :)')));
-    regu = sigma2_total* params.isnr;
+    regu = sigma2_total* (1-params.isnr);
     sigu = regu*eye(n_sensors);
     L_perm = permute(L_backward,[1 3 2]);
     
@@ -122,7 +122,7 @@ t.filter = toc;
 
 %% Loop over different pipelines
 
-for ipip = pips
+for ipip = params.pips
     
     %1 to 6: fixed
     %7: 90%
