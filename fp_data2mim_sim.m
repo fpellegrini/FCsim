@@ -196,8 +196,10 @@ for ipip = params.pips
                 var_explained=0.9;
             elseif ismember(ipip,[8 12 20])
                 %npcs are selected in a way that 99% of the variance is preserved
-                npcs(aroi) = min(find(varex> 0.99));
-                var_explained=0.99;
+                try
+                    npcs(aroi) = min(find(varex> 0.99));
+                    var_explained=0.99;
+                end
             elseif ipip <= 6
                 %fixed number of pcs 
                 npcs(aroi) = ipip;
