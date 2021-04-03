@@ -336,7 +336,9 @@ for ipip = params.pips
             corr_voxmic(ipip) = corr(nvoxroi_all ,MIC_(:));
             corr_voxicoh(ipip) = corr(nvoxroi_all,iCOH_(:));
             corr_voxacoh(ipip) = corr(nvoxroi_all,aCOH_(:));
-            corr_voxnpcs(ipip) = corr(nvoxroi', npcs');
+            if ~strcmp(params.ifilt,'c')
+                corr_voxnpcs(ipip) = corr(nvoxroi', npcs');
+            end
         end
         
     end
