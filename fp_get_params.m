@@ -31,7 +31,7 @@ elseif ip == 4
     %vary SNR
     nInteractions = 2;
     nRegionInts = 1;
-    SNR = [0.1 0.3 0.5 0.9];
+    SNR = [0.5 0.9];
     noise_mix = 0.5;
     nlag = 2;
     filtertype= {'l'}; %lcmv
