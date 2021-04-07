@@ -9,17 +9,15 @@ name = {...
     'ip2_int4';...
     'ip2_int5';...
     'ip3_iReg2';...
-    'ip4_isnr01';...
-    'ip4_isnr03';...
-    'ip4_isnr07';...
+    'ip4_isnr05';...
     'ip4_isnr09';...
     'ip5_iss0';...
     'ip5_iss025';...
     'ip5_iss075';...
     'ip5_iss1';...
     'ip6_lag1';...
-    'ip7_champ';...
-    'ip7_eloreta_reg'};
+    'ip7_eloreta_reg';...
+    'ip7_champ'};
 
 labs = {'MIC','MIM','Mean abscoh','mean icoh','absGC','posGC'};
 [cb] = cbrewer2('spectral', 11);
@@ -27,7 +25,7 @@ cb1 = cbrewer2('Set1',9);
 
 %%
 
-for iname = 1%:numel(name)
+for iname = 7:numel(name)
     
     
     clearvars -except iname name DIRDATA DIRFIG labs cb cb1
@@ -49,27 +47,23 @@ for iname = 1%:numel(name)
             case 6
                 iReg = 2;
             case 7
-                isnr = 0.1;
-            case 8
-                isnr = 0.3;
-            case 9
                 isnr = 0.5;
-            case 10
+            case 8
                 isnr = 0.9;
-            case 11
+            case 9
                 iss=0;
-            case 12
+            case 10
                 iss = 0.25;
-            case 13
+            case 11
                 iss = 0.75;
-            case 14
+            case 12
                 iss = 1;
-            case 15
+            case 13
                 ilag = 1;
-            case 16
-                ifilt = 'c';
-            case 17
+            case 14
                 ifilt = 'e';
+            case 15
+                ifilt = 'c';
         end
     end
     
@@ -120,15 +114,31 @@ for iname = 1%:numel(name)
         
         %%
         figure
-        figone(15,50)
+        if iname == 15
+            figone(15,25)
+        else
+            figone(15,50)
+        end
         
         if icon < 5
-            npips = 12;
+            if iname == 1
+                pips = 1:12;
+                npips = 12;
+            else 
+                pips = 1:9;
+                npips = 9;
+            end
         else 
+            pips = 1:9;
             npips = 9;
         end
         
-        for ipip = 1:npips
+        if iname == 15 %champ
+            pips = [1:3 8];
+            npips = 4;
+        end
+        
+        for ipip = pips
             
             %1 to 6: fixed
             %7: 90%
@@ -141,8 +151,7 @@ for iname = 1%:numel(name)
             %21: sum, then MIM
             %22: central voxel
             
-            
-            subplot(1,npips,ipip)
+            data1 = MRR{icon}(:,ipip);
             
             if ipip<=np
                 cl = [0.5 0.5 1];%cb(np+1-ipip,:);
@@ -154,7 +163,11 @@ for iname = 1%:numel(name)
                 cl = [0.2 0.2 0.2];
             end
             
-            data1 = MRR{icon}(:,ipip);
+            if iname == 15 && ipip == 8 
+                ipip = 4;
+            end
+            subplot(1,npips,ipip)
+            
             [h, u] = fp_raincloud_plot(data1, cl, 1,0.2, 'ks');
             view([-90 -90]);
             set(gca, 'Xdir', 'reverse');
@@ -168,7 +181,9 @@ for iname = 1%:numel(name)
                 %                         xtitles = {'1PC','2PCs', '3PCs','4PCs','5PCs','6PCs','90%',...
                 %                             '99%'};
                 %                     end
-            else
+            elseif iname == 15 
+                xtitles = {'1PC','2PCs', '3PCs','99%'};
+            else 
                 xtitles = {'1PC','2PCs', '3PCs','4PCs','5PCs','6PCs','90%', '99%','baseline'};
             end
             
@@ -178,6 +193,10 @@ for iname = 1%:numel(name)
             end
             
             xlabel([labs{icon} ' MRR'])
+            
+            if iname == 15 && ipip == 4
+                break
+            end
             
         end
         
@@ -192,7 +211,7 @@ for iname = 1%:numel(name)
     end
     
     
-    if iname ==1
+    if iname == 1
         
         for icon = 1:length(MRR)
             
