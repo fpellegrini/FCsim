@@ -15,7 +15,6 @@ for iname = 1: 15
     isnr=0.7;
     iss = 0.5;
     ilag=2;
-    ihemi=0;
     ifilt='l';
     
     if iname>1 && iname<6
@@ -46,7 +45,7 @@ for iname = 1: 15
     end
     
     %%
-    for iit= its
+    for iit= 1:nit
         
         clearvars -except iInt iReg isnr iss ilag ifilt iit nit iname DIRIN 
         
