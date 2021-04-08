@@ -6,6 +6,8 @@ if ~exist(DIRIN);mkdir(DIRIN); end
 
 for iname = 1: 15
     
+    iname 
+    
     clearvars -except iname DIRIN
     
     %default paramenters
@@ -46,7 +48,7 @@ for iname = 1: 15
     
     %%
     for iit= 1:nit
-        
+        iit
         clearvars -except iInt iReg isnr iss ilag ifilt iit nit iname DIRIN
         
         inname = sprintf('mim_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_iter%d'...
