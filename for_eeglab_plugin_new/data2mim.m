@@ -1,4 +1,4 @@
-function [MIM,MIC,DIFFGC,active_rois] = data2mim(signal_sensor,L,ind_roi_cortex)
+function [MIM,MIC,iCOH,DIFFGC,active_rois] = data2mim(signal_sensor,L,ind_roi_cortex)
 %Input: 
 % signal_sensor in the shape of n_sensor x l_epoch x n_trials
 % leadfield L in the shape of n_sensors x n_voxels x 3 dimensions
@@ -35,7 +35,8 @@ active_rois(empty_rois)=[];
 
 %% indeces 
 
-npcs = repmat(min(nvoxroi1)*ndim,1,nroi);
+% npcs = repmat(min(nvoxroi1)*ndim,1,nroi);
+npcs = repmat(min(5,min(nvoxroi1)*ndim),1,nroi);
 beg_inds = cumsum([1 npcs(1:end-1)]);
 end_inds = cumsum([npcs]);
 
@@ -107,26 +108,28 @@ for aroi = 1:nroi
     end
     
     
-end
+    end
 
 
 
 %% calculate MIM/MIC
 tic
-conn = data2sctrgcmim(signal_roi, fres, 20, 0,0, [], inds, {'MIC', 'MIM'});
+conn = data2sctrgcmim(signal_roi, fres, 20, 0,0, [], inds, {'MIC', 'MIM','COH'});
 toc
 %%
 MIM = zeros(nroi,nroi,126);
 MIC=zeros(nroi,nroi,126);
+iCOH = zeros(nroi, nroi, 126);
 
 iinds = 0;
 for iroi = 1:nroi
     if ismember(iroi,active_rois)
         for jroi = (iroi+1):nroi
             if ismember(jroi,active_rois)
-                iinds = iinds + 1;
+                iinds = iinds + 1; 
                 MIM( iroi, jroi,:) = conn.MIM(:, iinds)';
                 MIC(iroi, jroi,:) = conn.MIC(:, iinds)';
+                iCOH(iroi,jroi,:) = squeeze(mean(mean(abs(imag(conn.COH(:,PCA_inds{iroi},PCA_inds{jroi}))),2),3))';
             end
         end
     end
@@ -137,30 +140,7 @@ MIM(empty_rois,:,:)=[];
 MIM(:,empty_rois,:)=[];
 MIC(empty_rois,:,:)=[];
 MIC(:,empty_rois,:)=[];
-
-
-
-%%
-% mic_ = sum(MIC(:,:,filt.band_inds),3);
-% [mrr_mic(iit), pr_mic(iit),~] = fp_mrr_hk(mic_,iroi_seed,iroi_tar);
-% 
-% mim_ = sum(MIM(:,:,filt.band_inds),3);
-% [mrr_mim(iit), pr_mim(iit),~] = fp_mrr_hk(mim_,iroi_seed,iroi_tar);
-% 
-% %% plot 
-% 
-% subplot(1,2,1)
-% fp_raincloud_plot(mrr_mic, [0.7 0.7 0.8], 1,0.2, 'ks');
-% view([-90 -90]);
-% set(gca, 'Xdir', 'reverse');
-% set(gca, 'XLim', [0 1]);
-% title('MIC')
-% 
-% subplot(1,2,2)
-% fp_raincloud_plot(mrr_mim, [0.7 0.7 0.8], 1,0.2, 'ks');
-% view([-90 -90]);
-% set(gca, 'Xdir', 'reverse');
-% set(gca, 'XLim', [0 1]);
-% title('MIM')
+iCOH(:, empty_rois,:) = []; 
+iCOH(empty_rois,:,:)=[]; 
 
 
