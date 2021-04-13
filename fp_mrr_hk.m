@@ -58,7 +58,7 @@ else
     end
     
     %% moving earth distance in 3 variants
-%     try
+    try
         load('processed_bs_wzb_90_2000/bs_results.mat')
         iatl = 3; % DK atlas
         neighbor_thresh = 10; % 10mm vicinity defines neighborhood between regions
@@ -85,13 +85,13 @@ else
         d2_ = d2_ ./ sum(d2_(:));
         em3 = 1 - emd_hat_gd_metric_mex(d1, d2_, conndist);
         
-%     catch 
-%         
-%         em1 = 0; 
-%         em2 = 0; 
-%         em3 = 0; 
-%         
-%     end
+    catch 
+        
+        em1 = 0; 
+        em2 = 0; 
+        em3 = 0; 
+        
+    end
     
     
     
