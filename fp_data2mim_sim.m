@@ -9,7 +9,7 @@ if ~exist(DIROUT1);mkdir(DIROUT1); end
 %define which pipelines run with this configuration 
 if params.ip == 1
     params.pips = 1:22;
-elseif strcmp(params.ifilt,'c') %with champaign
+elseif strcmp(params.ifilt,'c')|| strcmp(params.ifilt,'cr') %with champaign
     params.pips = [1:3 8];
 else % run only fixed, 90% and 99% pipelines 
     params.pips = 1:9;
@@ -107,14 +107,26 @@ elseif strcmp(params.ifilt,'l') %lcmv
     [~, A] = lcmv(Cr, L_backward, struct('alpha', 0, 'onedim', 0));
     A = permute(A,[1, 3, 2]);
     
-elseif strcmp(params.ifilt,'c') %champ   
+elseif strcmp(params.ifilt,'c') %champ with non-realistically good conditions 
     sigma2_total = mean(diag(cov(signal_sensor(:, :)')));
     regu = sigma2_total* (1-params.isnr);
+    
     sigu = regu*eye(n_sensors);
     L_perm = permute(L_backward,[1 3 2]);
     
     [~,~,w] = awsm_champ(signal_sensor(:, :), L_perm(:, :), sigu, 200, 3, 2, 0);    
     A = real(reshape(w',size(L_perm)));
+    
+elseif strcmp(params.ifilt,'cr') %champ with regulaization 
+    
+    regu = fp_champ_crossval(signal_sensor,L_backward,5);
+    
+    sigu = regu*eye(n_sensors);
+    L_perm = permute(L_backward,[1 3 2]);
+    
+    [~,~,w] = awsm_champ(signal_sensor(:, :), L_perm(:, :), sigu, 200, 3, 2, 0);    
+    A = real(reshape(w',size(L_perm)));
+    
 end
 
 t.filter = toc;
@@ -171,7 +183,7 @@ for ipip = params.pips
         end
         
         clear s_
-        if strcmp(params.ifilt,'c') %in case of the champaign filter 
+        if strcmp(params.ifilt,'c') || strcmp(params.ifilt,'cr') %in case of the champaign filter 
             %sort out the dims and voxels with zero activity
             s_ = sum(signal_source,2)>10^-8 | sum(signal_source,2)< -(10^-8) ;
         else 
@@ -212,7 +224,7 @@ for ipip = params.pips
                 var_explained(aroi) = varex(npcs(aroi));
             end
             
-            if strcmp(params.ifilt,'c') %champaign filter 
+            if strcmp(params.ifilt,'c') || strcmp(params.ifilt,'cr') %champaign filter 
                 %sort out rois with zero activity
                 try
                     %bring signal_roi to the shape of npcs x l_epoch x n_trials
@@ -251,7 +263,7 @@ for ipip = params.pips
    
     if ipip ~= 10 && ipip ~= 11 && ipip ~= 12 
         
-        if strcmp(params.ifilt,'c') 
+        if strcmp(params.ifilt,'c') || strcmp(params.ifilt,'cr')
             %no calculations for empty rois 
             npcs(empty_rois) = [];
         end
@@ -271,7 +283,7 @@ for ipip = params.pips
         % extract measures out of the conn struct
         [MIM_, MIC_, DIFFGC_, iCOH_, aCOH_] = fp_unwrap_conn(conn,numel(npcs),filt,PCA_inds);
         
-        if strcmp(params.ifilt,'c')
+        if strcmp(params.ifilt,'c') || strcmp(params.ifilt,'cr')
             % fill active rois again into the full nroixnroi structure 
             
             clear mim mic diffgc 
@@ -338,7 +350,7 @@ for ipip = params.pips
             corr_voxmic(ipip) = corr(nvoxroi_all ,MIC_(:));
             corr_voxicoh(ipip) = corr(nvoxroi_all,iCOH_(:));
             corr_voxacoh(ipip) = corr(nvoxroi_all,aCOH_(:));
-            if ~strcmp(params.ifilt,'c')
+            if ~strcmp(params.ifilt,'c') || strcmp(params.ifilt,'cr')
                 corr_voxnpcs(ipip) = corr(nvoxroi', npcs');
             end
         end
@@ -349,17 +361,17 @@ for ipip = params.pips
     
     %% Evaluate 
     
-    [mrr_mic(ipip), pr_mic(ipip),hk_mic(ipip)] = fp_mrr_hk(MIC_,iroi_seed,iroi_tar,1);        
-    [mrr_mim(ipip), pr_mim(ipip),hk_mim(ipip)] = fp_mrr_hk(MIM_,iroi_seed,iroi_tar,1);
+    [mrr_mic(ipip), pr_mic(ipip),hk_mic(ipip),em1_mic(ipip),em2_mic(ipip),em3_mic(ipip)] = fp_mrr_hk(MIC_,iroi_seed,iroi_tar,1);        
+    [mrr_mim(ipip), pr_mim(ipip),hk_mim(ipip),em1_mim(ipip),em2_mim(ipip),em3_mim(ipip)] = fp_mrr_hk(MIM_,iroi_seed,iroi_tar,1);
     
     if ipip ~= 10 
-        [mrr_aCoh(ipip), pr_aCoh(ipip),hk_aCoh(ipip)] = fp_mrr_hk(aCOH_,iroi_seed,iroi_tar,1);
-        [mrr_iCoh(ipip), pr_iCoh(ipip),hk_iCoh(ipip)] = fp_mrr_hk(iCOH_,iroi_seed,iroi_tar,1);
+        [mrr_aCoh(ipip), pr_aCoh(ipip),hk_aCoh(ipip),em1_aCoh(ipip),em2_aCoh(ipip),em3_aCoh(ipip)] = fp_mrr_hk(aCOH_,iroi_seed,iroi_tar,1);
+        [mrr_iCoh(ipip), pr_iCoh(ipip),hk_iCoh(ipip),em1_iCoh(ipip),em2_iCoh(ipip),em3_iCoh(ipip)] = fp_mrr_hk(iCOH_,iroi_seed,iroi_tar,1);
         
         if ipip ~= 11 && ipip ~= 12  && ipip < 21 
             %absolute value of gc and only triu is considered. Metric neglects
             %the direction of the interaction 
-            [mrr_absgc(ipip), pr_absgc(ipip),hk_absgc(ipip)] = fp_mrr_hk(abs(DIFFGC_),iroi_seed,iroi_tar,1);
+            [mrr_absgc(ipip), pr_absgc(ipip),hk_absgc(ipip),em1_absgc(ipip),em2_absgc(ipip),em3_absgc(ipip)] = fp_mrr_hk(abs(DIFFGC_),iroi_seed,iroi_tar,1);
 
             %only positive part of gc is submitted and the whole matrix is
             %considered. Metric that is strongly influenced by the direction of
@@ -367,7 +379,7 @@ for ipip = params.pips
             clear pos_diffgc
             pos_diffgc = DIFFGC_; 
             pos_diffgc(pos_diffgc< 0) = 0;
-            [mrr_posgc(ipip), pr_posgc(ipip),hk_posgc(ipip)] = fp_mrr_hk(pos_diffgc,iroi_seed,iroi_tar,0);
+            [mrr_posgc(ipip), pr_posgc(ipip),hk_posgc(ipip),em1_posgc(ipip),em2_posgc(ipip),em3_posgc(ipip)] = fp_mrr_hk(pos_diffgc,iroi_seed,iroi_tar,0);
         end
         
     end
@@ -389,10 +401,11 @@ save(outname,'-v7.3')
 %save only evaluation parameters
 outname1 = sprintf('%smrr_%s.mat',DIROUT,params.logname);
 save(outname1,...
-    'mrr_mic','pr_mic','hk_mic',...
-    'mrr_mim','pr_mim','hk_mim',...
-    'mrr_aCoh','pr_aCoh','hk_aCoh',...
-    'mrr_iCoh','pr_iCoh','hk_iCoh',...
-    'mrr_absgc','pr_absgc','hk_absgc',...
-    'mrr_posgc','pr_posgc','hk_posgc','-v7.3')
+    'mrr_mic','pr_mic','hk_mic','em1_mic','em2_mic','em3_mic',...
+    'mrr_mim','pr_mim','hk_mim','em1_mim','em2_mim','em3_mim',...
+    'mrr_aCoh','pr_aCoh','hk_aCoh','em1_aCoh','em2_aCoh','em3_aCoh',...
+    'mrr_iCoh','pr_iCoh','hk_iCoh','em1_iCoh','em2_iCoh','em3_iCoh',...
+    'mrr_absgc','pr_absgc','hk_absgc','em1_absgc','em2_absgc','em3_absgc',...
+    'mrr_posgc','pr_posgc','hk_posgc','em1_posgc','em2_posgc','em3_posgc',...
+    '-v7.3')
 
