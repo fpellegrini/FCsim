@@ -5,7 +5,7 @@ DIRIN = './mim_sim3/';
 if ~exist(DIRIN);mkdir(DIRIN); end
 
 %%
-for iname = [5: 15]
+for iname = [1: 15]
     
     iname
     
@@ -46,12 +46,14 @@ for iname = [5: 15]
                 ifilt = 'e';
             case 15
                 ifilt = 'c';
+            case 16 
+                ifilt = 'cr';
         end
     end
     
     %%
     for iit= 1:nit
-        
+        tic
         try
             iit
             clearvars -except iInt iReg isnr iss ilag ifilt iit nit iname DIRIN
@@ -67,6 +69,8 @@ for iname = [5: 15]
                 MIM_ = MIM{ipip};
                 aCOH_ = aCOH{ipip};
                 iCOH_ = iCOH{ipip};
+                DIFFGC_ = DIFFGC{ipip}; 
+                
                 
                 
                 [mrr_mic(ipip), pr_mic(ipip),hk_mic(ipip),em1_mic(ipip),em2_mic(ipip),em3_mic(ipip)] = fp_mrr_hk(MIC_,iroi_seed,iroi_tar,1);
@@ -76,19 +80,31 @@ for iname = [5: 15]
                     [mrr_aCoh(ipip), pr_aCoh(ipip),hk_aCoh(ipip),em1_aCoh(ipip),em2_aCoh(ipip),em3_aCoh(ipip)] = fp_mrr_hk(aCOH_,iroi_seed,iroi_tar,1);
                     [mrr_iCoh(ipip), pr_iCoh(ipip),hk_iCoh(ipip),em1_iCoh(ipip),em2_iCoh(ipip),em3_iCoh(ipip)] = fp_mrr_hk(iCOH_,iroi_seed,iroi_tar,1);
                     
-                    %                 if ipip ~= 11 && ipip ~= 12  && ipip < 21
-                    %                     %absolute value of gc and only triu is considered. Metric neglects
-                    %                     %the direction of the interaction
-                    %                     [mrr_absgc(ipip), pr_absgc(ipip),hk_absgc(ipip),em1_absgc(ipip),em2_absgc(ipip),em3_absgc(ipip)] = fp_mrr_hk(abs(DIFFGC_),iroi_seed,iroi_tar,1);
-                    %
-                    %                     %only positive part of gc is submitted and the whole matrix is
-                    %                     %considered. Metric that is strongly influenced by the direction of
-                    %                     %the effect
-                    %                     clear pos_diffgc
-                    %                     pos_diffgc = DIFFGC_;
-                    %                     pos_diffgc(pos_diffgc< 0) = 0;
-                    %                     [mrr_posgc(ipip), pr_posgc(ipip),hk_posgc(ipip),em1_posgc(ipip),em2_posgc(ipip),em3_posgc(ipip)] = fp_mrr_hk(pos_diffgc,iroi_seed,iroi_tar,0);
-                    %                 end
+                    if ipip ~= 11 && ipip ~= 12  && ipip < 21
+                        %absolute value of gc and only triu is considered. Metric neglects
+                        %the direction of the interaction
+                        [mrr_absgc(ipip), pr_absgc(ipip),hk_absgc(ipip),...
+                            em1_absgc(ipip),em2_absgc(ipip),em3_absgc(ipip)] ...
+                            = fp_mrr_hk(abs(DIFFGC_),iroi_seed,iroi_tar,1);
+                        
+                        %only positive part of gc is submitted and the whole matrix is
+                        %considered. Metric that is strongly influenced by the direction of
+                        %the effect
+                        clear pos_diffgc
+                        pos_diffgc = DIFFGC_;
+                        pos_diffgc(pos_diffgc< 0) = 0;
+                        [mrr_posgc(ipip), pr_posgc(ipip),hk_posgc(ipip),...
+                            em1_posgc(ipip),em2_posgc(ipip),em3_posgc(ipip)]...
+                            = fp_mrr_hk(pos_diffgc,iroi_seed,iroi_tar,0);
+                        
+                        %wrong directions 
+                        clear pos_diffgc_w
+                        pos_diffgc_w = -DIFFGC_;
+                        pos_diffgc_w(pos_diffgc_w < 0) = 0;
+                        [mrr_posgc_w(ipip), pr_posgc_w(ipip),hk_posgc_w(ipip),...
+                            em1_posgc_w(ipip),em2_posgc_w(ipip),em3_posgc_w(ipip)]...
+                            = fp_mrr_hk(pos_diffgc_w,iroi_seed,iroi_tar,0);
+                    end
                     
                 end
             end
@@ -100,11 +116,13 @@ for iname = [5: 15]
                 'mrr_mim','pr_mim','hk_mim','em1_mim','em2_mim','em3_mim',...
                 'mrr_aCoh','pr_aCoh','hk_aCoh','em1_aCoh','em2_aCoh','em3_aCoh',...
                 'mrr_iCoh','pr_iCoh','hk_iCoh','em1_iCoh','em2_iCoh','em3_iCoh',...
-                'mrr_absgc','pr_absgc','hk_absgc',...
-                'mrr_posgc','pr_posgc','hk_posgc',...
+                'mrr_absgc','pr_absgc','hk_absgc','em1_absgc','em2_absgc','em3_absgc',...
+                'mrr_posgc','pr_posgc','hk_posgc','em1_posgc','em2_posgc','em3_posgc',...
+                'mrr_posgc_w','pr_posgc_w','hk_posgc_w','em1_posgc_w','em2_posgc_w','em3_posgc_w',...
                 '-v7.3')
             
             
+            toc
         end
     end
 end
