@@ -117,9 +117,10 @@ tic
 conn = data2sctrgcmim(signal_roi, fres, 20, 0,0, [], inds, {'MIC', 'MIM','COH'});
 toc
 %%
-MIM = zeros(nroi,nroi,126);
-MIC=zeros(nroi,nroi,126);
-iCOH = zeros(nroi, nroi, 126);
+nf = size(conn.MIM,1);
+MIM = zeros(nroi,nroi,nf);
+MIC=zeros(nroi,nroi,nf);
+iCOH = zeros(nroi, nroi, nf);
 
 iinds = 0;
 for iroi = 1:nroi
