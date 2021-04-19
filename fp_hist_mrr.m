@@ -17,7 +17,8 @@ name = {...
     'ip5_iss1';...
     'ip6_lag1';...
     'ip7_eloreta_reg';...
-    'ip7_champ'};
+    'ip7_champ';...
+    'ip7_champ_reg'};
 
 labs = {'MIC','MIM','Mean abscoh','mean icoh','absGC','posGC'};
 [cb] = cbrewer2('spectral', 11);
@@ -25,7 +26,7 @@ cb1 = cbrewer2('Set1',9);
 
 %%
 
-for iname = 2
+for iname = 16
     
     
     clearvars -except iname name DIRDATA DIRFIG labs cb cb1
@@ -66,6 +67,8 @@ for iname = 2
                 ifilt = 'e';
             case 15
                 ifilt = 'c';
+            case 16
+                ifilt = 'cr';
         end
     end
     
