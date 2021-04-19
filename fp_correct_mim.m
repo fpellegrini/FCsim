@@ -20,7 +20,7 @@ for iit = 1:nit
     %calculate MIM and MIC
     clear conn
     output = {'MIM','MIC','COH'};
-    conn = data2sctrgcmim(sig_s, fres, 20, 0,0, [], inds, output);        
+    conn = data2sctrgcmim(sig_s, fres, 20, 0,0, [], inds, output,0);        
     % extract measures out of the conn struct
     [MIM_s(:,:,iit), MIC_s(:,:,iit), ~, iCOH_s(:,:,iit), aCOH_s(:,:,iit)] = fp_unwrap_conn(conn,D.nroi,filt,PCA_inds);    
 end

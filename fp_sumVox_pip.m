@@ -13,7 +13,7 @@ for oroi = 1:nroi-1
         
         [inds, ~] = fp_npcs2inds(npcs);
         
-        conn = data2sctrgcmim(data, fres, 20, 0,0, [], inds, output);
+        conn = data2sctrgcmim(data, fres, 20, 0,0, [], inds, output,0);
         
         % extract measures out of the conn struct
         [mim, mic, ~,~,~] = fp_unwrap_conn(conn,nvoxroi(oroi)+nvoxroi(uroi),filt,[]);

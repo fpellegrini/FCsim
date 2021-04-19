@@ -1,4 +1,4 @@
-function conn = data2sctrgcmim(data, fres, nlags, cond, nboot, maxfreq, inds, output)
+function conn = data2sctrgcmim(data, fres, nlags, cond, nboot, maxfreq, inds, output, verbose)
 % Epoched time series data to spectral conditional time-reversed Granger causality
 %
 % (C) 2018 Stefan Haufe
@@ -77,6 +77,10 @@ if nargin < 8 || isempty(output)
   output = {'TRGC'};
 end
 
+if nargin < 9 || isempty(verbose)
+  verbose = 0;
+end
+
 if  nlags < 0
   if cond 
     [~,~,~, nlags] = tsdata_to_infocrit(data, -nlags, [], 0);
@@ -145,8 +149,10 @@ if abs(nboot) < 1 % no bootstrap
     %% loop over sender/receiver combinations to compute (time-reversed) GC 
     for iind = 1:ninds   
       if ~isequal(inds{iind}{1}, inds{iind}{2})
-        disp(['testing connection ' num2str(iind) '/' num2str(ninds) ': [' num2str(inds{iind}{1}) '] <-> [' num2str(inds{iind}{2}) '], conditional'])
- 
+        if verbose
+          disp(['testing connection ' num2str(iind) '/' num2str(ninds) ': [' num2str(inds{iind}{1}) '] <-> [' num2str(inds{iind}{2}) '], conditional'])
+        end
+        
         if ~isempty(intersect(output, {'MIM', 'MIC'}))
         %MIC and MIM
           [MIC(:, iind) , MIM(:, iind)] =  roi_mim2(COH, inds{iind}{1}, inds{iind}{2});    
@@ -176,8 +182,9 @@ if abs(nboot) < 1 % no bootstrap
     % loop over sender/receiver combinations to compute time-reversed GC 
     for iind = 1:ninds  
       if ~isequal(inds{iind}{1}, inds{iind}{2})
-        %disp(['testing connection ' num2str(iind) '/' num2str(ninds) ': [' num2str(inds{iind}{1}) '] <-> [' num2str(inds{iind}{2}) ']'])
-
+        if verbose
+          disp(['testing connection ' num2str(iind) '/' num2str(ninds) ': [' num2str(inds{iind}{1}) '] <-> [' num2str(inds{iind}{2}) ']'])
+        end
         %ind configuration 
         subset = [inds{iind}{1} inds{iind}{2}];
         nsubsetvars = length(subset);
@@ -279,7 +286,9 @@ else % bootstrap
       for iind = 1:ninds
         if ~isequal(inds{iind}{1}, inds{iind}{2})
 %           i3 = setdiff(setdiff(1:nchan, inds{iind}{1}), inds{iind}{2});
-          disp(['bootstrap run ' num2str(iboot) '/' num2str(nboot) ', testing connection ' num2str(iind) '/' num2str(ninds) ': [' num2str(inds{iind}{1}) '] <-> [' num2str(inds{iind}{2}) '], conditional'])
+          if verbose
+            disp(['bootstrap run ' num2str(iboot) '/' num2str(nboot) ', testing connection ' num2str(iind) '/' num2str(ninds) ': [' num2str(inds{iind}{1}) '] <-> [' num2str(inds{iind}{2}) '], conditional'])
+          end
           
           if ~isempty(intersect(output, {'MIM', 'MIC'}))
             %MIC and MIM
@@ -310,8 +319,10 @@ else % bootstrap
       % loop over sender/receiver combinations to compute time-reversed GC 
       for iind = 1:ninds 
         if ~isequal(inds{iind}{1}, inds{iind}{2})
-          disp(['bootstrap run ' num2str(iboot) '/' num2str(nboot) ', testing connection ' num2str(iind) '/' num2str(ninds) ': [' num2str(inds{iind}{1}) '] <-> [' num2str(inds{iind}{2}) ']'])
-
+          if verbose
+            disp(['bootstrap run ' num2str(iboot) '/' num2str(nboot) ', testing connection ' num2str(iind) '/' num2str(ninds) ': [' num2str(inds{iind}{1}) '] <-> [' num2str(inds{iind}{2}) ']'])
+          end
+          
           subset = [inds{iind}{1} inds{iind}{2}];
           nsubsetvars = length(subset);
           subinds = {1:length(inds{iind}{1}), length(inds{iind}{1}) + (1:length(inds{iind}{2}))};   

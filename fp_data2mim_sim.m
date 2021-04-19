@@ -278,7 +278,7 @@ for ipip = params.pips
         else
             output = {'MIM','MIC','TRGC','COH'};
         end
-        conn = data2sctrgcmim(signal_roi, fres, 20, 0,0, [], inds, output);
+        conn = data2sctrgcmim(signal_roi, fres, 20, 0,0, [], inds, output,0);
         
         % extract measures out of the conn struct
         [MIM_, MIC_, DIFFGC_, iCOH_, aCOH_] = fp_unwrap_conn(conn,numel(npcs),filt,PCA_inds);
