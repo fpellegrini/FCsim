@@ -72,18 +72,18 @@ else
         d2 = d2 - min(d2);
 
         d2_ = d2;
-        d2_ = d2_ ./ sum(d2_(:));
+        d2_ = d2_ ./ nansum(d2_(:));
         em1 = 1 - emd_hat_gd_metric_mex(d1, d2_, conndist_full);
 
         d2_ = d2;
         d2_(d2_ < prctile(d2_, 95)) = 0;
-        d2_ = d2_ ./ sum(d2_(:));
+        d2_ = d2_ ./ nansum(d2_(:));
         em2 = 1 - emd_hat_gd_metric_mex(d1, d2_, conndist_full);
 
         d2_ = d2;
         [so, ~] = sort(d2_, 'descend');
         d2_(d2_ < so(numel(iroi_seed))) = 0;
-        d2_ = d2_ ./ sum(d2_(:));
+        d2_ = d2_ ./ nansum(d2_(:));
         em3 = 1 - emd_hat_gd_metric_mex(d1, d2_, conndist_full);
         
     catch %that not the full simulation stops when compilation of mex files fail 

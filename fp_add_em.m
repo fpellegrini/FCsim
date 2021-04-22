@@ -5,7 +5,7 @@ DIRIN = './mim_sim3/';
 if ~exist(DIRIN);mkdir(DIRIN); end
 
 %%
-for iname = [1: 15]
+for iname = [2: 15]
     
     iname
     
@@ -52,9 +52,9 @@ for iname = [1: 15]
     end
     
     %%
-    for iit= 1:nit
+    for iit= 48:nit
         tic
-        try
+%         try
             iit
             clearvars -except iInt iReg isnr iss ilag ifilt iit nit iname DIRIN
             
@@ -69,7 +69,9 @@ for iname = [1: 15]
                 MIM_ = MIM{ipip};
                 aCOH_ = aCOH{ipip};
                 iCOH_ = iCOH{ipip};
-                DIFFGC_ = DIFFGC{ipip}; 
+                if ipip ~= 10 && ipip ~= 11 && ipip ~= 12  && ipip < 21
+                    DIFFGC_ = DIFFGC{ipip}; 
+                end
                 
                 
                 
@@ -123,6 +125,6 @@ for iname = [1: 15]
             
             
             toc
-        end
+%         end
     end
 end

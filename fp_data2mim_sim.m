@@ -252,7 +252,7 @@ for ipip = params.pips
             
         elseif ipip == 21 
             %sum of activity, then MIM 
-            signal_roi = cat(1,signal_roi, squeeze(sum(reshape(signal_source,ndim, nvoxroi(aroi),l_epoch,n_trials),2)));
+            signal_roi = cat(1,signal_roi, squeeze(mean(reshape(signal_source,ndim, nvoxroi(aroi),l_epoch,n_trials),2)));
             npcs(aroi) = 3;
         end
     end
