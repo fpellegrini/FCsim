@@ -341,17 +341,19 @@ for ipip = params.pips
         end
         
         if ipip ~= 9 && ipip < 21
-            to_save{ipip}.npcs = npcs;
-            to_save{ipip}.varex = var_explained;
-
-            nvoxroi_all = nvoxroi'*nvoxroi;
-            nvoxroi_all = nvoxroi_all(:);
-            corr_voxmim(ipip) = corr(nvoxroi_all,MIM_(:));
-            corr_voxmic(ipip) = corr(nvoxroi_all ,MIC_(:));
-            corr_voxicoh(ipip) = corr(nvoxroi_all,iCOH_(:));
-            corr_voxacoh(ipip) = corr(nvoxroi_all,aCOH_(:));
-            if ~strcmp(params.ifilt,'c') || ~strcmp(params.ifilt,'cr')
-                corr_voxnpcs(ipip) = corr(nvoxroi', npcs');
+            try
+                to_save{ipip}.npcs = npcs;
+                to_save{ipip}.varex = var_explained;
+                
+                nvoxroi_all = nvoxroi'*nvoxroi;
+                nvoxroi_all = nvoxroi_all(:);
+                corr_voxmim(ipip) = corr(nvoxroi_all,MIM_(:));
+                corr_voxmic(ipip) = corr(nvoxroi_all ,MIC_(:));
+                corr_voxicoh(ipip) = corr(nvoxroi_all,iCOH_(:));
+                corr_voxacoh(ipip) = corr(nvoxroi_all,aCOH_(:));
+                if ~strcmp(params.ifilt,'c') || ~strcmp(params.ifilt,'cr')
+                    corr_voxnpcs(ipip) = corr(nvoxroi', npcs');
+                end
             end
         end
         

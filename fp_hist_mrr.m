@@ -26,7 +26,7 @@ cb1 = cbrewer2('Set1',9);
 
 %%
 
-for iname = 1
+for iname = 4
     
     
     clearvars -except iname name DIRDATA DIRFIG labs cb cb1
