@@ -178,7 +178,7 @@ for ipip = params.pips
         %project sensor signal to voxels at the current roi (aroi)
         signal_source = A2{aroi}' * signal_sensor(:,:);
         
-        if ipip > 12 %zscoring pipelines 
+        if ipip > 12 && ipip < 21 %zscoring pipelines 
             signal_source = zscore(signal_source);
         end
         
@@ -208,12 +208,14 @@ for ipip = params.pips
                 var_explained=0.9;
             elseif ismember(ipip,[8 12 20])
                 %npcs are selected in a way that 99% of the variance is preserved
-                try
+                try 
                     npcs(aroi) = min(find(varex> 0.99));
-                    var_explained=0.99;
+                catch
+                    npcs(aroi) = 0; 
                 end
+                var_explained=0.99;
             elseif ipip <= 6
-                %fixed number of pcs 
+                %fixed number of pcs
                 npcs(aroi) = ipip;
                 try %may not be possible with the champaign filter
                     var_explained(aroi) = varex(npcs(aroi));
