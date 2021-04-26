@@ -5,7 +5,7 @@ DIRIN = './mim_sim3/';
 if ~exist(DIRIN);mkdir(DIRIN); end
 
 %%
-for iname = [5: 15]
+for iname = [6: 15]
     
     iname
     
@@ -52,7 +52,7 @@ for iname = [5: 15]
     end
     
     %%
-    for iit= 39:nit
+    for iit= 1:nit
         tic
         try
             iit

@@ -26,7 +26,7 @@ cb1 = cbrewer2('Set1',9);
 
 %%
 
-for iname = 4
+for iname = 6:15
     
     
     clearvars -except iname name DIRDATA DIRFIG labs cb cb1
@@ -91,42 +91,42 @@ for iname = 4
             MRR{2}(iit,:) = mrr_mic;
             MRR{3}(iit,:) = mrr_aCoh;
             MRR{4}(iit,:) = mrr_iCoh;
-            MRR{5}(iit,:) = mrr_absgc;
-            MRR{6}(iit,:) = mrr_posgc;
-            MRR{7}(iit,:) = mrr_posgc_w;
+%             MRR{5}(iit,:) = mrr_absgc;
+%             MRR{6}(iit,:) = mrr_posgc;
+%             MRR{7}(iit,:) = mrr_posgc_w;
             
             PR{1}(iit,:) = pr_mim;
             PR{2}(iit,:) = pr_mic;
             PR{3}(iit,:) = pr_aCoh;
             PR{4}(iit,:) = pr_iCoh;
-            PR{5}(iit,:) = pr_absgc;
-            PR{6}(iit,:) = pr_posgc;
-            PR{7}(iit,:) = pr_posgc_w;
+%             PR{5}(iit,:) = pr_absgc;
+%             PR{6}(iit,:) = pr_posgc;
+%             PR{7}(iit,:) = pr_posgc_w;
             
             EM1{1}(iit,:) = em1_mim;
             EM1{2}(iit,:) = em1_mic;
             EM1{3}(iit,:) = em1_aCoh;
             EM1{4}(iit,:) = em1_iCoh;
-            EM1{5}(iit,:) = em1_absgc;
-            EM1{6}(iit,:) = em1_posgc;
-            EM1{7}(iit,:) = em1_posgc_w;
+%             EM1{5}(iit,:) = em1_absgc;
+%             EM1{6}(iit,:) = em1_posgc;
+%             EM1{7}(iit,:) = em1_posgc_w;
              
             EM2{1}(iit,:) = em2_mim;
             EM2{2}(iit,:) = em2_mic;
             EM2{3}(iit,:) = em2_aCoh;
             EM2{4}(iit,:) = em2_iCoh;
-            EM2{5}(iit,:) = em2_absgc;
-            EM2{6}(iit,:) = em2_posgc;
-            EM2{7}(iit,:) = em2_posgc_w;
+%             EM2{5}(iit,:) = em2_absgc;
+%             EM2{6}(iit,:) = em2_posgc;
+%             EM2{7}(iit,:) = em2_posgc_w;
             
                         
             EM3{1}(iit,:) = em3_mim;
             EM3{2}(iit,:) = em3_mic;
             EM3{3}(iit,:) = em3_aCoh;
             EM3{4}(iit,:) = em3_iCoh;
-            EM3{5}(iit,:) = em3_absgc;
-            EM3{6}(iit,:) = em3_posgc;
-            EM3{7}(iit,:) = em3_posgc_w;
+%             EM3{5}(iit,:) = em3_absgc;
+%             EM3{6}(iit,:) = em3_posgc;
+%             EM3{7}(iit,:) = em3_posgc_w;
             
             
             
@@ -135,7 +135,7 @@ for iname = 4
         end
     end
     
-    for ii = 1:6
+    for ii = 1:4
         MRR{ii}(a,:) = [];
         PR{ii}(a,:) = [];
     end
