@@ -1,7 +1,5 @@
 function reg_param = fp_champ_crossval(signal_sensor,leadfield,nfold)
 
-tic
-
 [n_sensors, n_voxels,n_dims] = size(leadfield);
 
 regs = logspace(-2,0,15) * mean(diag(cov(signal_sensor(:,:)')));
@@ -39,5 +37,3 @@ for ifold = 1:nfold
 end
 
 reg_param = regs(find(mean(mrsq,2)==min(mean(mrsq,2))));
-
-toc

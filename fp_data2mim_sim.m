@@ -208,7 +208,7 @@ for ipip = params.pips
                 var_explained=0.9;
             elseif ismember(ipip,[8 12 20])
                 %npcs are selected in a way that 99% of the variance is preserved
-                try 
+                try %might be empty in case of the cr filter
                     npcs(aroi) = min(find(varex> 0.99));
                 catch
                     npcs(aroi) = 0; 
@@ -228,12 +228,16 @@ for ipip = params.pips
             
             if strcmp(params.ifilt,'c') || strcmp(params.ifilt,'cr') %champaign filter 
                 %sort out rois with zero activity
-                try
-                    %bring signal_roi to the shape of npcs x l_epoch x n_trials
-                    signal_roi = cat(1,signal_roi,reshape((signal_roi_(:,1:npcs(aroi)))',[],l_epoch,n_trials));
-                    active_rois = [active_rois aroi];
-                catch
+                if npcs(aroi) == 0
                     empty_rois = [empty_rois aroi];
+                else
+                    try
+                        %bring signal_roi to the shape of npcs x l_epoch x n_trials
+                        signal_roi = cat(1,signal_roi,reshape((signal_roi_(:,1:npcs(aroi)))',[],l_epoch,n_trials));
+                        active_rois = [active_rois aroi];
+                    catch
+                        empty_rois = [empty_rois aroi];
+                    end
                 end
                 
             else
