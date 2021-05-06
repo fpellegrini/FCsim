@@ -5,7 +5,7 @@ nit = 50;
 
 %% true MIM and MIC
 output = {'MIM','MIC','COH'};
-conn = data2sctrgcmim(signal_roi, fres, 20, 0,0, [], inds, output);
+conn = data2sctrgcmim(signal_roi, fres, 30, 0,0, [], inds, output);
 % extract measures out of the conn struct
 [MIM_t, MIC_t, ~, iCOH_t, aCOH_t] = fp_unwrap_conn(conn,D.nroi,filt,PCA_inds);
 
@@ -22,7 +22,7 @@ for iit = 1:nit
     output = {'MIM','MIC','COH'};
     conn = data2sctrgcmim(sig_s, fres, 20, 0,0, [], inds, output,0);        
     % extract measures out of the conn struct
-    [MIM_s(:,:,iit), MIC_s(:,:,iit), ~, iCOH_s(:,:,iit), aCOH_s(:,:,iit)] = fp_unwrap_conn(conn,D.nroi,filt,PCA_inds);    
+    [MIM_s(:,:,iit), MIC_s(:,:,iit), ~, iCOH_s(:,:,iit), aCOH_s(:,:,iit)] = fp_unwrap_conn(conn,D.nroi,filt,PCA_inds);  
 end
 
 %% Normalization
