@@ -49,9 +49,9 @@ end
 
 %set random small or large lag
 if params.ilag == 1
-    lag = randi([0, 20],params.iInt*params.iReg,1);
+    lag = randi([1, 5],params.iInt*params.iReg,1);
 else
-    lag = randi([20, 80],params.iInt*params.iReg,1);
+    lag = randi([6, 20],params.iInt*params.iReg,1);
 end
 
 %% indices of signal and noise 
