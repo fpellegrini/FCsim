@@ -82,7 +82,7 @@ else
 
         d2_ = d2;
         [so, ~] = sort(d2_, 'descend');
-        d2_(d2_ < so(numel(iroi_seed))) = 0;
+        d2_(d2_ < so(2*numel(iroi_seed))) = 0;
         d2_ = d2_ ./ nansum(d2_(:));
         em3 = 1 - emd_hat_gd_metric_mex(d1, d2_, conndist_full);
         
