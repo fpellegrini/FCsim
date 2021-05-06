@@ -74,6 +74,8 @@ else
     Y = quartiles;
 end
 
+Y(end+1) = mean(X); 
+
 % raindrops
 h{2} = scatter(X, jit - 0.5);
 %h{2} = scatter(X, jit - b/2);
@@ -92,12 +94,13 @@ if box_on
     
     % mean line    
     h{4} = line([Y(3) Y(3)], [b/10-(wdth*0.5) b/10+(wdth*0.5)], 'col', 'k', 'LineWidth', 3);
+    h{5} = line([Y(end) Y(end)], [b/10-(wdth*0.5) b/10+(wdth*0.5)], 'col', 'r', 'LineWidth', 3);
     %h{4} = line([Y(3) Y(3)], [-b/2-(wdth*0.5) -b/2+(wdth*0.5)], 'col', 'r', 'LineWidth', 2);
     
     % whiskers
     if iqr ~= 0 
-        h{5} = line([Y(2) Y(5)], [b/10 b/10], 'col',g, 'LineWidth', 2);
-        h{6} = line([Y(1) Y(4)], [b/10 b/10], 'col',g, 'LineWidth', 2);
+        h{6} = line([Y(2) Y(5)], [b/10 b/10], 'col',g, 'LineWidth', 2);
+        h{7} = line([Y(1) Y(4)], [b/10 b/10], 'col',g, 'LineWidth', 2);
         %h{5} = line([Y(2) Y(5)], [-b/2 -b/2], 'col', 'k', 'LineWidth', 2);
         %h{6} = line([Y(1) Y(4)], [-b/2 -b/2], 'col', 'k', 'LineWidth', 2);
     end
