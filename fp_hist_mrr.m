@@ -26,7 +26,7 @@ cb1 = cbrewer2('Set1',9);
 
 %%
 
-for iname = 6:15
+for iname = 16
     
     
     clearvars -except iname name DIRDATA DIRFIG labs cb cb1
@@ -91,17 +91,17 @@ for iname = 6:15
             MRR{2}(iit,:) = mrr_mic;
             MRR{3}(iit,:) = mrr_aCoh;
             MRR{4}(iit,:) = mrr_iCoh;
-%             MRR{5}(iit,:) = mrr_absgc;
-%             MRR{6}(iit,:) = mrr_posgc;
-%             MRR{7}(iit,:) = mrr_posgc_w;
+            MRR{5}(iit,:) = mrr_absgc;
+            MRR{6}(iit,:) = mrr_posgc;
+            MRR{7}(iit,:) = mrr_posgc_w;
             
             PR{1}(iit,:) = pr_mim;
             PR{2}(iit,:) = pr_mic;
             PR{3}(iit,:) = pr_aCoh;
             PR{4}(iit,:) = pr_iCoh;
-%             PR{5}(iit,:) = pr_absgc;
-%             PR{6}(iit,:) = pr_posgc;
-%             PR{7}(iit,:) = pr_posgc_w;
+            PR{5}(iit,:) = pr_absgc;
+            PR{6}(iit,:) = pr_posgc;
+            PR{7}(iit,:) = pr_posgc_w;
             
             EM1{1}(iit,:) = em1_mim;
             EM1{2}(iit,:) = em1_mic;
@@ -142,14 +142,14 @@ for iname = 6:15
     
     %%
     
-    for im = 1:5 %measures: MRR, PR, 3 EM measures 
+    for im = 1:2 %measures: MRR, PR, 3 EM measures 
         
         for icon = 1:length(MRR) %MIC, MIM, aCoh, iCoh, absgc,posgc,posgc_w 
 
 
             %%
             figure
-            if iname == 15
+            if iname == 15 || iname == 16
                 figone(15,25)
             else
                 figone(15,50) 
@@ -176,7 +176,7 @@ for iname = 6:15
                 npips = 9;
             end
 
-            if iname == 15 %champ
+            if iname == 15 || iname == 16 %champ
                 pips = [1:3 8];
                 npips = 4;
             end
@@ -227,7 +227,7 @@ for iname = 6:15
                     cl = [0.2 0.2 0.2];
                 end
 
-                if iname == 15 && ipip == 8 
+                if (iname == 15 || iname == 16) && ipip == 8 
                     ipip1 = 4;
                 elseif iname == 1 && icon > 2 && icon < 5 && ipip > 9
                     ipip1 = ipip-1;
@@ -260,7 +260,7 @@ for iname = 6:15
 
                 xlabel([labs{icon} ' ' imlab1])
 
-                if iname == 15 && ipip == 4
+                if (iname == 15 || iname == 16) && ipip == 4
                     break
                 end
 
