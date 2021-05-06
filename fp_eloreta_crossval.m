@@ -2,10 +2,12 @@ function reg_param = fp_eloreta_crossval(signal_sensor,leadfield,nfold)
 
 [n_sensors, n_voxels,n_dims] = size(leadfield);
 %logarithmic spacing between 0.001 and 0.5
-a = [0.001 0.5];
-al = log10(a);
-bl = linspace(al(1),al(2),10);
-regs = 10.^bl;
+% a = [0.001 0.5];
+% al = log10(a);
+% bl = linspace(al(1),al(2),10);
+% regs = 10.^bl;
+regs = logspace(-2,0,15) * mean(diag(cov(signal_sensor(:,:)')));
+regs(end) = []; 
 
 signal_sensor1 = reshape(signal_sensor,n_sensors,[]);
 
