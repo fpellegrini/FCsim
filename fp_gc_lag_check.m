@@ -1,6 +1,6 @@
 function fp_gc_lag_check 
 
-fs= 100; 
+fs= 500; 
 fres = fs; 
 frqs = sfreqs(fres, fs); % freqs in Hz
 
@@ -46,21 +46,21 @@ for ilag = lags
 end 
 %%
 
-for igc = 1:3
+for igc = 3
     figure
-    figone(30,50)
+%     figone(30,50)
     for ilag = 1:numel(lags)
         sp(ilag) = subplot(2,numel(lags)/2,ilag);
         
-        plot(frqs, squeeze(gc(ilag, :,:,igc))')
+        plot(frqs(frqs<45), squeeze(gc(ilag, :,frqs<45,igc))')
         xlabel('Freqs')
         ylabel('GC')
         title(['Lag ' num2str(lags(ilag))])
         
         rectX = iband;
         rectY = ylim([sp(ilag)]);
-%         pch = patch(sp(ilag), rectX([1 2 2 1]) , rectY([1 1 2 2]), 'r', ...
-%             'EdgeColor', 'none', 'FaceAlpha', 0.1);
+        pch = patch(sp(ilag), rectX([1 2 2 1]) , rectY([1 1 2 2]), 'r', ...
+            'EdgeColor', 'none', 'FaceAlpha', 0.1);
         
         legend('morder 10','morder 20','morder 30','morder 40','morder 50','morder 60','morder 70','morder 80','alpha')
 
