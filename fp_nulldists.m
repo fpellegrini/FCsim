@@ -6,6 +6,8 @@ for iit = 1:50
     a = randperm(68,2);
     iroi_seed= a(1);
     iroi_tar = a(2);
+    cc(a(1),a(2)) = 10;
+    cc(a(2),a(1)) = 10;
     [mrr(iit), pr(iit),hk(iit),em1(iit),em2(iit),em3(iit)] = fp_mrr_hk(cc,iroi_seed,iroi_tar,1);
     
 end
@@ -18,42 +20,42 @@ subplot(2,3,1)
 view([-90 -90]);
 set(gca, 'Xdir', 'reverse');
 set(gca, 'XLim', [0 1]);
-title('Null distribution MRR')
+title('Perfect skill MRR')
 
 subplot(2,3,2)
 [h, u] = fp_raincloud_plot(pr, [0 0 1], 1,0.2, 'ks');
 view([-90 -90]);
 set(gca, 'Xdir', 'reverse');
 set(gca, 'XLim', [0 1]);
-title('Null distribution PR')
+title('Perfect skill PR')
 
 subplot(2,3,3)
 [h, u] = fp_raincloud_plot(hk, [0 0 1], 1,0.2, 'ks');
 view([-90 -90]);
 set(gca, 'Xdir', 'reverse');
 set(gca, 'XLim', [0 1]);
-title('Null distribution HK')
+title('Perfect skill HK')
 
 subplot(2,3,4)
 [h, u] = fp_raincloud_plot(em1, [0 0 1], 1,0.2, 'ks');
 view([-90 -90]);
 set(gca, 'Xdir', 'reverse');
 set(gca, 'XLim', [0 1]);
-title('Null distribution (1-EM1)')
+title('Perfect skill (1-EM1)')
 
 subplot(2,3,5)
 [h, u] = fp_raincloud_plot(em2, [0 0 1], 1,0.2, 'ks');
 view([-90 -90]);
 set(gca, 'Xdir', 'reverse');
 set(gca, 'XLim', [0 1]);
-title('Null distribution (1-EM2)')
+title('Perfect skill (1-EM2)')
 
 subplot(2,3,6)
 [h, u] = fp_raincloud_plot(em3, [0 0 1], 1,0.2, 'ks');
 view([-90 -90]);
 set(gca, 'Xdir', 'reverse');
 set(gca, 'XLim', [0 1]);
-title('Null distribution (1-EM3)')
+title('Perfect skill (1-EM3)')
 
 %%
 

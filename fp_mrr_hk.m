@@ -76,7 +76,7 @@ else
         em1 = 1 - emd_hat_gd_metric_mex(d1, d2_, conndist_full);
 
         d2_ = d2;
-        d2_(d2_ < prctile(d2_, 95)) = 0;
+        d2_(d2_ < prctile(d2_, 99.9)) = 0;
         d2_ = d2_ ./ nansum(d2_(:));
         em2 = 1 - emd_hat_gd_metric_mex(d1, d2_, conndist_full);
 
