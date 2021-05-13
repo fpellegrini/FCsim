@@ -1,5 +1,5 @@
-DIRDATA = './mim_sim3/';
-DIRFIG = './figures/mimsim_ana/mim_sim3/';
+DIRDATA = './mim_sim4/';
+DIRFIG = './figures/mimsim_ana/mim_sim4/';
 if ~exist(DIRFIG); mkdir(DIRFIG); end
 
 name = {...
@@ -26,7 +26,7 @@ cb1 = cbrewer2('Set1',9);
 
 %%
 
-for iname = 16
+for iname = 1
     
     
     clearvars -except iname name DIRDATA DIRFIG labs cb cb1
@@ -103,27 +103,27 @@ for iname = 16
             PR{6}(iit,:) = pr_posgc;
             PR{7}(iit,:) = pr_posgc_w;
             
-            EM1{1}(iit,:) = em1_mim;
-            EM1{2}(iit,:) = em1_mic;
-            EM1{3}(iit,:) = em1_aCoh;
-            EM1{4}(iit,:) = em1_iCoh;
+%             EM1{1}(iit,:) = em1_mim;
+%             EM1{2}(iit,:) = em1_mic;
+%             EM1{3}(iit,:) = em1_aCoh;
+%             EM1{4}(iit,:) = em1_iCoh;
 %             EM1{5}(iit,:) = em1_absgc;
 %             EM1{6}(iit,:) = em1_posgc;
 %             EM1{7}(iit,:) = em1_posgc_w;
              
-            EM2{1}(iit,:) = em2_mim;
-            EM2{2}(iit,:) = em2_mic;
-            EM2{3}(iit,:) = em2_aCoh;
-            EM2{4}(iit,:) = em2_iCoh;
+%             EM2{1}(iit,:) = em2_mim;
+%             EM2{2}(iit,:) = em2_mic;
+%             EM2{3}(iit,:) = em2_aCoh;
+%             EM2{4}(iit,:) = em2_iCoh;
 %             EM2{5}(iit,:) = em2_absgc;
 %             EM2{6}(iit,:) = em2_posgc;
 %             EM2{7}(iit,:) = em2_posgc_w;
             
                         
-            EM3{1}(iit,:) = em3_mim;
-            EM3{2}(iit,:) = em3_mic;
-            EM3{3}(iit,:) = em3_aCoh;
-            EM3{4}(iit,:) = em3_iCoh;
+%             EM3{1}(iit,:) = em3_mim;
+%             EM3{2}(iit,:) = em3_mic;
+%             EM3{3}(iit,:) = em3_aCoh;
+%             EM3{4}(iit,:) = em3_iCoh;
 %             EM3{5}(iit,:) = em3_absgc;
 %             EM3{6}(iit,:) = em3_posgc;
 %             EM3{7}(iit,:) = em3_posgc_w;
