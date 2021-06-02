@@ -88,7 +88,7 @@ for ilag = 1:5 %in ms: 2,4,6,8,10
     %% Pipeline 1
     
     errorpipeline = [];
-    for ipip = 1 %fixed 1 pc
+    for ipip = 3 %fixed 1 pc
         
         fprintf(['Testing pipeline ' num2str(ipip) '\n'])
         try
