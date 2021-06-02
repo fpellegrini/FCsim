@@ -16,11 +16,11 @@ name = {...
     'ip5_iss075';...
     'ip5_iss1';...
     'ip6_lag1';...
-    'ip7_eloreta_reg';...
+    'ip7_eloreta_reg';...%14
     'ip7_champ';...
     'ip7_champ_reg'};
 
-labs = {'MIC','MIM','Mean abscoh','mean icoh','absGC','posGC','posGCw'};
+labs = {'MIM','MIC','Mean abscoh','mean icoh','absGC','posGC','posGCw'};
 [cb] = cbrewer2('spectral', 11);
 cb1 = cbrewer2('Set1',9);
 
@@ -101,32 +101,15 @@ for iname = 1
             PR{4}(iit,:) = pr_iCoh;
             PR{5}(iit,:) = pr_absgc;
             PR{6}(iit,:) = pr_posgc;
-            PR{7}(iit,:) = pr_posgc_w;
-            
-%             EM1{1}(iit,:) = em1_mim;
-%             EM1{2}(iit,:) = em1_mic;
-%             EM1{3}(iit,:) = em1_aCoh;
-%             EM1{4}(iit,:) = em1_iCoh;
-%             EM1{5}(iit,:) = em1_absgc;
-%             EM1{6}(iit,:) = em1_posgc;
-%             EM1{7}(iit,:) = em1_posgc_w;
-             
-%             EM2{1}(iit,:) = em2_mim;
-%             EM2{2}(iit,:) = em2_mic;
-%             EM2{3}(iit,:) = em2_aCoh;
-%             EM2{4}(iit,:) = em2_iCoh;
-%             EM2{5}(iit,:) = em2_absgc;
-%             EM2{6}(iit,:) = em2_posgc;
-%             EM2{7}(iit,:) = em2_posgc_w;
-            
+            PR{7}(iit,:) = pr_posgc_w;            
                         
-%             EM3{1}(iit,:) = em3_mim;
-%             EM3{2}(iit,:) = em3_mic;
-%             EM3{3}(iit,:) = em3_aCoh;
-%             EM3{4}(iit,:) = em3_iCoh;
-%             EM3{5}(iit,:) = em3_absgc;
-%             EM3{6}(iit,:) = em3_posgc;
-%             EM3{7}(iit,:) = em3_posgc_w;
+            EM3{1}(iit,:) = em3_mim;
+            EM3{2}(iit,:) = em3_mic;
+            EM3{3}(iit,:) = em3_aCoh;
+            EM3{4}(iit,:) = em3_iCoh;
+            EM3{5}(iit,:) = em3_absgc;
+            EM3{6}(iit,:) = em3_posgc;
+            EM3{7}(iit,:) = em3_posgc_w;
             
             
             
@@ -135,16 +118,17 @@ for iname = 1
         end
     end
     
-    for ii = 1:4
+    for ii = 1:length(MRR)
         MRR{ii}(a,:) = [];
         PR{ii}(a,:) = [];
+        EM3{ii}(a,:) = [];
     end
     
     %%
     
-    for im = 1:2 %measures: MRR, PR, 3 EM measures 
+    for im = 3 %measures: MRR, PR, EM3
         
-        for icon = 1:length(MRR) %MIC, MIM, aCoh, iCoh, absgc,posgc,posgc_w 
+        for icon = 1:length(MRR) %MIM, MIC, aCoh, iCoh, absgc,posgc,posgc_w 
 
 
             %%
@@ -204,27 +188,19 @@ for iname = 1
                         imlab = 'PR';
                         imlab1 = 'PR';
                     case 3
-                        data1 = EM1{icon}(:,ipip);
-                        imlab = 'EM1';
-                        imlab1 = '1-EM1';
-                    case 4
-                        data1 = EM2{icon}(:,ipip);
-                        imlab = 'EM2';
-                        imlab1 = '1-EM2';
-                    case 5
                         data1 = EM3{icon}(:,ipip);
-                        imlab = 'EM3';
-                        imlab1 = '1-EM3';
+                        imlab = 'EM';
+                        imlab1 = '1-EM';
                 end 
 
                 if ipip<=np
-                    cl = [0.5 0.5 1];%cb(np+1-ipip,:);
+                    cl = [0.8 0.7 0.6];
                 elseif ipip <np+3 || ipip == 11 || ipip == 12
-                    cl = [1 0.5 0.5];%cb(ipip+2,:);
+                    cl = [0.8 0.4 0.5];
                 elseif ipip == 10
-                        cl = [0.5 1 0.5];
+                        cl = [0.4 0.6 0.7];
                 elseif ipip == 9
-                    cl = [0.2 0.2 0.2];
+                     cl = [0.8 0.8 0.8];
                 end
 
                 if (iname == 15 || iname == 16) && ipip == 8 
@@ -244,13 +220,13 @@ for iname = 1
                 if iname == 1
                     
                     xtitles = {'1PC','2PCs', '3PCs','4PCs','5PCs','6PCs','90%',...
-                        '99%','baseline','sumVox','90% corrected','99% corrected'};
+                        '99%','TrueVox','sumVox','90% corrected','99% corrected'};
 
 
 %                 elseif iname == 15 
 %                     xtitles = {'1PC','2PCs', '3PCs','99%'};
                 else 
-                    xtitles = {'1PC','2PCs', '3PCs','4PCs','5PCs','6PCs','90%', '99%','baseline'};
+                    xtitles = {'1PC','2PCs', '3PCs','4PCs','5PCs','6PCs','90%', '99%','TrueVox'};
                 end
 
                 title(xtitles(ipip))
@@ -266,7 +242,6 @@ for iname = 1
 
             end
 
-            %                 xlim([0 103])
             ylim([-0.75 2])
 
             outname = [DIRFIG name{iname} '_' imlab '_' labs{icon}];
@@ -286,11 +261,7 @@ for iname = 1
                 figure
                 figone(15,50)
 
-                if icon <5
-                    npips = size(MRR{1},2)-12;
-                else 
-                    npips = size(MRR{1},2)-14;
-                end
+                npips = size(MRR{1},2)-12;
 
                 for ipip = 1:npips
 
@@ -298,9 +269,9 @@ for iname = 1
                     subplot(1,npips,ipip)
 
                     if ipip<=np
-                        cl = [0.5 0.5 1];%cb(np+1-ipip,:);
+                        cl = [0.8 0.7 0.6];
                     elseif ipip <np+3 || ipip == 11 || ipip == 12
-                        cl = [1 0.5 0.5];%cb(ipip+2,:);
+                        cl = [0.8 0.4 0.5];
                     elseif ipip == 10
                         cl = [0.8 0.8 0.5];
                     elseif ipip == 9
@@ -317,14 +288,6 @@ for iname = 1
                             imlab = 'PR';
                             imlab1 = 'PR';
                         case 3
-                            data1 = EM1{icon}(:,ipip+12);
-                            imlab = 'EM1';
-                            imlab1 = '1-EM1';
-                        case 4
-                            data1 = EM2{icon}(:,ipip+12);
-                            imlab = 'EM2';
-                            imlab1 = '1-EM2';
-                        case 5
                             data1 = EM3{icon}(:,ipip+12);
                             imlab = 'EM3';
                             imlab1 = '1-EM3';
@@ -337,7 +300,7 @@ for iname = 1
 
                     %                     if icon <3
                     xtitles = {'1PC-zs','2PCs-zs', '3PCs-zs','4PCs-zs','5PCs-zs','6PCs-zs','90%-zs',...
-                        '99%-zs','sum+MIM','central voxel'};
+                        '99%-zs','sum+MIM','TrueVox'};
                     %                     else
                     %                         xtitles = {'1PC','2PCs', '3PCs','4PCs','5PCs','6PCs','90%',...
                     %                             '99%'};
@@ -352,8 +315,7 @@ for iname = 1
                     xlabel([labs{icon} ' ' imlab1])
 
                 end
-
-                %                 xlim([0 103])
+                
                 ylim([-0.75 2])
 
                 outname = [DIRFIG name{iname} '_' imlab '2_' labs{icon}];
