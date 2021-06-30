@@ -6,8 +6,8 @@ if ~exist(DIROUT);mkdir(DIROUT); end
 DIROUT1 = '/home/bbci/data/haufe/Franziska/data/mim_save4/';
 if ~exist(DIROUT1);mkdir(DIROUT1); end
 
-%define which pipelines run with this configuration
-if params.ip == 1
+%define which pipelines run with this configforuration
+if params.ip == 1 %default version 
     params.pips = 1:22;
 elseif strcmp(params.ifilt,'c')|| strcmp(params.ifilt,'cr') %with champaign
     params.pips = [1:3 8];
@@ -99,7 +99,7 @@ if strcmp(params.ifilt,'e') %eloreta
     A = squeeze(mkfilt_eloreta_v2(L_backward,reg_param));
     A = permute(A,[1, 3, 2]);
     
-elseif strcmp(params.ifilt,'l') %lcmv
+elseif strcmp(params.ifilt,'l') %lcmv (default)
     cCS = cov(signal_sensor(:,:)');
     reg = 0.05*trace(cCS)/length(cCS);
     Cr = cCS + reg*eye(size(cCS,1));
@@ -135,7 +135,7 @@ t.filter = toc;
 %% Loop over different pipelines
 
 errorpipeline = [];
-for ipip = params.pips
+for ipip = params.pips %most successful: ipip 1 to 3
     
     %1 to 6: fixed
     %7: 90%
