@@ -1,4 +1,4 @@
-function [nInteractions, nRegionInts,SNR,noise_mix,nlag,filtertype] = fp_get_params(ip)
+function [nInteractions, nRegionInts,SNR,noise_mix,nlag,filtertype, dimred] = fp_get_params(ip)
 
 if ip == 1
     %defaults
@@ -8,6 +8,7 @@ if ip == 1
     noise_mix = 0.5;
     nlag = 2;
     filtertype= {'l'}; %lcmv
+    dimred = 'p'; %pca
     
 elseif ip == 2
     %vary nInteractions
@@ -17,6 +18,7 @@ elseif ip == 2
     noise_mix = 0.5;
     nlag = 2;
     filtertype= {'l'}; %lcmv
+    dimred = 'p';
     
 elseif ip == 3
     %vary nRegionInts
@@ -26,6 +28,7 @@ elseif ip == 3
     noise_mix = 0.5;
     nlag = 2;
     filtertype= {'l'}; %lcmv
+    dimred = 'p';
     
 elseif ip == 4
     %vary SNR
@@ -35,6 +38,7 @@ elseif ip == 4
     noise_mix = 0.5;
     nlag = 2;
     filtertype= {'l'}; %lcmv
+    dimred = 'p';
     
 elseif ip == 5
     %vary noise_mix
@@ -44,6 +48,7 @@ elseif ip == 5
     noise_mix = [0 0.25 0.75 1];
     nlag = 2;
     filtertype= {'l'}; %lcmv
+    dimred = 'p';
     
 elseif ip == 6
     %vary lag size
@@ -53,6 +58,7 @@ elseif ip == 6
     noise_mix = 0.5;
     nlag = 1; %small (0 to 5 samples (=1)) or large (5 to 20 samples (=2))
     filtertype= {'l'}; %lcmv
+    dimred = 'p';
     
 elseif ip == 7
     %vary filter
@@ -62,5 +68,16 @@ elseif ip == 7
     noise_mix = 0.5;
     nlag = 2;
     filtertype= {'e','c','cr'};
+    dimred = 'p';
+    
+elseif ip == 8 
+    %ssd instead of pca
+    nInteractions = 2;
+    nRegionInts = 1;
+    SNR = 0.7;
+    noise_mix = 0.5;
+    nlag = 2;
+    filtertype= {'l'};
+    dimred = 's'; %ssd 
     
 end
