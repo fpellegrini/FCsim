@@ -11,7 +11,9 @@ if params.ip == 1 %default version
     params.pips = 1:22;
 elseif strcmp(params.ifilt,'c')|| strcmp(params.ifilt,'cr') %with champaign
     params.pips = [1:3 8];
-else % run only fixed, 90% and 99% pipelines
+elseif params.ip == 8 
+    params.pips = 1:6;
+else % run only fixed, 90% and 99% pipelines and baseline
     params.pips = 1:9;
 end
 
@@ -194,38 +196,53 @@ for ipip = params.pips %most successful: ipip 1 to 3
             
             if ~(ipip == 9) && ~(ipip == 10) && ipip < 21
                 
-                %do PCA
-                clear signal_roi_ S
-                [signal_roi_,S,~] = svd(double(signal_source(s_,:))','econ');
+                if strcmp(params.dimred,'p')
+                    %do PCA
+                    clear signal_roi_ S
+                    [signal_roi_,S,~] = svd(double(signal_source(s_,:))','econ');
+                    
+                elseif strcmp(params.dimred,'s')
+                    %do SSD                    
+                    [W, ~, ~, ~] = ssd(double(signal_source(s_,:))', [8 13; 2 40; 7 14], fres, [], []);
+                    
+                    npcs(aroi) = ipip; %fixed number of pcs
+                    signal_roi_ = double(signal_source(s_,:))' * W(:, 1:npcs(aroi));
+     
+                else
+                    error('Dimred has to be either p or s.')
+                end
                 
-                % variance explained
-                vx_ = cumsum(diag(S).^2)./sum(diag(S).^2);
-                invx = 1:min(length(vx_), n_sensors);
-                varex = vx_(invx);
-                
-                %save npcs and variance explained
-                if ismember(ipip,[7 11 19])
-                    %npcs are selected in a way that 90% of the variance is preserved
-                    npcs(aroi) = min(find(varex> 0.9));
-                    var_explained=0.9;
-                elseif ismember(ipip,[8 12 20])
-                    %npcs are selected in a way that 99% of the variance is preserved
-                    try %might be empty in case of the cr filter
-                        npcs(aroi) = min(find(varex> 0.99));
-                    catch
-                        npcs(aroi) = 0;
-                    end
-                    var_explained=0.99;
-                elseif ipip <= 6
-                    %fixed number of pcs
-                    npcs(aroi) = ipip;
-                    try %may not be possible with the champaign filter
+                if params.ip ~= 8
+                    
+                    % variance explained
+                    vx_ = cumsum(diag(S).^2)./sum(diag(S).^2);
+                    invx = 1:min(length(vx_), n_sensors);
+                    varex = vx_(invx);
+
+                    %save npcs and variance explained
+                    if ismember(ipip,[7 11 19])
+                        %npcs are selected in a way that 90% of the variance is preserved
+                        npcs(aroi) = min(find(varex> 0.9));
+                        var_explained=0.9;
+                    elseif ismember(ipip,[8 12 20])
+                        %npcs are selected in a way that 99% of the variance is preserved
+                        try %might be empty in case of the cr filter
+                            npcs(aroi) = min(find(varex> 0.99));
+                        catch
+                            npcs(aroi) = 0;
+                        end
+                        var_explained=0.99;
+                    elseif ipip <= 6
+                        %fixed number of pcs
+                        npcs(aroi) = ipip;
+                        try %may not be possible with the champaign filter
+                            var_explained(aroi) = varex(npcs(aroi));
+                        end
+                    elseif ipip >= 13 && ipip <= 18
+                        %fixed number of pcs
+                        npcs(aroi) = ipip-12;
                         var_explained(aroi) = varex(npcs(aroi));
                     end
-                elseif ipip >= 13 && ipip <= 18
-                    %fixed number of pcs
-                    npcs(aroi) = ipip-12;
-                    var_explained(aroi) = varex(npcs(aroi));
                 end
                 
                 if strcmp(params.ifilt,'c') || strcmp(params.ifilt,'cr') %champaign filter
