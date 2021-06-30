@@ -14,7 +14,7 @@ iit = str2num(getenv('SGE_TASK_ID'))
 % for ip = varyParam
 clear nInteractions nRegionInts SNR noise_mix nlag filtertype hemisym
 
-[nInteractions,nRegionInts,SNR,noise_mix,~,filtertype] = fp_get_params(ip);
+[nInteractions,nRegionInts,SNR,noise_mix,~,filtertype,~] = fp_get_params(ip);
 
 for iInt = nInteractions
     for iReg = nRegionInts
