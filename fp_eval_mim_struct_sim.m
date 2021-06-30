@@ -14,7 +14,7 @@ iit = str2num(getenv('SGE_TASK_ID'))
 % for ip = varyParam
 clear nInteractions nRegionInts SNR noise_mix nlag filtertype hemisym
 
-[nInteractions,nRegionInts,SNR,noise_mix,nlag,filtertype] = fp_get_params(ip);
+[nInteractions,nRegionInts,SNR,noise_mix,nlag,filtertype, dimred] = fp_get_params(ip);
 
 for iInt = nInteractions
     for iReg = nRegionInts
@@ -27,8 +27,8 @@ for iInt = nInteractions
                         
                         iit
                         %create logfile for parallization
-                        logname = sprintf('iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_iter%d'...
-                            ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,iit);
+                        logname = sprintf('iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_iter%d_%s'...
+                            ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,iit,dimred);
                         %
                         if ~exist(sprintf('%s%s_work',DIRLOG,logname)) & ~exist(sprintf('%s%s_done',DIRLOG,logname))
                             eval(sprintf('!touch %s%s_work',DIRLOG,logname))
@@ -41,6 +41,7 @@ for iInt = nInteractions
                             params.iss = iss;
                             params.ilag = ilag;
                             params.ifilt = ifilt;
+                            params.dimred = dimred;
                             params.iit = iit;
                             params.ip = ip;
                             params.logname = logname;
