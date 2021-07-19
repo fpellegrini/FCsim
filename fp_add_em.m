@@ -120,7 +120,18 @@ for iname = 1
                 end
             end
             
-            %save only evaluation parameters
+            %% asr            
+            
+            CS = fp_tsdata_to_cpsd(signal_sensor,fres,'WELCH',1:size(signal_sensor,1),...
+                1:size(signal_sensor,1), 1:size(signal_sensor,3), 1:size(signal_sensor,3));
+
+            ASR = log(norm(imag(CS(:)))/norm(real(CS(:))));
+            
+            
+            
+            %%
+            
+            %save only evaluation parameters and ASR 
             outname1 = sprintf('%smrr_%s.mat',DIRIN,params.logname);
             save(outname1,...
                 'mrr_mic','pr_mic','hk_mic','em3_mic','em3_mic_s',...
@@ -130,7 +141,7 @@ for iname = 1
                 'mrr_absgc','pr_absgc','hk_absgc','em3_absgc','em3_absgc_s',...
                 'mrr_posgc','pr_posgc','hk_posgc','em3_posgc','em3_posgc_s',...
                 'mrr_posgc_w','pr_posgc_w','hk_posgc_w','em3_posgc_w','em3_posgc_w_s',...
-                '-v7.3')
+                'ASR', '-v7.3')
 %
 %             save(outname1,...
 %                 'mrr_mic','pr_mic','hk_mic','em3_mic',...
@@ -140,7 +151,7 @@ for iname = 1
 %                 'mrr_absgc','pr_absgc','hk_absgc','em3_absgc',...
 %                 'mrr_posgc','pr_posgc','hk_posgc','em3_posgc',...
 %                 'mrr_posgc_w','pr_posgc_w','hk_posgc_w','em3_posgc_w',...
-%                 '-v7.3')
+%                 'ASR','-v7.3')
 
 %         end
 toc
