@@ -1,5 +1,6 @@
 function fp_add_corrected_pips
 
+fp_addpath
 
 DIRIN = '/home/bbci/data/haufe/Franziska/data/mim_sim4/';
 DIRLOG ='/home/bbci/data/haufe/Franziska/log/mim_sim4/corrected/';
