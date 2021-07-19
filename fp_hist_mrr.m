@@ -18,7 +18,8 @@ name = {...
     'ip6_lag1';...
     'ip7_eloreta_reg';...%14
     'ip7_champ';...
-    'ip7_champ_reg'};
+    'ip7_champ_reg'
+    'ip8_ssd'};
 
 labs = {'MIM','MIC','Mean abscoh','mean icoh','absGC','posGC','posGCw'};
 [cb] = cbrewer2('spectral', 11);
@@ -26,7 +27,7 @@ cb1 = cbrewer2('Set1',9);
 
 %%
 
-for iname = 1
+for iname = 17
     
     
     clearvars -except iname name DIRDATA DIRFIG labs cb cb1
@@ -40,6 +41,7 @@ for iname = 1
     ilag=2;
     ihemi=0;
     ifilt='l';
+    dimred = []; %'p';
     
     if iname==2
         iInt = 1; 
@@ -69,6 +71,8 @@ for iname = 1
                 ifilt = 'c';
             case 16
                 ifilt = 'cr';
+            case 17 
+                dimred = 's';
         end
     end
     
@@ -82,8 +86,8 @@ for iname = 1
     for iit= its
         
         try
-            inname = sprintf('mrr_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_iter%d'...
-                ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,iit);
+            inname = sprintf('mrr_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_iter%d_%s'...
+                ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,iit,dimred);
             
             load([DIRDATA inname '.mat'])
             
@@ -126,7 +130,7 @@ for iname = 1
     
     %%
     
-    for im = 3 %measures: MRR, PR, EM3
+    for im = 1 %measures: MRR, PR, EM3
         
         for icon = 1:length(MRR) %MIM, MIC, aCoh, iCoh, absgc,posgc,posgc_w 
 
@@ -163,6 +167,10 @@ for iname = 1
             if iname == 15 || iname == 16 %champ
                 pips = [1:3 8];
                 npips = 4;
+                
+            elseif iname == 17 
+                pips = 1:6; 
+                npips = 6; 
             end
 
             for ipip = pips
