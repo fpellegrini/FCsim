@@ -2,26 +2,31 @@ function fp_add_corrected_pips
 
 
 DIRIN = '/home/bbci/data/haufe/Franziska/data/mim_sim4/';
+DIRLOG ='/home/bbci/data/haufe/Franziska/log/mim_sim4/corrected/';
+if ~exist(DIRLOG); mkdir(DIRLOG); end
 
+iit = str2num(getenv('SGE_TASK_ID'));
 %%
 
 %default paramenters
-nit = 100;
 iInt = 2;
 iReg=1;
 isnr=0.7;
 iss = 0.5;
 ilag=2;
 ifilt='l';
+logname = sprintf('iter%d',iit);
 
 
 %%
-for iit= 1:nit
+
+if ~exist(sprintf('%s%s_work',DIRLOG,logname)) & ~exist(sprintf('%s%s_done',DIRLOG,logname))
+    eval(sprintf('!touch %s%s_work',DIRLOG,logname))
+    fprintf('Working on %s. \n',logname)
     
     tic
     
     iit
-    clearvars -except iInt iReg isnr iss ilag ifilt iit nit iname DIRIN
     
     inname = sprintf('mim_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_iter%d'...
         ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,iit);
@@ -36,9 +41,7 @@ for iit= 1:nit
         %% PCA
         
         clear npcs
-        signal_roi = [];
-        empty_rois =[];
-        active_rois = [];
+        signal_roi = []
         
         %loop over regions
         for aroi = 1:D.nroi
@@ -102,28 +105,23 @@ for iit= 1:nit
         MIM{ipip} = MIM_;
         MIC{ipip} = MIC_;
         
-        if ipip ~= 10
-            
-            aCOH{ipip} = aCOH_;
-            iCOH{ipip} = iCOH_;
-            
-            try
-                to_save{ipip}.npcs = npcs;
-                to_save{ipip}.varex = var_explained;
-                
-                nvoxroi_all = nvoxroi'*nvoxroi;
-                nvoxroi_all = nvoxroi_all(:);
-                corr_voxmim(ipip) = corr(nvoxroi_all,MIM_(:));
-                corr_voxmic(ipip) = corr(nvoxroi_all ,MIC_(:));
-                corr_voxicoh(ipip) = corr(nvoxroi_all,iCOH_(:));
-                corr_voxacoh(ipip) = corr(nvoxroi_all,aCOH_(:));
-                if ~strcmp(params.ifilt,'c') || ~strcmp(params.ifilt,'cr')
-                    corr_voxnpcs(ipip) = corr(nvoxroi', npcs');
-                end
-            end
-            
-        end
+        aCOH{ipip} = aCOH_;
+        iCOH{ipip} = iCOH_;
         
+        try
+            to_save{ipip}.npcs = npcs;
+            to_save{ipip}.varex = var_explained;
+            
+            nvoxroi_all = nvoxroi'*nvoxroi;
+            nvoxroi_all = nvoxroi_all(:);
+            corr_voxmim(ipip) = corr(nvoxroi_all,MIM_(:));
+            corr_voxmic(ipip) = corr(nvoxroi_all ,MIC_(:));
+            corr_voxicoh(ipip) = corr(nvoxroi_all,iCOH_(:));
+            corr_voxacoh(ipip) = corr(nvoxroi_all,aCOH_(:));
+            if ~strcmp(params.ifilt,'c') || ~strcmp(params.ifilt,'cr')
+                corr_voxnpcs(ipip) = corr(nvoxroi', npcs');
+            end
+        end
         
         
         %% Evaluate
@@ -139,7 +137,7 @@ for iit= 1:nit
             [mrr_iCoh(ipip), pr_iCoh(ipip),hk_iCoh(ipip),em1_iCoh(ipip),em2_iCoh(ipip),em3_iCoh(ipip)] ...
                 = fp_mrr_hk(iCOH_,iroi_seed,iroi_tar,1);
         end
-               
+        
         
         clear MIM_ MIC_ DIFFGC_ aCOH_ iCOH_
         
@@ -165,4 +163,7 @@ for iit= 1:nit
         'mrr_posgc_w','pr_posgc_w','hk_posgc_w','em1_posgc_w','em2_posgc_w','em3_posgc_w',...
         '-v7.3')
     
+    eval(sprintf('!mv %s%s_work %s%s_done',DIRLOG,logname,DIRLOG,logname))
+    
 end
+
