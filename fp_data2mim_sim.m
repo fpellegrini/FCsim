@@ -6,7 +6,7 @@ if ~exist(DIROUT);mkdir(DIROUT); end
 DIROUT1 = '/home/bbci/data/haufe/Franziska/data/mim_save4/';
 if ~exist(DIROUT1);mkdir(DIROUT1); end
 
-%define which pipelines run with this configforuration
+%define which pipelines run with this configuration
 if params.ip == 1 %default version 
     params.pips = 1:22;
 elseif strcmp(params.ifilt,'c')|| strcmp(params.ifilt,'cr') %with champaign
@@ -416,13 +416,6 @@ for ipip = params.pips %most successful: ipip 1 to 3
                     em1_posgc(ipip),em2_posgc(ipip),em3_posgc(ipip)] ...
                     = fp_mrr_hk(pos_diffgc,iroi_seed,iroi_tar,0);
                 
-                %wrong directions
-                clear pos_diffgc_w
-                pos_diffgc_w = -DIFFGC_;
-                pos_diffgc_w(pos_diffgc_w < 0) = 0;
-                [mrr_posgc_w(ipip), pr_posgc_w(ipip),hk_posgc_w(ipip),...
-                    em1_posgc_w(ipip),em2_posgc_w(ipip),em3_posgc_w(ipip)]...
-                    = fp_mrr_hk(pos_diffgc_w,iroi_seed,iroi_tar,0);
             end
             
         end
@@ -452,6 +445,5 @@ save(outname1,...
     'mrr_iCoh','pr_iCoh','hk_iCoh','em1_iCoh','em2_iCoh','em3_iCoh',...
     'mrr_absgc','pr_absgc','hk_absgc','em1_absgc','em2_absgc','em3_absgc',...
     'mrr_posgc','pr_posgc','hk_posgc','em1_posgc','em2_posgc','em3_posgc',...
-    'mrr_posgc_w','pr_posgc_w','hk_posgc_w','em1_posgc_w','em2_posgc_w','em3_posgc_w',...
     '-v7.3')
 
