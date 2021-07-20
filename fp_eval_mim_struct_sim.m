@@ -46,8 +46,11 @@ for iInt = nInteractions
                             params.ip = ip;
                             params.logname = logname;
                             
-                            
-                            fp_data2mim_sim(params)
+                            if strcmp(params.ifilt,'d') 
+                                fp_data2mim_sim_dics(params)
+                            else
+                                fp_data2mim_sim(params)
+                            end
                             
                             eval(sprintf('!mv %s%s_work %s%s_done',DIRLOG,logname,DIRLOG,logname))
                             

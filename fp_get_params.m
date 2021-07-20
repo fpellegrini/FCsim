@@ -67,7 +67,8 @@ elseif ip == 7
     SNR = 0.7;
     noise_mix = 0.5;
     nlag = 2;
-    filtertype= {'e','c','cr'};
+    filtertype= {'d'};
+%     filtertype= {'e','c','cr','d'};
     dimred = 'p';
     
 elseif ip == 8 
