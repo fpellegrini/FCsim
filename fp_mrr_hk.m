@@ -56,29 +56,29 @@ else
 %     end
     
     %% moving earth distance
-    %     try
-    load('processed_bs_wzb_90_2000/bs_results.mat')
-    iatl = 3; % DK atlas
-    neighbor_thresh = 10; % 10mm vicinity defines neighborhood between regions
-    [conndist_full, ~, ~, ~] = get_ROI_dist_full(cortex, iatl, neighbor_thresh);
-    
-    d1 = label(:); % takes always the full matrix, not only upper half
-    d1 = d1 ./ sum(d1(:));
-    
-    d2 = cc(:);
-    d2 = d2 - min(d2);
-    
-    d2_ = d2;
-    [so, ~] = sort(d2_, 'descend');
-    d2_(d2_ < so(2*numel(iroi_seed))) = 0;
-    d2_ = d2_ ./ nansum(d2_(:));
-    em3 = 1 - emd_hat_gd_metric_mex(d1, d2_, conndist_full);
-    
-    %     catch %that not the full simulation stops when compilation of mex files fail
-    %
-    %         em3 = 0;
-    %
-    %     end
+    try
+        load('processed_bs_wzb_90_2000/bs_results.mat')
+        iatl = 3; % DK atlas
+        neighbor_thresh = 10; % 10mm vicinity defines neighborhood between regions
+        [conndist_full, ~, ~, ~] = get_ROI_dist_full(cortex, iatl, neighbor_thresh);
+        
+        d1 = label(:); % takes always the full matrix, not only upper half
+        d1 = d1 ./ sum(d1(:));
+        
+        d2 = cc(:);
+        d2 = d2 - min(d2);
+        
+        d2_ = d2;
+        [so, ~] = sort(d2_, 'descend');
+        d2_(d2_ < so(2*numel(iroi_seed))) = 0;
+        d2_ = d2_ ./ nansum(d2_(:));
+        em3 = 1 - emd_hat_gd_metric_mex(d1, d2_, conndist_full);
+        
+    catch %that not the full simulation stops when compilation of mex files fail
+        
+        em3 = 0;
+        
+    end
     
     
     %% new performance metric based on rank
