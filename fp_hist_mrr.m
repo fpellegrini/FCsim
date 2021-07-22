@@ -18,8 +18,9 @@ name = {...
     'ip6_lag1';...
     'ip7_eloreta_reg';...%14
     'ip7_champ';...
-    'ip7_champ_reg'
-    'ip8_ssd'};
+    'ip7_champ_reg';...
+    'ip8_ssd';...
+    'ip7_dics'};
 
 labs = {'MIM','MIC','Mean abscoh','mean icoh','absGC','posGC','posGCw'};
 [cb] = cbrewer2('spectral', 11);
@@ -27,7 +28,7 @@ cb1 = cbrewer2('Set1',9);
 
 %%
 
-for iname = 17
+for iname = 18
     
     
     clearvars -except iname name DIRDATA DIRFIG labs cb cb1
@@ -71,7 +72,9 @@ for iname = 17
                 ifilt = 'c';
             case 16
                 ifilt = 'cr';
-            case 17 
+            case 18 
+                ifilt = 'd';
+            case 17
                 dimred = 's';
         end
     end
@@ -86,8 +89,13 @@ for iname = 17
     for iit= its
         
         try
-            inname = sprintf('mrr_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_iter%d_%s'...
-                ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,iit,dimred);
+            if iname == 18 | iname == 17
+                inname = sprintf('mrr_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_iter%d_%s'...
+                    ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,iit,dimred);
+            else
+                inname = sprintf('mrr_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_iter%d'...
+                    ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,iit);
+            end
             
             load([DIRDATA inname '.mat'])
             
@@ -97,7 +105,6 @@ for iname = 17
             MRR{4}(iit,:) = mrr_iCoh;
             MRR{5}(iit,:) = mrr_absgc;
             MRR{6}(iit,:) = mrr_posgc;
-            MRR{7}(iit,:) = mrr_posgc_w;
             
             PR{1}(iit,:) = pr_mim;
             PR{2}(iit,:) = pr_mic;
@@ -105,15 +112,13 @@ for iname = 17
             PR{4}(iit,:) = pr_iCoh;
             PR{5}(iit,:) = pr_absgc;
             PR{6}(iit,:) = pr_posgc;
-            PR{7}(iit,:) = pr_posgc_w;            
-                        
+            
             EM3{1}(iit,:) = em3_mim;
             EM3{2}(iit,:) = em3_mic;
             EM3{3}(iit,:) = em3_aCoh;
             EM3{4}(iit,:) = em3_iCoh;
             EM3{5}(iit,:) = em3_absgc;
             EM3{6}(iit,:) = em3_posgc;
-            EM3{7}(iit,:) = em3_posgc_w;
             
             
             
@@ -130,7 +135,7 @@ for iname = 17
     
     %%
     
-    for im = 1 %measures: MRR, PR, EM3
+    for im = 2 %measures: MRR, PR, EM3
         
         for icon = 1:length(MRR) %MIM, MIC, aCoh, iCoh, absgc,posgc,posgc_w 
 
@@ -220,7 +225,12 @@ for iname = 17
                 end
                 subplot(1,npips,ipip1)
 
-                [h, u] = fp_raincloud_plot(data1, cl, 1,0.2, 'ks');
+                if im == 2
+                    [h, u] = fp_raincloud_plot_a(data1, cl, 1,0.2, 'ks');
+                else
+                    [h, u] = fp_raincloud_plot(data1, cl, 1,0.2, 'ks');
+                end
+                
                 view([-90 -90]);
                 set(gca, 'Xdir', 'reverse');
                 set(gca, 'XLim', [0 1]);
