@@ -20,7 +20,9 @@ name = {...
     'ip6_lag1';...
     'ip7_eloreta_reg';...
     'ip7_champ';...
-    'ip7_champ_reg'};
+    'ip7_champ_reg';...
+    'ip8_ssd';...
+    'ip7_dics'};
 
 labs = {'MIM','MIC','Mean abscoh','mean icoh','absGC','posGC','posGCw'};
 %%
@@ -66,6 +68,10 @@ else
             ifilt = 'c';
         case 16
             ifilt = 'cr';
+        case 18
+            ifilt = 'd';
+        case 17
+            dimred = 's';
     end
 end
 
@@ -79,8 +85,13 @@ a=[];
 for iit= its
     
     try
-        inname = sprintf('mrr_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_iter%d'...
-            ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,iit);
+        if iname == 18 | iname == 17
+            inname = sprintf('mrr_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_iter%d_%s'...
+                ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,iit,dimred);
+        else
+            inname = sprintf('mrr_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_iter%d'...
+                ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,iit);
+        end
         
         load([DIRDATA inname '.mat'])
         
@@ -139,7 +150,7 @@ for im = 3 %measures: MRR, PR, EM3
             pips = [1:8 21 22 9];
             npips = 11;
         end
-
+        
         ipip1=1;
         for ipip = pips
             
@@ -189,7 +200,7 @@ for im = 3 %measures: MRR, PR, EM3
             set(gca, 'Xdir', 'reverse');
             set(gca, 'XLim', [0 1]);
             
-            if icon < 3    
+            if icon < 3
                 xtitles = {'1PC','2PCs', '3PCs','4PCs','5PCs','6PCs','90%',...
                     '99%','MIM+sum','Sum+MIM','Central','TrueVox'};
             else
@@ -215,7 +226,7 @@ for im = 3 %measures: MRR, PR, EM3
         
         
     end
- 
+    
     
 end
 
