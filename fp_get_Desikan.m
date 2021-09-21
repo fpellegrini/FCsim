@@ -11,12 +11,12 @@ ind_cortex = []; %all voxel indices
 ind_roi = {}; %all voxels grouped by region 
 ind_roi_cortex = {}; %index of roi voxels in ind_cortex, grouped by region 
 
-%active voxel inds 
+%active voxel inds (referring to original indeces) 
 sub_ind_cortex = []; %randomly selected active voxels of each region
 sub_ind_roi = {}; %randomly selected active voxels of each region, grouped by region
 sub_ind_roi_region = {}; %index of active voxel within region 
 
-%central voxel inds
+%central voxel inds (referring to ind_cortex/ ind_roi/ ind_roi_cortex)
 ctr_ind_cortex = []; %central voxels of each region
 ctr_ind_roi = {}; %central voxels of each region, grouped by region
 ctr_ind_roi_region = {}; %index of central voxel within region 

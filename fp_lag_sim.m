@@ -6,9 +6,6 @@ if ~exist(DIROUT);mkdir(DIROUT); end
 DIROUT1 = '/home/bbci/data/haufe/Franziska/data/mim_save4_lag/';
 if ~exist(DIROUT1);mkdir(DIROUT1); end
 
-%define which pipelines run with this configuration
-params.pips = 1;
-
 %% signal generation
 % getting atlas, voxel and roi indices; active voxel of each region
 % is aleady selected here
@@ -88,7 +85,7 @@ for ilag = 1:5 %in ms: 2,4,6,8,10
     %% Pipeline 1
     
     errorpipeline = [];
-    for ipip = 3 %fixed 1 pc
+    for ipip = 3 %fixed 3 pc
         
         fprintf(['Testing pipeline ' num2str(ipip) '\n'])
         try
