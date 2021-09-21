@@ -28,7 +28,7 @@ labs = {'MIM','MIC','Mean abscoh','mean icoh','absGC','posGC','posGCw'};
 
 im = 2; %measures: MRR, PR, EM3    
 icon = 1; %:length(MRR) %MIM, MIC, aCoh, iCoh, absgc,posgc,posgc_w
-ipip = 1;
+ipip = 3;
 %%
 o=1;
 figure
@@ -197,7 +197,7 @@ end
 
 
 
-outname = [DIRFIG imlab '_' labs{icon} '_snr'];
+outname = [DIRFIG imlab '_' labs{icon} '_snr_3pcs'];
 saveas(gcf,outname, 'png')
 close all
 
