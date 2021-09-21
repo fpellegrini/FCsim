@@ -198,8 +198,6 @@ for ipip = params.pips %most successful: ipip 1 to 3
         
         %% Evaluate
         
-        [mrr_mic(ipip), pr_mic(ipip),hk_mic(ipip),em3_mic(ipip)] ...
-            = fp_mrr_hk(MIC_,iroi_seed,iroi_tar,1);
         [mrr_mim(ipip), pr_mim(ipip),hk_mim(ipip),em3_mim(ipip)] ...
             = fp_mrr_hk(MIM_,iroi_seed,iroi_tar,1);
         
