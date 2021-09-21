@@ -5,7 +5,7 @@ DIRIN = './mim_sim4/';
 if ~exist(DIRIN);mkdir(DIRIN); end
 
 %%
-for iname = [7 8]
+for iname = [2:6]
     
     iname
     
@@ -22,31 +22,31 @@ for iname = [7 8]
     
     if iname ==  2
         iInt = 1;
-    elseif iname>2 && iname<6
+    elseif iname>2 && iname<7
         iInt = iname;
     else
         switch iname
-            case 6
-                iReg = 2;
             case 7
-                isnr = 0.5;
+                iReg = 2;
             case 8
-                isnr = 0.9;
+                isnr = 0.5;
             case 9
-                iss=0;
+                isnr = 0.9;
             case 10
-                iss = 0.25;
+                iss=0;
             case 11
-                iss = 0.75;
+                iss = 0.25;
             case 12
-                iss = 1;
+                iss = 0.75;
             case 13
-                ilag = 1;
+                iss = 1;
             case 14
-                ifilt = 'e';
+                ilag = 1;
             case 15
+                ifilt = 'e';
+            case 16
                 ifilt = 'c';
-            case 16 
+            case 17
                 ifilt = 'cr';
         end
     end
