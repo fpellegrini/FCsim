@@ -1,7 +1,7 @@
-function fp_hist_mrr_ICBEM
+function fp_hist_mrr_filt
 
 DIRDATA = './mim_sim4/';
-DIRFIG = './figures/mimsim_ana/mim_sim4/ICBEM/';
+DIRFIG = './figures/mimsim_ana/mim_sim4/Bernstein/';
 if ~exist(DIRFIG); mkdir(DIRFIG); end
 
 name = {...
@@ -26,7 +26,7 @@ name = {...
 
 labs = {'MIM','MIC','Mean abscoh','mean icoh','absGC','posGC','posGCw'};
 
-im = 1; %measures: MRR, PR, EM3    
+im = 2; %measures: MRR, PR, EM3    
 icon = 1; %:length(MRR) %MIM, MIC, aCoh, iCoh, absgc,posgc,posgc_w
 ipip = 1;
 %%
@@ -176,7 +176,7 @@ for iname = [18 1 16 14]
     set(gca, 'Xdir', 'reverse');
     set(gca, 'XLim', [0 1]);
     
-    titles = {'dics','lcmv','champaign','eloreta'};
+    titles = {'dics','lcmv','champagne','eloreta'};
     title(titles{o})
     ylim([-0.75 2])
     xlabel([labs{icon} ' ' imlab1])
@@ -197,9 +197,9 @@ end
 
 
 
-%         outname = [DIRFIG name{iname} '_' imlab '_' labs{icon}];
-%         saveas(gcf,outname, 'png')
-%         close all
+outname = [DIRFIG imlab '_' labs{icon} '_filters'];
+saveas(gcf,outname, 'png')
+close all
 
 
 

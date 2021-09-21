@@ -1,7 +1,7 @@
 function fp_hist_mrr_ICBEM
 
 DIRDATA = './mim_sim4/';
-DIRFIG = './figures/mimsim_ana/mim_sim4/ICBEM/';
+DIRFIG = './figures/mimsim_ana/mim_sim4/Bernstein/';
 if ~exist(DIRFIG); mkdir(DIRFIG); end
 
 name = {...
@@ -134,7 +134,7 @@ end
 
 %%
 
-for im = 3 %measures: MRR, PR, EM3
+for im = 2 %measures: MRR, PR, EM3
     
     for icon = 1:length(MRR) %MIM, MIC, aCoh, iCoh, absgc,posgc,posgc_w
         
@@ -194,8 +194,11 @@ for im = 3 %measures: MRR, PR, EM3
             
             subplot(1,npips,ipip1)
             
-            
-            [h, u] = fp_raincloud_plot(data1, cl, 1,0.2, 'ks');
+            if im == 2
+                [h, u] = fp_raincloud_plot_a(data1, cl, 1,0.2, 'ks');
+            else
+                [h, u] = fp_raincloud_plot(data1, cl, 1,0.2, 'ks');
+            end
             view([-90 -90]);
             set(gca, 'Xdir', 'reverse');
             set(gca, 'XLim', [0 1]);
