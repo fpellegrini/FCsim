@@ -60,7 +60,8 @@ for ipip = params.pips %most successful: ipip 1 to 3
         tic
         %% PCA
         
-        clear npcs P A2 V CS_roi
+        clear npcs A2 V CS_roi
+        P=[];
         
         %loop over regions
         for aroi = 1:D.nroi
@@ -122,13 +123,16 @@ for ipip = params.pips %most successful: ipip 1 to 3
                 
                 V{aroi} = real(V{aroi}(:, 1:npcs(aroi)));
                 
+                clear p
                 for ifq = 1:fres+1
-                    P(:,:,aroi,ifq) = squeeze(A2{aroi}(:,:,ifq)) * V{aroi}; 
+                    p(:,:,ifq) = squeeze(A2{aroi}(:,:,ifq)) * V{aroi}; 
                 end  
+                P = cat(2,P,p);
+               
                 
             elseif ipip == 9
                 %baseline
-                P(:,:,aroi,:) = A2{aroi};
+                P = cat(2,P,A2{aroi});
                 npcs(aroi) = nvoxroi(aroi)*ndim;
             end
            
@@ -136,8 +140,7 @@ for ipip = params.pips %most successful: ipip 1 to 3
         
         CS_roi = [];
         for ifreq = 1:fres+1
-            CS_roi(:, :, ifreq) = reshape(P(:, :, :, ifreq), n_sensors, [])' ...
-                * CS_sensor(:, :, ifreq) * reshape(P(:, :, :, ifreq), n_sensors, []);
+            CS_roi(:, :, ifreq) = P(:, :, ifreq)' * CS_sensor(:, :, ifreq) * P(:, :, ifreq);
         end
         
         
