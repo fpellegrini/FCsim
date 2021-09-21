@@ -165,14 +165,15 @@ for ipip = params.pips %most successful: ipip 1 to 3
             
             clear A_ signal_source
             
-            %A_ is the lcmv filter at aroi
-            A_ = A(:, :,D.ind_roi_cortex{aroi},:);
-            
             if ipip == 9 %baseline: pre-select voxels of true activity
-                A_ = A_(:,:,D.sub_ind_roi_region{aroi},:);
+                A_ = A(:,:,D.sub_ind_roi_region{aroi},:);
                 
             elseif ipip == 22 %pick central voxel of each region
+                A_ = A(:, :,D.ind_roi_cortex{aroi},:);
                 A_ = A_(:,:,D.ctr_ind_roi_region{aroi},:);
+                
+            else
+                A_ = A(:, :,D.ind_roi_cortex{aroi},:);
             end
             
             %number of voxels at the current roi
