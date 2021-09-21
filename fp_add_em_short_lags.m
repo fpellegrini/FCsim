@@ -1,7 +1,7 @@
 function fp_add_em_short_lags
 
 
-DIRIN = './mim_sim4/';
+DIRIN = 'mim_sim4_lag/';
 if ~exist(DIRIN);mkdir(DIRIN); end
 
 %%
