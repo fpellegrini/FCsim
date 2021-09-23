@@ -1,4 +1,6 @@
-DIRDATA = './mim_sim4_lag/';
+function fp_hist_mrr_iInts
+
+DIRDATA = './mim_sim4/';
 DIRFIG = './figures/mimsim_ana/mim_sim4/';
 if ~exist(DIRFIG); mkdir(DIRFIG); end
 
@@ -24,37 +26,79 @@ name = {...
 
 labs = {'MIM','MIC','Mean abscoh','mean icoh','absGC','posGC','posGCw'};
 
-im = 2; %measures: MRR, PR, EM3
+im = 2; %measures: MRR, PR, EM3    
 icon = 1; %:length(MRR) %MIM, MIC, aCoh, iCoh, absgc,posgc,posgc_w
-ipip = 3; %only third pipeline was calculated 
+ipip = 3; 
 %%
 o=1;
 figure
 figone(15,30)
-iname = 1;
-
-clearvars -except iname name DIRDATA DIRFIG labs o im icon ipip
-
-%default paramenters
-nit = 100;
-iInt = 2;
-iReg=1;
-isnr=0.7;
-iss = 0.5;
-ifilt='l';
-
-np = 6;
-
-its = [1:nit];
-a=[];
-
-%%
-for ilag = 1:5
+for iname = [2 1 3:5]
+    
+    clearvars -except iname name DIRDATA DIRFIG labs o im icon ipip
+    
+    %default paramenters
+    nit = 100;
+    iInt = 2;
+    iReg=1;
+    isnr=0.7;
+    iss = 0.5;
+    ilag=2;
+    ifilt='l';
+    
+    if iname==2
+        iInt = 1;
+    elseif iname>2 && iname<6
+        iInt = iname;
+    else
+        switch iname
+            case 6
+                iReg = 2;
+            case 7
+                isnr = 0.5;
+            case 8
+                isnr = 0.9;
+            case 9
+                iss=0;
+            case 10
+                iss = 0.25;
+            case 11
+                iss = 0.75;
+            case 12
+                iss = 1;
+            case 13
+                ilag = 1;
+            case 14
+                ifilt = 'e';
+            case 15
+                ifilt = 'c';
+            case 16
+                ifilt = 'cr';
+            case 18
+                ifilt = 'd';
+                dimred = 'p';
+            case 17
+                dimred = 's';
+        end
+    end
+    
+    
+    np = 6;
+    
+    its = [1:nit];
+    a=[];
+    
+    %%
     for iit= its
         
         try
-            inname = sprintf('mrr_mim_iInt%d_iReg%d_snr0%d_iss0%d_filt%s_iter%d_lag%d'...
-                ,iInt,iReg,isnr*10,iss*10,ifilt,iit, ilag);
+            if iname == 18 || iname == 17
+                inname = sprintf('mrr_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_iter%d_%s'...
+                    ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,iit,dimred);
+            else
+                inname = sprintf('mrr_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_iter%d'...
+                    ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,iit);
+            end
             
             load([DIRDATA inname '.mat'])
             
@@ -91,8 +135,8 @@ for ilag = 1:5
         PR{ii}(a,:) = [];
         EM3{ii}(a,:) = [];
     end
-    
-    %%
+        
+%%
     
     switch im
         case 1
@@ -132,24 +176,39 @@ for ilag = 1:5
     set(gca, 'Xdir', 'reverse');
     set(gca, 'XLim', [0 1]);
     
-    titles = {'2 ms' ,'4 ms' ,'6 ms','8 ms','10 ms'};
+    titles = {'1 interaction','2 interactions','3 interactions','4 interactions','5 interactions'};
     title(titles{o})
     ylim([-0.75 2])
     xlabel([labs{icon} ' ' imlab1])
     grid on
-    %
-    %     if o~=1
-    %         set(gca,'xtick',[])
-    %     end
+%     
+%     if o~=1
+%         set(gca,'xtick',[])
+%     end
     
     o=o+1;
     
 end
 
-%%
-outname = [DIRFIG imlab '_' labs{icon} '_lags'];
+
+
+
+
+
+
+
+outname = [DIRFIG imlab '_' labs{icon} '_Ints'];
 saveas(gcf,outname, 'png')
 close all
+
+
+
+
+
+
+
+
+
 
 
 

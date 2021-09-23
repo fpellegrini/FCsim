@@ -100,7 +100,7 @@ end
 
 for im = 2 %measures: MRR, PR, EM3
     
-    for icon = 1:length(MRR) %MIM, MIC, aCoh, iCoh, absgc,posgc,posgc_w
+    for icon = 1:4 %MIM, MIC, aCoh, iCoh, absgc,posgc,posgc_w
         
         
         %%
