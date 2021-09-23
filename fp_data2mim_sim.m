@@ -9,7 +9,7 @@ if ~exist(DIROUT1);mkdir(DIROUT1); end
 %define which pipelines run with this configuration
 if params.ip == 1 %default version 
     params.pips = 1:22;
-elseif strcmp(params.ifilt,'c')|| strcmp(params.ifilt,'cr') %with champaign
+elseif strcmp(params.ifilt(1),'c') %with champaign
     params.pips = [1:3 8];
 elseif params.ip == 8 
     params.pips = 1:6;
@@ -129,6 +129,56 @@ elseif strcmp(params.ifilt,'cr') %champ with regulaization
     [~,~,w] = awsm_champ(signal_sensor(:, :), L_perm(:, :), sigu, 200, 3, 2, 0);
     A = real(reshape(w',size(L_perm)));
     
+        
+elseif strcmp(params.ifilt,'che') %champ hetero
+     
+    %estimate noise_cov
+    Y = mean(signal_sensor,3);
+    normalize_constant = norm(Y*Y','fro');
+    [~,~,noise_cov,~,~,~,~,~,~]=nut_reg_vbfa(Y,5,150,0);    
+    noise_cov = noise_cov / normalize_constant;
+    
+    L_perm = permute(L_backward,[1 3 2]); 
+
+    [~,~,w_hetero,~,~,~,~]= champ_heteroscedastic_3D(signal_sensor(:, :),...
+        L_perm(:, :),noise_cov,200,ndim,0,0,0,3,1);
+    
+    A = real(reshape(w_hetero',size(L_perm)));
+    
+elseif strcmp(params.ifilt,'cho') %chanp homo
+    
+    %estimate noise_cov
+    Y = mean(signal_sensor,3);
+    normalize_constant = norm(Y*Y','fro');
+    [~,~,noise_cov,~,~,~,~,~,~]=nut_reg_vbfa(Y,5,150,0);    
+    noise_cov = noise_cov / normalize_constant;
+    
+    L_perm = permute(L_backward,[1 3 2]); 
+    
+    [~,~,~,~,W_Champ_Homoscedastic]= Champagne_Homoscedastic(L_perm(:,:),signal_sensor(:,:),...
+        'noise_cov',noise_cov,'noise_update_mode',1,'max_num_iterations',200,...
+        'threshold_error',eps,'print_results',0,'print_figures',0);
+
+    A = real(reshape(W_Champ_Homoscedastic',size(L_perm)));
+    
+elseif strcmp(params.ifilt,'cfun')
+    
+    %estimate noise_cov
+    Y = mean(signal_sensor,3);
+    normalize_constant = norm(Y*Y','fro');
+    [~,~,noise_cov,~,~,~,~,~,~]=nut_reg_vbfa(Y,5,150,0);
+    noise_cov = noise_cov / normalize_constant;
+    
+    L_perm = permute(L_backward,[1 3 2]);
+    
+    [~,~,~,~,W_FUN]= FUN_learning_func_3D(L_perm(:,:),signal_sensor(:,:),...
+        'noise_cov',noise_cov,'noise_update_mode','Diagonal',...
+        'source_update_mode','Diagonal','max_num_iterations',100,...
+        'threshold_error',eps,'print_results',0,'print_figures',0);
+    
+    
+    A = real(reshape(W_FUN',size(L_perm)));
+    
 end
 
 t.filter = toc;
@@ -188,7 +238,7 @@ for ipip = params.pips %most successful: ipip 1 to 3
             end
             
             clear s_
-            if strcmp(params.ifilt,'c') || strcmp(params.ifilt,'cr') %in case of the champaign filter
+            if strcmp(params.ifilt(1),'c') %in case of the champaign filter
                 %sort out the dims and voxels with zero activity
                 s_ = sum(signal_source,2)>10^-8 | sum(signal_source,2)< -(10^-8) ;
             else
@@ -246,7 +296,7 @@ for ipip = params.pips %most successful: ipip 1 to 3
                     end
                 end
                 
-                if strcmp(params.ifilt,'c') || strcmp(params.ifilt,'cr') %champaign filter
+                if strcmp(params.ifilt(1),'c') %champaign filter
                     %sort out rois with zero activity
                     if npcs(aroi) == 0
                         empty_rois = [empty_rois aroi];
@@ -289,7 +339,7 @@ for ipip = params.pips %most successful: ipip 1 to 3
         
         if ipip ~= 10 && ipip ~= 11 && ipip ~= 12
             
-            if strcmp(params.ifilt,'c') || strcmp(params.ifilt,'cr')
+            if strcmp(params.ifilt(1),'c')
                 %no calculations for empty rois
                 npcs(empty_rois) = [];
             end
@@ -309,7 +359,7 @@ for ipip = params.pips %most successful: ipip 1 to 3
             % extract measures out of the conn struct
             [MIM_, MIC_, DIFFGC_, iCOH_, aCOH_] = fp_unwrap_conn(conn,numel(npcs),filt,PCA_inds);
             
-            if strcmp(params.ifilt,'c') || strcmp(params.ifilt,'cr')
+            if strcmp(params.ifilt(1),'c')
                 % fill active rois again into the full nroixnroi structure
                 
                 clear mim mic diffgc
@@ -377,7 +427,7 @@ for ipip = params.pips %most successful: ipip 1 to 3
                     corr_voxmic(ipip) = corr(nvoxroi_all ,MIC_(:));
                     corr_voxicoh(ipip) = corr(nvoxroi_all,iCOH_(:));
                     corr_voxacoh(ipip) = corr(nvoxroi_all,aCOH_(:));
-                    if ~strcmp(params.ifilt,'c') || ~strcmp(params.ifilt,'cr')
+                    if ~strcmp(params.ifilt(1),'c')
                         corr_voxnpcs(ipip) = corr(nvoxroi', npcs');
                     end
                 end
@@ -389,22 +439,21 @@ for ipip = params.pips %most successful: ipip 1 to 3
         
         %% Evaluate
         
-        [mrr_mic(ipip), pr_mic(ipip),hk_mic(ipip),em1_mic(ipip),em2_mic(ipip),em3_mic(ipip)] ...
+        [mrr_mic(ipip), pr_mic(ipip),hk_mic(ipip),em3_mic(ipip)] ...
             = fp_mrr_hk(MIC_,iroi_seed,iroi_tar,1);
-        [mrr_mim(ipip), pr_mim(ipip),hk_mim(ipip),em1_mim(ipip),em2_mim(ipip),em3_mim(ipip)] ...
+        [mrr_mim(ipip), pr_mim(ipip),hk_mim(ipip),em3_mim(ipip)] ...
             = fp_mrr_hk(MIM_,iroi_seed,iroi_tar,1);
         
         if ipip ~= 10
-            [mrr_aCoh(ipip), pr_aCoh(ipip),hk_aCoh(ipip),em1_aCoh(ipip),em2_aCoh(ipip),em3_aCoh(ipip)] ...
+            [mrr_aCoh(ipip), pr_aCoh(ipip),hk_aCoh(ipip),em3_aCoh(ipip)] ...
                 = fp_mrr_hk(aCOH_,iroi_seed,iroi_tar,1);
-            [mrr_iCoh(ipip), pr_iCoh(ipip),hk_iCoh(ipip),em1_iCoh(ipip),em2_iCoh(ipip),em3_iCoh(ipip)] ...
+            [mrr_iCoh(ipip), pr_iCoh(ipip),hk_iCoh(ipip),em3_iCoh(ipip)] ...
                 = fp_mrr_hk(iCOH_,iroi_seed,iroi_tar,1);
             
             if ipip ~= 11 && ipip ~= 12 
                 %absolute value of gc and only triu is considered. Metric neglects
                 %the direction of the interaction
-                [mrr_absgc(ipip), pr_absgc(ipip),hk_absgc(ipip),...
-                    em1_absgc(ipip),em2_absgc(ipip),em3_absgc(ipip)] ...
+                [mrr_absgc(ipip), pr_absgc(ipip),hk_absgc(ipip),em3_absgc(ipip)] ...
                     = fp_mrr_hk(abs(DIFFGC_),iroi_seed,iroi_tar,1);
                 
                 %only positive part of gc is submitted and the whole matrix is
@@ -413,15 +462,13 @@ for ipip = params.pips %most successful: ipip 1 to 3
                 clear pos_diffgc
                 pos_diffgc = DIFFGC_;
                 pos_diffgc(pos_diffgc< 0) = 0;
-                [mrr_posgc(ipip), pr_posgc(ipip),hk_posgc(ipip),...
-                    em1_posgc(ipip),em2_posgc(ipip),em3_posgc(ipip)] ...
+                [mrr_posgc(ipip), pr_posgc(ipip),hk_posgc(ipip),em3_posgc(ipip)] ...
                     = fp_mrr_hk(pos_diffgc,iroi_seed,iroi_tar,0);
                 
             end
             
         end
-        
-        
+              
         
         clear MIM_ MIC_ DIFFGC_ aCOH_ iCOH_
         
@@ -440,11 +487,11 @@ save(outname,'-v7.3')
 %save only evaluation parameters
 outname1 = sprintf('%smrr_%s.mat',DIROUT,params.logname);
 save(outname1,...
-    'mrr_mic','pr_mic','hk_mic','em1_mic','em2_mic','em3_mic',...
-    'mrr_mim','pr_mim','hk_mim','em1_mim','em2_mim','em3_mim',...
-    'mrr_aCoh','pr_aCoh','hk_aCoh','em1_aCoh','em2_aCoh','em3_aCoh',...
-    'mrr_iCoh','pr_iCoh','hk_iCoh','em1_iCoh','em2_iCoh','em3_iCoh',...
-    'mrr_absgc','pr_absgc','hk_absgc','em1_absgc','em2_absgc','em3_absgc',...
-    'mrr_posgc','pr_posgc','hk_posgc','em1_posgc','em2_posgc','em3_posgc',...
+    'mrr_mic','pr_mic','hk_mic','em3_mic',...
+    'mrr_mim','pr_mim','hk_mim','em3_mim',...
+    'mrr_aCoh','pr_aCoh','hk_aCoh','em3_aCoh',...
+    'mrr_iCoh','pr_iCoh','hk_iCoh','em3_iCoh',...
+    'mrr_absgc','pr_absgc','hk_absgc','em3_absgc',...
+    'mrr_posgc','pr_posgc','hk_posgc','em3_posgc',...
     '-v7.3')
 

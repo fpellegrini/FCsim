@@ -23,6 +23,7 @@ for iInt = nInteractions
                 for ilag = nlag
                     for ifi = 1:numel(filtertype)
                         
+                        clear ifilt
                         ifilt = filtertype{ifi};
                         
                         iit
