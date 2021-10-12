@@ -6,7 +6,7 @@ DIRIN = '/home/bbci/data/haufe/Franziska/data/mim_sim4/';
 if ~exist(DIRIN);mkdir(DIRIN); end
 
 %%
-for iname = [7 18 19]
+for iname = [18]
     
     iname
     
@@ -61,7 +61,7 @@ for iname = [7 18 19]
     %%
     for iit= 1:nit
         tic
-        try
+%         try
             iit
             clearvars -except iInt iReg isnr iss ilag ifilt iit nit iname DIRIN
             
@@ -184,7 +184,7 @@ for iname = [7 18 19]
                 'mrr_posgc','pr_posgc','hk_posgc','em3_posgc',...
                 'ASR','-v7.3')
             toc
-    end
+%     end
 
     end
 end
