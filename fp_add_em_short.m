@@ -1,11 +1,12 @@
 function fp_add_em_short
 
+fp_addpath
 
-DIRIN = './mim_sim4/';
+DIRIN = '/home/bbci/data/haufe/Franziska/data/mim_sim4/';
 if ~exist(DIRIN);mkdir(DIRIN); end
 
 %%
-for iname = [2:6]
+for iname = [7 18 19]
     
     iname
     
@@ -19,6 +20,7 @@ for iname = [2:6]
     iss = 0.5;
     ilag=2;
     ifilt='l';
+    dimred = 'p';
     
     if iname ==  2
         iInt = 1;
@@ -48,6 +50,11 @@ for iname = [2:6]
                 ifilt = 'c';
             case 17
                 ifilt = 'cr';
+            case 18
+                ifilt = 'd';
+            case 19 
+                dimred = 's';
+             
         end
     end
     
@@ -58,8 +65,14 @@ for iname = [2:6]
             iit
             clearvars -except iInt iReg isnr iss ilag ifilt iit nit iname DIRIN
             
-            inname = sprintf('mim_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_iter%d'...
-                ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,iit);
+            if iname == 7 || iname == 18
+                inname = sprintf('mim_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_iter%d_%s'...
+                ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,iit,dimred);
+            
+            else
+                inname = sprintf('mim_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_iter%d'...
+                    ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,iit);
+            end
             
             load([DIRIN inname '.mat'])
             
@@ -83,7 +96,7 @@ for iname = [2:6]
                 
                 % pr is now not area under the precision-recall curve
                 % anymore but the new performance metric 
-                [ pr_mic(ipip)] = fp_mrr_hk_short(MIC_,iroi_seed,iroi_tar,1);
+                [pr_mic(ipip)] = fp_mrr_hk_short(MIC_,iroi_seed,iroi_tar,1);
                 
                 [pr_mim(ipip)] = fp_mrr_hk_short(MIM_,iroi_seed,iroi_tar,1);        
                 
@@ -141,6 +154,27 @@ for iname = [2:6]
 %                 'mrr_posgc_w','pr_posgc_w','hk_posgc_w','em3_posgc_w','em3_posgc_w_s',...
 %                 'ASR', '-v7.3')
 
+            if iname == 7 || iname == 18
+                mrr_mic = [];
+                hk_mic = []; 
+                em3_mic=[]; 
+                mrr_mim = [];
+                hk_mim = []; 
+                em3_mim=[]; 
+                mrr_iCoh = [];
+                hk_iCoh = []; 
+                em3_iCoh=[]; 
+                mrr_aCoh = [];
+                hk_aCoh = []; 
+                em3_aCoh=[]; 
+                mrr_absgc = [];
+                hk_absgc = []; 
+                em3_absgc=[];
+                mrr_posgc = [];
+                hk_posgc = []; 
+                em3_posgc=[];
+            end
+
             save(outname1,...
                 'mrr_mic','pr_mic','hk_mic','em3_mic',...
                 'mrr_mim','pr_mim','hk_mim','em3_mim',...
@@ -148,7 +182,6 @@ for iname = [2:6]
                 'mrr_iCoh','pr_iCoh','hk_iCoh','em3_iCoh',...
                 'mrr_absgc','pr_absgc','hk_absgc','em3_absgc',...
                 'mrr_posgc','pr_posgc','hk_posgc','em3_posgc',...
-                'mrr_posgc_w','pr_posgc_w','hk_posgc_w','em3_posgc_w',...
                 'ASR','-v7.3')
             toc
     end
