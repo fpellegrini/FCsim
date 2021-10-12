@@ -1,6 +1,6 @@
 function fp_add_em_short
 
-fp_addpath
+% fp_addpath
 
 DIRIN = '/home/bbci/data/haufe/Franziska/data/mim_sim4/';
 if ~exist(DIRIN);mkdir(DIRIN); end
@@ -63,7 +63,7 @@ for iname = [18]
         tic
 %         try
             iit
-            clearvars -except iInt iReg isnr iss ilag ifilt iit nit iname DIRIN
+            clearvars -except iInt iReg isnr iss ilag ifilt iit nit iname DIRIN dimred
             
             if iname == 7 || iname == 18
                 inname = sprintf('mim_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_iter%d_%s'...
