@@ -61,7 +61,7 @@ for iname = [7 18 19]
     %%
     for iit= 1:nit
         tic
-%         try
+        try
             iit
             clearvars -except iInt iReg isnr iss ilag ifilt iit nit iname DIRIN dimred
             
@@ -184,7 +184,7 @@ for iname = [7 18 19]
                 'mrr_posgc','pr_posgc','hk_posgc','em3_posgc',...
                 'ASR','-v7.3')
             toc
-%     end
+    end
 
     end
 end
