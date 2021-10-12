@@ -126,7 +126,7 @@ elseif strcmp(params.ifilt,'cr') %champ with regulaization
     sigu = regu*eye(n_sensors);
     L_perm = permute(L_backward,[1 3 2]);
     
-    [~,~,w] = awsm_champ(signal_sensor(:, :), L_perm(:, :), sigu, 200, 3, 2, 0);
+    [~,~,w] = awsm_champ(signal_sensor(:, :), L_perm(:, :), sigu, 100, 3, 2, 0);
     A = real(reshape(w',size(L_perm)));
     
         
@@ -141,7 +141,7 @@ elseif strcmp(params.ifilt,'che') %champ hetero
     L_perm = permute(L_backward,[1 3 2]); 
 
     [~,~,w_hetero,~,~,~,~]= champ_heteroscedastic_3D(signal_sensor(:, :),...
-        L_perm(:, :),noise_cov,200,ndim,0,0,0,3,1);
+        L_perm(:, :),noise_cov,100,ndim,0,0,0,3,1);
     
     A = real(reshape(w_hetero',size(L_perm)));
     
@@ -156,7 +156,7 @@ elseif strcmp(params.ifilt,'cho') %chanp homo
     L_perm = permute(L_backward,[1 3 2]); 
     
     [~,~,~,~,W_Champ_Homoscedastic]= Champagne_Homoscedastic(L_perm(:,:),signal_sensor(:,:),...
-        'noise_cov',noise_cov,'noise_update_mode',1,'max_num_iterations',200,...
+        'noise_cov',noise_cov,'noise_update_mode',1,'max_num_iterations',100,...
         'threshold_error',eps,'print_results',0,'print_figures',0);
 
     A = real(reshape(W_Champ_Homoscedastic',size(L_perm)));
