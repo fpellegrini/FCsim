@@ -245,7 +245,7 @@ for ipip = params.pips %most successful: ipip 1 to 3
                 s_ = logical(ones(size(signal_source,1),1));
             end
             
-            if ~(ipip == 9) && ~(ipip == 10) && ipip < 21
+            if ~(ipip == 9 && params.ip==3) && ~(ipip == 10) && ipip < 21
                 
                 if strcmp(params.dimred,'p')
                     %do PCA
@@ -293,6 +293,11 @@ for ipip = params.pips %most successful: ipip 1 to 3
                         %fixed number of pcs
                         npcs(aroi) = ipip-12;
                         var_explained(aroi) = varex(npcs(aroi));
+                    elseif ipip==9 && params.ip == 3
+                        npcs(aroi) = nvoxroi(aroi)*ndim;
+                        try 
+                            var_explained(aroi) = varex(npcs(aroi));
+                        end
                     end
                 end
                 
