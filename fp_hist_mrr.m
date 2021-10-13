@@ -20,7 +20,8 @@ name = {...
     'ip7_champ';...
     'ip7_champ_reg';...
     'ip8_ssd';...
-    'ip7_dics'};
+    'ip7_dics';...
+    'ip7_che'};
 
 labs = {'MIM','MIC','Mean abscoh','mean icoh','absGC','posGC','posGCw'};
 [cb] = cbrewer2('spectral', 11);
@@ -28,7 +29,7 @@ cb1 = cbrewer2('Set1',9);
 
 %%
 
-for iname = [9:12]
+for iname = 19
     
     
     clearvars -except iname name DIRDATA DIRFIG labs cb cb1
@@ -52,6 +53,7 @@ for iname = [9:12]
         switch iname
             case 6
                 iReg = 2;
+                dimred = 'p';
             case 7
                 isnr = 0.5;
             case 8
@@ -72,10 +74,15 @@ for iname = [9:12]
                 ifilt = 'c';
             case 16
                 ifilt = 'cr';
-            case 18 
+            case 18
                 ifilt = 'd';
+                dimred = 'p';   
+            case 19
+                ifilt = 'che';
+                dimred = 'p';
             case 17
                 dimred = 's';
+                
         end
     end
     
@@ -89,7 +96,7 @@ for iname = [9:12]
     for iit= its
         
         try
-            if iname == 18 | iname == 17
+            if iname == 18 | iname == 17 | iname == 6 | iname == 19
                 inname = sprintf('mrr_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_iter%d_%s'...
                     ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,iit,dimred);
             else
@@ -98,13 +105,13 @@ for iname = [9:12]
             end
             
             load([DIRDATA inname '.mat'])
-            
-            MRR{1}(iit,:) = mrr_mim;
-            MRR{2}(iit,:) = mrr_mic;
-            MRR{3}(iit,:) = mrr_aCoh;
-            MRR{4}(iit,:) = mrr_iCoh;
-            MRR{5}(iit,:) = mrr_absgc;
-            MRR{6}(iit,:) = mrr_posgc;
+%             
+%             MRR{1}(iit,:) = mrr_mim;
+%             MRR{2}(iit,:) = mrr_mic;
+%             MRR{3}(iit,:) = mrr_aCoh;
+%             MRR{4}(iit,:) = mrr_iCoh;
+%             MRR{5}(iit,:) = mrr_absgc;
+%             MRR{6}(iit,:) = mrr_posgc;
             
             PR{1}(iit,:) = pr_mim;
             PR{2}(iit,:) = pr_mic;
@@ -113,12 +120,12 @@ for iname = [9:12]
             PR{5}(iit,:) = pr_absgc;
             PR{6}(iit,:) = pr_posgc;
             
-            EM3{1}(iit,:) = em3_mim;
-            EM3{2}(iit,:) = em3_mic;
-            EM3{3}(iit,:) = em3_aCoh;
-            EM3{4}(iit,:) = em3_iCoh;
-            EM3{5}(iit,:) = em3_absgc;
-            EM3{6}(iit,:) = em3_posgc;
+%             EM3{1}(iit,:) = em3_mim;
+%             EM3{2}(iit,:) = em3_mic;
+%             EM3{3}(iit,:) = em3_aCoh;
+%             EM3{4}(iit,:) = em3_iCoh;
+%             EM3{5}(iit,:) = em3_absgc;
+%             EM3{6}(iit,:) = em3_posgc;
             
             
             
@@ -127,22 +134,22 @@ for iname = [9:12]
         end
     end
     
-    for ii = 1:length(MRR)
-        MRR{ii}(a,:) = [];
+    for ii = 1:length(PR)
+%         MRR{ii}(a,:) = [];
         PR{ii}(a,:) = [];
-        EM3{ii}(a,:) = [];
+%         EM3{ii}(a,:) = [];
     end
     
     %%
     
     for im = 2 %measures: MRR, PR, EM3
         
-        for icon = 1:length(MRR) %MIM, MIC, aCoh, iCoh, absgc,posgc,posgc_w 
+        for icon = 1:length(PR) %MIM, MIC, aCoh, iCoh, absgc,posgc,posgc_w 
 
 
             %%
             figure
-            if iname == 15 || iname == 16
+            if iname == 15 || iname == 16 || iname == 19
                 figone(15,25)
             else
                 figone(15,50) 
@@ -169,7 +176,7 @@ for iname = [9:12]
                 npips = 9;
             end
 
-            if iname == 15 || iname == 16 %champ
+            if iname == 15 || iname == 16 || iname == 19%champ
                 pips = [1:3 8];
                 npips = 4;
                 
@@ -216,7 +223,7 @@ for iname = [9:12]
                      cl = [0.8 0.8 0.8];
                 end
 
-                if (iname == 15 || iname == 16) && ipip == 8 
+                if (iname == 15 || iname == 16 || iname == 19) && ipip == 8 
                     ipip1 = 4;
                 elseif iname == 1 && icon > 2 && icon < 5 && ipip > 9
                     ipip1 = ipip-1;
