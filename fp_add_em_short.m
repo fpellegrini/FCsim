@@ -6,7 +6,7 @@ DIRIN = '/home/bbci/data/haufe/Franziska/data/mim_sim4/';
 if ~exist(DIRIN);mkdir(DIRIN); end
 
 %%
-for iname = [7 18 19]
+for iname = [8]
     
     iname
     
@@ -143,7 +143,7 @@ for iname = [7 18 19]
             %%
             
             %save only evaluation parameters and ASR 
-            outname1 = sprintf('%smrr_%s.mat',DIRIN,params.logname);
+            outname1 = sprintf('%smrr_%s_pr.mat',DIRIN,params.logname);
 %             save(outname1,...
 %                 'mrr_mic','pr_mic','hk_mic','em3_mic','em3_mic_s',...
 %                 'mrr_mim','pr_mim','hk_mim','em3_mim','em3_mim_s',...
