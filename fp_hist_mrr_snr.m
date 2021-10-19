@@ -1,7 +1,7 @@
 function fp_hist_mrr_snr
 
 DIRDATA = './mim_sim4/';
-DIRFIG = './figures/mimsim_ana/mim_sim4/Bernstein/';
+DIRFIG = './figures/mimsim_ana/mim_sim4/TRR/';
 if ~exist(DIRFIG); mkdir(DIRFIG); end
 
 name = {...
@@ -27,7 +27,7 @@ name = {...
 labs = {'MIM','MIC','Mean abscoh','mean icoh','absGC','posGC','posGCw'};
 
 im = 2; %measures: MRR, PR, EM3    
-icon = 1; %:length(MRR) %MIM, MIC, aCoh, iCoh, absgc,posgc,posgc_w
+icon = 6; %:length(MRR) %MIM, MIC, aCoh, iCoh, absgc,posgc,posgc_w
 ipip = 3;
 %%
 o=1;
@@ -179,8 +179,11 @@ for iname = [7 1 8]
     titles = {'snr 0.5','snr 0.7','snr 0.9'};
     title(titles{o})
     ylim([-0.75 2])
-    xlabel([labs{icon} ' ' imlab1])
+    if o==1
+        xlabel([labs{icon} ' ' imlab1])
+    end
     grid on
+    set(gca,'ytick',[])
 %     
 %     if o~=1
 %         set(gca,'xtick',[])

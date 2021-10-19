@@ -29,7 +29,7 @@ cb1 = cbrewer2('Set1',9);
 
 %%
 
-for iname = 19
+for iname = 7
     
     
     clearvars -except iname name DIRDATA DIRFIG labs cb cb1
@@ -268,7 +268,7 @@ for iname = 19
             end
 
             ylim([-0.75 2])
-
+%%
             outname = [DIRFIG name{iname} '_' imlab '_' labs{icon}];
             saveas(gcf,outname, 'png')
             close all

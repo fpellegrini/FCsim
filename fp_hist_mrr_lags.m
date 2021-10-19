@@ -25,7 +25,7 @@ name = {...
 labs = {'MIM','MIC','Mean abscoh','mean icoh','absGC','posGC','posGCw'};
 
 im = 2; %measures: MRR, PR, EM3
-icon = 1; %:length(MRR) %MIM, MIC, aCoh, iCoh, absgc,posgc,posgc_w
+icon = 6; %:length(MRR) %MIM, MIC, aCoh, iCoh, absgc,posgc,posgc_w
 ipip = 3; %only third pipeline was calculated 
 %%
 o=1;

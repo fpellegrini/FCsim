@@ -1,7 +1,7 @@
 function fp_hist_mrr_filt
 
 DIRDATA = './mim_sim4/';
-DIRFIG = './figures/mimsim_ana/mim_sim4/Bernstein/';
+DIRFIG = './figures/mimsim_ana/mim_sim4/TRR/';
 if ~exist(DIRFIG); mkdir(DIRFIG); end
 
 name = {...
@@ -27,7 +27,7 @@ name = {...
 labs = {'MIM','MIC','Mean abscoh','mean icoh','absGC','posGC','posGCw'};
 
 im = 2; %measures: MRR, PR, EM3    
-icon = 1; %:length(MRR) %MIM, MIC, aCoh, iCoh, absgc,posgc,posgc_w
+icon = 6; %:length(MRR) %MIM, MIC, aCoh, iCoh, absgc,posgc,posgc_w
 ipip = 3;
 %%
 o=1;
@@ -102,13 +102,13 @@ for iname = [18 1 16 14]
             
             load([DIRDATA inname '.mat'])
             
-            MRR{1}(iit,:) = mrr_mim;
-            MRR{2}(iit,:) = mrr_mic;
-            MRR{3}(iit,:) = mrr_aCoh;
-            MRR{4}(iit,:) = mrr_iCoh;
-            MRR{5}(iit,:) = mrr_absgc;
-            MRR{6}(iit,:) = mrr_posgc;
-            
+%             MRR{1}(iit,:) = mrr_mim;
+%             MRR{2}(iit,:) = mrr_mic;
+%             MRR{3}(iit,:) = mrr_aCoh;
+%             MRR{4}(iit,:) = mrr_iCoh;
+%             MRR{5}(iit,:) = mrr_absgc;
+%             MRR{6}(iit,:) = mrr_posgc;
+%             
             PR{1}(iit,:) = pr_mim;
             PR{2}(iit,:) = pr_mic;
             PR{3}(iit,:) = pr_aCoh;
@@ -116,12 +116,12 @@ for iname = [18 1 16 14]
             PR{5}(iit,:) = pr_absgc;
             PR{6}(iit,:) = pr_posgc;
             
-            EM3{1}(iit,:) = em3_mim;
-            EM3{2}(iit,:) = em3_mic;
-            EM3{3}(iit,:) = em3_aCoh;
-            EM3{4}(iit,:) = em3_iCoh;
-            EM3{5}(iit,:) = em3_absgc;
-            EM3{6}(iit,:) = em3_posgc;
+%             EM3{1}(iit,:) = em3_mim;
+%             EM3{2}(iit,:) = em3_mic;
+%             EM3{3}(iit,:) = em3_aCoh;
+%             EM3{4}(iit,:) = em3_iCoh;
+%             EM3{5}(iit,:) = em3_absgc;
+%             EM3{6}(iit,:) = em3_posgc;
             
             
             
@@ -130,10 +130,10 @@ for iname = [18 1 16 14]
         end
     end
     
-    for ii = 1:length(MRR)
-        MRR{ii}(a,:) = [];
+    for ii = 1:length(PR)
+%         MRR{ii}(a,:) = [];
         PR{ii}(a,:) = [];
-        EM3{ii}(a,:) = [];
+%         EM3{ii}(a,:) = [];
     end
         
 %%
@@ -179,7 +179,10 @@ for iname = [18 1 16 14]
     titles = {'dics','lcmv','champagne','eloreta'};
     title(titles{o})
     ylim([-0.75 2])
-    xlabel([labs{icon} ' ' imlab1])
+    if o==1       
+        xlabel([labs{icon} ' ' imlab1])
+    end
+    set(gca,'ytick',[])
     grid on
 %     
 %     if o~=1
