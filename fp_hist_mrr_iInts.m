@@ -1,7 +1,7 @@
 function fp_hist_mrr_iInts
 
 DIRDATA = './mim_sim4/';
-DIRFIG = './figures/mimsim_ana/mim_sim4/';
+DIRFIG = './figures/mimsim_ana/mim_sim4/TRR/';
 if ~exist(DIRFIG); mkdir(DIRFIG); end
 
 name = {...
@@ -179,8 +179,11 @@ for iname = [2 1 3:5]
     titles = {'1 interaction','2 interactions','3 interactions','4 interactions','5 interactions'};
     title(titles{o})
     ylim([-0.75 2])
-    xlabel([labs{icon} ' ' imlab1])
+    if o==1
+        xlabel([labs{icon} ' ' imlab1])
+    end
     grid on
+    set(gca,'ytick',[])
 %     
 %     if o~=1
 %         set(gca,'xtick',[])

@@ -27,13 +27,13 @@ name = {...
 labs = {'MIM','MIC','Mean abscoh','mean icoh','absGC','posGC','posGCw'};
 
 im = 2; %measures: MRR, PR, EM3    
-icon = 6; %:length(MRR) %MIM, MIC, aCoh, iCoh, absgc,posgc,posgc_w
+icon = 1; %:length(MRR) %MIM, MIC, aCoh, iCoh, absgc,posgc,posgc_w
 ipip = 3;
 %%
 o=1;
 figure
 figone(15,23)
-for iname = [7 1 8]
+for iname = [20 7 1 8]
     
     clearvars -except iname name DIRDATA DIRFIG labs o im icon ipip
     
@@ -56,6 +56,7 @@ for iname = [7 1 8]
                 iReg = 2;
             case 7
                 isnr = 0.5;
+                dimred = 'pr';
             case 8
                 isnr = 0.9;
             case 9
@@ -79,6 +80,9 @@ for iname = [7 1 8]
                 dimred = 'p';
             case 17
                 dimred = 's';
+            case 20
+                dimred = 'p';
+                isnr = 0.3;
         end
     end
     
@@ -92,7 +96,7 @@ for iname = [7 1 8]
     for iit= its
         
         try
-            if iname == 18 || iname == 17
+            if iname == 18 || iname == 17 || iname == 20 || iname == 7
                 inname = sprintf('mrr_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_iter%d_%s'...
                     ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,iit,dimred);
             else
@@ -165,7 +169,7 @@ for iname = [7 1 8]
         cl = [0.8 0.8 0.8];
     end
     
-    subplot(1,3,o)
+    subplot(1,4,o)
     
     if im == 2
         [h, u] = fp_raincloud_plot_a(data1, cl, 1,0.2, 'ks');
@@ -176,7 +180,7 @@ for iname = [7 1 8]
     set(gca, 'Xdir', 'reverse');
     set(gca, 'XLim', [0 1]);
     
-    titles = {'snr 0.5','snr 0.7','snr 0.9'};
+    titles = {'snr 0.3', 'snr 0.5','snr 0.7','snr 0.9'};
     title(titles{o})
     ylim([-0.75 2])
     if o==1

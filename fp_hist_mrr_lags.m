@@ -1,5 +1,5 @@
 DIRDATA = './mim_sim4_lag/';
-DIRFIG = './figures/mimsim_ana/mim_sim4/';
+DIRFIG = './figures/mimsim_ana/mim_sim4/TRR/';
 if ~exist(DIRFIG); mkdir(DIRFIG); end
 
 name = {...
@@ -48,7 +48,7 @@ np = 6;
 its = [1:nit];
 a=[];
 
-%%
+%
 for ilag = 1:5
     for iit= its
         
@@ -92,7 +92,7 @@ for ilag = 1:5
         EM3{ii}(a,:) = [];
     end
     
-    %%
+    %
     
     switch im
         case 1
@@ -135,8 +135,12 @@ for ilag = 1:5
     titles = {'2 ms' ,'4 ms' ,'6 ms','8 ms','10 ms'};
     title(titles{o})
     ylim([-0.75 2])
-    xlabel([labs{icon} ' ' imlab1])
+    if o==1
+        xlabel([labs{icon} ' ' imlab1])
+    end
     grid on
+    set(gca,'ytick',[])
+    
     %
     %     if o~=1
     %         set(gca,'xtick',[])
@@ -146,7 +150,7 @@ for ilag = 1:5
     
 end
 
-%%
+%
 outname = [DIRFIG imlab '_' labs{icon} '_lags'];
 saveas(gcf,outname, 'png')
 close all
