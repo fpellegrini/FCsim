@@ -1,6 +1,7 @@
 function fp_addpip
 
-for iit = 1:100
+fp_addpath
+for iit = 35:100
     
     
     clearvars -except iit
