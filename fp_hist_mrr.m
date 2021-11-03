@@ -21,7 +21,8 @@ name = {...
     'ip7_champ_reg';...
     'ip8_ssd';...
     'ip7_dics';...
-    'ip7_che'};
+    'ip7_che';
+    'ip7_cho'};%20
 
 labs = {'MIM','MIC','Mean abscoh','mean icoh','absGC','posGC','posGCw'};
 [cb] = cbrewer2('spectral', 11);
@@ -29,7 +30,7 @@ cb1 = cbrewer2('Set1',9);
 
 %%
 
-for iname = 7
+for iname = 14
     
     
     clearvars -except iname name DIRDATA DIRFIG labs cb cb1
@@ -82,6 +83,9 @@ for iname = 7
                 dimred = 'p';
             case 17
                 dimred = 's';
+            case 20 
+                dimred = 'p';
+                ifilt = 'cho';
                 
         end
     end
@@ -96,7 +100,7 @@ for iname = 7
     for iit= its
         
         try
-            if iname == 18 | iname == 17 | iname == 6 | iname == 19
+            if iname == 18 | iname == 17 | iname == 6 | iname == 19 | iname == 20 | iname == 7
                 inname = sprintf('mrr_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_iter%d_%s'...
                     ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,iit,dimred);
             else
@@ -149,7 +153,7 @@ for iname = 7
 
             %%
             figure
-            if iname == 15 || iname == 16 || iname == 19
+            if iname == 15 || iname == 16 || iname == 19 || iname == 20
                 figone(15,25)
             else
                 figone(15,50) 
@@ -176,7 +180,7 @@ for iname = 7
                 npips = 9;
             end
 
-            if iname == 15 || iname == 16 || iname == 19%champ
+            if iname == 15 || iname == 16 || iname == 19 || iname == 20%champ
                 pips = [1:3 8];
                 npips = 4;
                 
@@ -223,7 +227,7 @@ for iname = 7
                      cl = [0.8 0.8 0.8];
                 end
 
-                if (iname == 15 || iname == 16 || iname == 19) && ipip == 8 
+                if (iname == 15 || iname == 16 || iname == 19 || iname == 20) && ipip == 8 
                     ipip1 = 4;
                 elseif iname == 1 && icon > 2 && icon < 5 && ipip > 9
                     ipip1 = ipip-1;
@@ -255,11 +259,12 @@ for iname = 7
                 end
 
                 title(xtitles(ipip))
-                if ipip~=1
-                    set(gca,'xtick',[])
+                if ipip==1
+                    xlabel([labs{icon} ' ' imlab1])                   
                 end
 
-                xlabel([labs{icon} ' ' imlab1])
+                set(gca,'ytick',[])
+                grid on
 
                 if (iname == 15 || iname == 16) && ipip == 4
                     break
