@@ -6,7 +6,7 @@ DIRIN = '/home/bbci/data/haufe/Franziska/data/mim_sim4/';
 if ~exist(DIRIN);mkdir(DIRIN); end
 
 %%
-for iname = [8]
+for iname = 15
     
     iname
     
