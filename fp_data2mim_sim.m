@@ -216,7 +216,8 @@ for ipip = params.pips %most successful: ipip 1 to 3
             clear A_ signal_source
             
             if ipip == 9 %baseline: pre-select voxels of true activity
-                A_ = A(:,:,D.sub_ind_roi_region{aroi},:);
+                A_ = A(:, :,D.ind_roi_cortex{aroi},:);
+                A_ = A_(:,:,D.sub_ind_roi_region{aroi},:);
                 
             elseif ipip == 22 %pick central voxel of each region
                 A_ = A(:, :,D.ind_roi_cortex{aroi},:);
@@ -245,7 +246,13 @@ for ipip = params.pips %most successful: ipip 1 to 3
                 s_ = logical(ones(size(signal_source,1),1));
             end
             
-            if ~(ipip == 9 && params.ip==3) && ~(ipip == 10) && ipip < 21
+            if (ipip == 9 && params.ip~=3)|| ipip == 22
+                
+                %baseline and central voxel pipeline
+                signal_roi = cat(1,signal_roi,reshape(signal_source,[],l_epoch,n_trials));
+                npcs(aroi) = nvoxroi(aroi)*ndim;
+ 
+            elseif ~(ipip == 10) && ipip < 21
                 
                 if strcmp(params.dimred,'p')
                     %do PCA
@@ -263,7 +270,7 @@ for ipip = params.pips %most successful: ipip 1 to 3
                     error('Dimred has to be either p or s.')
                 end
                 
-                if params.ip ~= 8
+                if params.ip ~= 8 %for all pca pipelines
                     
                     % variance explained
                     vx_ = cumsum(diag(S).^2)./sum(diag(S).^2);
@@ -318,21 +325,14 @@ for ipip = params.pips %most successful: ipip 1 to 3
                 else
                     %bring signal_roi to the shape of npcs x l_epoch x n_trials
                     signal_roi = cat(1,signal_roi,reshape((signal_roi_(:,1:npcs(aroi)))',[],l_epoch,n_trials));
-                end
-                
-                
-                
-            elseif ipip == 9 || ipip == 22
-                %baseline and central voxel pipeline
-                signal_roi = cat(1,signal_roi,reshape(signal_source,[],l_epoch,n_trials));
-                npcs(aroi) = nvoxroi(aroi)*ndim;
+                end     
                 
             elseif ipip == 10
                 %sumVox
                 signal_roi{aroi} = reshape(signal_source,[],l_epoch,n_trials);
                 
             elseif ipip == 21
-                %sum of activity, then MIM
+                %mean of activity, then MIM
                 signal_roi = cat(1,signal_roi, squeeze(mean(reshape(signal_source,ndim, nvoxroi(aroi),l_epoch,n_trials),2)));
                 npcs(aroi) = ndim;
             end
