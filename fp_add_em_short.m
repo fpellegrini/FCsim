@@ -6,7 +6,7 @@ DIRIN = '/home/bbci/data/haufe/Franziska/data/mim_sim4/';
 if ~exist(DIRIN);mkdir(DIRIN); end
 
 %%
-for iname = 15
+for iname = 8
     
     iname
     
@@ -65,7 +65,7 @@ for iname = 15
             iit
             clearvars -except iInt iReg isnr iss ilag ifilt iit nit iname DIRIN dimred
             
-            if iname == 7 || iname == 18 || iname == 19
+            if iname == 7 || iname == 18 || iname == 19 || iname == 8 
                 inname = sprintf('mim_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_iter%d_%s'...
                 ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,iit,dimred);
             
@@ -78,6 +78,8 @@ for iname = 15
             
             if iname ~= 16
                 pips = 1:numel(MIM);
+            elseif iname == 8 
+                pips = [1:9 21];
             else 
                 pips = [1:3 8];
             end
