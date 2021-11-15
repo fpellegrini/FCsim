@@ -1,7 +1,7 @@
 function fp_hist_mrr_noisemix
 
 DIRDATA = './mim_sim4/';
-DIRFIG = './figures/mimsim_ana/mim_sim4/Bernstein/';
+DIRFIG = './figures/mimsim_ana/mim_sim4/Manuscript/';
 if ~exist(DIRFIG); mkdir(DIRFIG); end
 
 name = {...
@@ -26,16 +26,16 @@ name = {...
 
 labs = {'MIM','MIC','Mean abscoh','mean icoh','absGC','posGC','posGCw'};
 
-im = 1; %measures: MRR, PR, EM3    
+im = 2; %measures: MRR, PR, EM3    
 icon = 6; %:length(MRR) %MIM, MIC, aCoh, iCoh, absgc,posgc,posgc_w
 ipip = 3;
 %%
 o=1;
 figure
-figone(15,30)
+figone(8,18)
 for iname = [9 10 1 11 12]
     
-    clearvars -except iname name DIRDATA DIRFIG labs o im icon ipip
+    clearvars -except iname name DIRDATA DIRFIG labs o im icon ipip xt
     
     %default paramenters
     nit = 100;
@@ -167,24 +167,41 @@ for iname = [9 10 1 11 12]
     
     subplot(1,5,o)
     
-    if im == 2
-        [h, u] = fp_raincloud_plot_a(data1, cl, 1,0.2, 'ks');
-    else
-        [h, u] = fp_raincloud_plot(data1, cl, 1,0.2, 'ks');
-    end
+    [h, u] = fp_raincloud_plot_a(data1, cl, 1,0.2, 'ks');
     view([-90 -90]);
     set(gca, 'Xdir', 'reverse');
     set(gca, 'XLim', [0 1]);
     
     titles = {'0% bn','25% bn','50% bn','75% bn','100% bn'};
-    title(titles{o})
+    htit = title(titles{o});
+    htit.Position(1) = -0.12;
+    set(gca,'ytick',[])
     ylim([-0.75 2])
-    xlabel([labs{icon} ' ' imlab1])
-    grid on
-%     
-%     if o~=1
-%         set(gca,'xtick',[])
-%     end
+    box off
+
+    if o==1
+        xlabel([labs{icon} ' ' imlab1])
+        set(gca,'Clipping','Off')
+        xt = xticks;
+        for ix = xt
+            hu = line([ix ix],[2 -13]);
+            set(hu, 'color',[0.9 0.9 0.9])
+            uistack(hu,'bottom')
+        end
+        hu1 = line([0 0],[2 -13]);
+        set(hu1, 'color',[0 0 0])
+    else
+        set(gca,'xticklabel',{[]})
+        set(gca,'XColor','none','YColor','none','TickDir','out')
+        set(gca,'Clipping','Off')
+        for ix = xt
+            hu = line([ix ix],[2.2 -0.75]);
+            set(hu, 'color',[0.9 0.9 0.9])
+            uistack(hu,'bottom')
+        end
+        hu = line([0 0],[2.2 -0.75]);
+        set(hu, 'color',[0 0 0])
+    end
     
     o=o+1;
     

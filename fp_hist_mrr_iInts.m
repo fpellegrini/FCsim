@@ -1,7 +1,7 @@
 function fp_hist_mrr_iInts
 
 DIRDATA = './mim_sim4/';
-DIRFIG = './figures/mimsim_ana/mim_sim4/TRR/';
+DIRFIG = './figures/mimsim_ana/mim_sim4/Manuscript/';
 if ~exist(DIRFIG); mkdir(DIRFIG); end
 
 name = {...
@@ -26,16 +26,16 @@ name = {...
 
 labs = {'MIM','MIC','Mean abscoh','mean icoh','absGC','posGC','posGCw'};
 
-im = 2; %measures: MRR, PR, EM3    
+im = 2; %measures: MRR, PR, EM3
 icon = 6; %:length(MRR) %MIM, MIC, aCoh, iCoh, absgc,posgc,posgc_w
-ipip = 3; 
+ipip = 3;
 %%
 o=1;
 figure
-figone(15,30)
+figone(8,18)
 for iname = [2 1 3:5]
     
-    clearvars -except iname name DIRDATA DIRFIG labs o im icon ipip
+    clearvars -except iname name DIRDATA DIRFIG labs o im icon ipip xt
     
     %default paramenters
     nit = 100;
@@ -102,13 +102,6 @@ for iname = [2 1 3:5]
             
             load([DIRDATA inname '.mat'])
             
-            MRR{1}(iit,:) = mrr_mim;
-            MRR{2}(iit,:) = mrr_mic;
-            MRR{3}(iit,:) = mrr_aCoh;
-            MRR{4}(iit,:) = mrr_iCoh;
-            MRR{5}(iit,:) = mrr_absgc;
-            MRR{6}(iit,:) = mrr_posgc;
-            
             PR{1}(iit,:) = pr_mim;
             PR{2}(iit,:) = pr_mic;
             PR{3}(iit,:) = pr_aCoh;
@@ -116,42 +109,22 @@ for iname = [2 1 3:5]
             PR{5}(iit,:) = pr_absgc;
             PR{6}(iit,:) = pr_posgc;
             
-            EM3{1}(iit,:) = em3_mim;
-            EM3{2}(iit,:) = em3_mic;
-            EM3{3}(iit,:) = em3_aCoh;
-            EM3{4}(iit,:) = em3_iCoh;
-            EM3{5}(iit,:) = em3_absgc;
-            EM3{6}(iit,:) = em3_posgc;
-            
-            
             
         catch
             a = [a iit];
         end
     end
     
-    for ii = 1:length(MRR)
-        MRR{ii}(a,:) = [];
+    for ii = 1:length(PR)
         PR{ii}(a,:) = [];
-        EM3{ii}(a,:) = [];
     end
-        
-%%
     
-    switch im
-        case 1
-            data1 = MRR{icon}(:,ipip);
-            imlab = 'MRR';
-            imlab1 = 'MRR';
-        case 2
-            data1 = PR{icon}(:,ipip);
-            imlab = 'PR';
-            imlab1 = 'PR';
-        case 3
-            data1 = EM3{icon}(:,ipip);
-            imlab = 'EM';
-            imlab1 = '1-EM';
-    end
+    %%
+    
+    data1 = PR{icon}(:,ipip);
+    imlab = 'PR';
+    imlab1 = 'PR';
+    
     
     if ipip<=np
         cl = [0.8 0.7 0.6];
@@ -167,27 +140,41 @@ for iname = [2 1 3:5]
     
     subplot(1,5,o)
     
-    if im == 2
-        [h, u] = fp_raincloud_plot_a(data1, cl, 1,0.2, 'ks');
-    else
-        [h, u] = fp_raincloud_plot(data1, cl, 1,0.2, 'ks');
-    end
+    [h, u] = fp_raincloud_plot_a(data1, cl, 1,0.2, 'ks');
     view([-90 -90]);
     set(gca, 'Xdir', 'reverse');
     set(gca, 'XLim', [0 1]);
     
     titles = {'1 interaction','2 interactions','3 interactions','4 interactions','5 interactions'};
-    title(titles{o})
+    htit = title(titles{o});
+    htit.Position(1) = -0.12;
+    set(gca,'ytick',[])
     ylim([-0.75 2])
+    box off
+    
     if o==1
         xlabel([labs{icon} ' ' imlab1])
+        set(gca,'Clipping','Off')
+        xt = xticks;
+        for ix = xt
+            hu = line([ix ix],[2 -13]);
+            set(hu, 'color',[0.9 0.9 0.9])
+            uistack(hu,'bottom')
+        end
+        hu1 = line([0 0],[2 -13]);
+        set(hu1, 'color',[0 0 0])
+    else
+        set(gca,'xticklabel',{[]})
+        set(gca,'XColor','none','YColor','none','TickDir','out')
+        set(gca,'Clipping','Off')
+        for ix = xt
+            hu = line([ix ix],[2.2 -0.75]);
+            set(hu, 'color',[0.9 0.9 0.9])
+            uistack(hu,'bottom')
+        end
+        hu = line([0 0],[2.2 -0.75]);
+        set(hu, 'color',[0 0 0])
     end
-    grid on
-    set(gca,'ytick',[])
-%     
-%     if o~=1
-%         set(gca,'xtick',[])
-%     end
     
     o=o+1;
     

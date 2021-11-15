@@ -1,7 +1,7 @@
 function fp_hist_mrr_snr
 
 DIRDATA = './mim_sim4/';
-DIRFIG = './figures/mimsim_ana/mim_sim4/TRR/';
+DIRFIG = './figures/mimsim_ana/mim_sim4/Manuscript/';
 if ~exist(DIRFIG); mkdir(DIRFIG); end
 
 name = {...
@@ -27,15 +27,15 @@ name = {...
 labs = {'MIM','MIC','Mean abscoh','mean icoh','absGC','posGC','posGCw'};
 
 im = 2; %measures: MRR, PR, EM3    
-icon = 1; %:length(MRR) %MIM, MIC, aCoh, iCoh, absgc,posgc,posgc_w
+icon = 6; %:length(MRR) %MIM, MIC, aCoh, iCoh, absgc,posgc,posgc_w
 ipip = 3;
 %%
 o=1;
 figure
-figone(15,23)
+figone(8,18)
 for iname = [20 7 1 8]
     
-    clearvars -except iname name DIRDATA DIRFIG labs o im icon ipip
+    clearvars -except iname name DIRDATA DIRFIG labs o im icon ipip xt
     
     %default paramenters
     nit = 100;
@@ -169,34 +169,46 @@ for iname = [20 7 1 8]
         cl = [0.8 0.8 0.8];
     end
     
-    subplot(1,4,o)
-    
-    if im == 2
-        [h, u] = fp_raincloud_plot_a(data1, cl, 1,0.2, 'ks');
-    else
-        [h, u] = fp_raincloud_plot(data1, cl, 1,0.2, 'ks');
-    end
+    subplot(1,4,o)   
+    [h, u] = fp_raincloud_plot_a(data1, cl, 1,0.2, 'ks');
     view([-90 -90]);
     set(gca, 'Xdir', 'reverse');
     set(gca, 'XLim', [0 1]);
     
-    titles = {'snr 0.3', 'snr 0.5','snr 0.7','snr 0.9'};
-    title(titles{o})
+    titles = {'SNR 0.3', 'SNR 0.5','SNR 0.7','SNR 0.9'};
+    htit = title(titles{o});
+    htit.Position(1) = -0.12;
+    set(gca,'ytick',[])
     ylim([-0.75 2])
+    box off
+    
     if o==1
         xlabel([labs{icon} ' ' imlab1])
+        set(gca,'Clipping','Off')
+        xt = xticks;
+        for ix = xt
+            hu = line([ix ix],[2 -10]);
+            set(hu, 'color',[0.9 0.9 0.9])
+            uistack(hu,'bottom')
+        end
+        hu1 = line([0 0],[2 -10]);
+        set(hu1, 'color',[0 0 0])
+    else
+        set(gca,'xticklabel',{[]})
+        set(gca,'XColor','none','YColor','none','TickDir','out')
+        set(gca,'Clipping','Off')
+        for ix = xt
+            hu = line([ix ix],[2.2 -0.75]);
+            set(hu, 'color',[0.9 0.9 0.9])
+            uistack(hu,'bottom')
+        end
+        hu = line([0 0],[2.2 -0.75]);
+        set(hu, 'color',[0 0 0])
     end
-    grid on
-    set(gca,'ytick',[])
-%     
-%     if o~=1
-%         set(gca,'xtick',[])
-%     end
     
     o=o+1;
     
 end
-
 
 
 

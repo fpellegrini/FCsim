@@ -30,12 +30,12 @@ if nargin < 5
 end
 
 %transform Y axis for better visibility 
-base=50; X = -log(1-X*(1-1/base))/log(base);
+base=100; X = -log(1-X*(1-1/base))/log(base);
 
 % calculate kernel density
 switch density_type
     case 'ks'
-        [f, Xi, u] = ksdensity(X, 'bandwidth', bandwidth);
+        [f, Xi, u] = ksdensity(X, 'bandwidth', bandwidth,'NumPoints',1000);
     case 'rash'
         try
             [Xi, f] = rst_RASH(X);
@@ -47,10 +47,14 @@ switch density_type
 end
 
 % density plot
+f_save = f;
+f(Xi<0 | Xi>1) = [];
+Xi(Xi<0 | Xi>1) = [];
+
 h{1} = area(Xi, f); hold on
 set(h{1}, 'FaceColor', cl);
-set(h{1}, 'EdgeColor', [1 1 1]);
-set(h{1}, 'LineWidth', 2);
+set(h{1}, 'EdgeColor', 'none');
+set(h{1}, 'LineWidth', 0.01);
 plot([0 1],[0 0],'color',[1 1 1],'LineWidth',2)
 
 % make some space under the density plot for the boxplot
@@ -82,7 +86,7 @@ Y(end+1) = mean(X);
 % raindrops
 h{2} = scatter(X, jit - 0.5);
 %h{2} = scatter(X, jit - b/2);
-h{2}.SizeData = 10;
+h{2}.SizeData = 5;
 h{2}.MarkerFaceColor = cl;
 h{2}.MarkerEdgeColor = 'none';
 
@@ -92,26 +96,26 @@ if box_on
     h{3} = rectangle('Position', [Y(1) b/10-(wdth*0.5) Y(2)-Y(1) wdth]);   
     %h{3} = rectangle('Position', [Y(1) -b/2-(wdth*0.5) Y(2)-Y(1) wdth]);
     set(h{3}, 'EdgeColor', g)
-    set(h{3}, 'LineWidth', 2);
+    set(h{3}, 'LineWidth', 1);
     % could also set 'FaceColor' here as Micah does, but I prefer without
     
     % mean line    
-    h{4} = line([Y(3) Y(3)], [b/10-(wdth*0.5) b/10+(wdth*0.5)], 'col', 'k', 'LineWidth', 3);
-    h{5} = line([Y(end) Y(end)], [b/10-(wdth*0.5) b/10+(wdth*0.5)], 'col', 'r', 'LineWidth', 3);
+    h{4} = line([Y(3) Y(3)], [b/10-(wdth*0.5) b/10+(wdth*0.5)], 'col', 'k', 'LineWidth', 1);
+    h{5} = line([Y(end) Y(end)], [b/10-(wdth*0.5) b/10+(wdth*0.5)], 'col', 'r', 'LineWidth', 1);
     %h{4} = line([Y(3) Y(3)], [-b/2-(wdth*0.5) -b/2+(wdth*0.5)], 'col', 'r', 'LineWidth', 2);
     
     % whiskers
     if iqr ~= 0 
-        h{6} = line([Y(2) Y(5)], [b/10 b/10], 'col',g, 'LineWidth', 2);
-        h{7} = line([Y(1) Y(4)], [b/10 b/10], 'col',g, 'LineWidth', 2);
+        h{6} = line([Y(2) Y(5)], [b/10 b/10], 'col',g, 'LineWidth', 1);
+        h{7} = line([Y(1) Y(4)], [b/10 b/10], 'col',g, 'LineWidth', 1);
         %h{5} = line([Y(2) Y(5)], [-b/2 -b/2], 'col', 'k', 'LineWidth', 2);
         %h{6} = line([Y(1) Y(4)], [-b/2 -b/2], 'col', 'k', 'LineWidth', 2);
     end
 end
 
 xlim([0 1])
-xticks = [0 0.5 0.7 0.9 0.95:0.01:1];
-xticks = -log(1-xticks*(1-1/base))/log(base);
-xTickLabels = [0 0.5 0.7 0.9 0.95:0.01:1];
+xticks1 = [0 0.5 0.7 0.9 0.95 0.97:0.01:1];
+xticks = -log(1-xticks1*(1-1/base))/log(base);
+xTickLabels = xticks1;
 % xTickLabels = -log(1-xTickLabels*(1-1/base))/log(base);
 set(gca,'xtick',xticks,'xticklabels',xTickLabels);
