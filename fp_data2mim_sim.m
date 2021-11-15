@@ -10,9 +10,9 @@ if ~exist(DIROUT1);mkdir(DIROUT1); end
 if params.ip == 1 %default version 
     params.pips = 1:22;
 elseif strcmp(params.ifilt(1),'c') %with champaign
-    params.pips = [1:3 8];
-elseif params.ip == 8 
-    params.pips = 1:6;
+    params.pips = [1:3 9];%1 to 3 fixed PCs and truevox
+elseif params.ip == 3 ||  params.ip == 8 
+    params.pips = [1:6 9];
 else % run only fixed, 90% and 99% pipelines and baseline
     params.pips = 1:9;
 end
