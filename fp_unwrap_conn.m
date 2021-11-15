@@ -1,8 +1,9 @@
-function [MIM_, MIC_, DIFFGC_, iCOH_, aCOH_] = fp_unwrap_conn(conn,nroi,filt,PCA_inds)
+function [MIM_, MIC_, GC_, DIFFGC_, iCOH_, aCOH_] = fp_unwrap_conn(conn,nroi,filt,PCA_inds)
 
 %initialize output variables 
 MIM_ = [];
 MIC_ = [];
+GC=[];
 DIFFGC_ = [];
 iCOH_ =[];
 aCOH_ = [];
@@ -24,6 +25,10 @@ for iroi = 1:nroi
         if isfield(conn,'TRGC')
             DIFFGC_(iroi,jroi) = mean(squeeze(conn.TRGC(filt.band_inds,iinds,1) - conn.TRGC(filt.band_inds,iinds,2)));
             DIFFGC_(jroi,iroi) = -DIFFGC_(iroi,jroi);
+        end
+        if isfield(conn,'GC') 
+           GC_(iroi,jroi) = mean(squeeze(conn.GC(filt.band_inds,iinds,1) - conn.GC(filt.band_inds,iinds,2)));
+           GC_(jroi,iroi) = -GC_(iroi,jroi);
         end
     end
 end

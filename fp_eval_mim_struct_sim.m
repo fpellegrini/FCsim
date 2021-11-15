@@ -2,7 +2,7 @@ function fp_eval_mim_struct_sim(ip)
 
 fp_addpath
 
-DIRLOG ='/home/bbci/data/haufe/Franziska/log/mim_sim4/';
+DIRLOG ='/home/bbci/data/haufe/Franziska/log/mim_sim5/';
 if ~exist(DIRLOG); mkdir(DIRLOG); end
 
 rng('shuffle')

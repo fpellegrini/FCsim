@@ -1,9 +1,9 @@
 function fp_data2mim_sim(params)
 
 % define folders for saving results
-DIROUT = '/home/bbci/data/haufe/Franziska/data/mim_sim4/';
+DIROUT = '/home/bbci/data/haufe/Franziska/data/mim_sim5/';
 if ~exist(DIROUT);mkdir(DIROUT); end
-DIROUT1 = '/home/bbci/data/haufe/Franziska/data/mim_save4/';
+DIROUT1 = '/home/bbci/data/haufe/Franziska/data/mim_save5/';
 if ~exist(DIROUT1);mkdir(DIROUT1); end
 
 %define which pipelines run with this configuration
@@ -150,12 +150,15 @@ elseif strcmp(params.ifilt,'cho') %chanp homo
     %estimate noise_cov
     Y = mean(signal_sensor,3);
     normalize_constant = norm(Y*Y','fro');
-    [~,~,noise_cov,~,~,~,~,~,~]=nut_reg_vbfa(Y,5,150,0);    
+    [~,~,noise_cov,~,~,~,~,~,~]=nut_reg_vbfa(Y,5,150,0);   
+    noise_cov = eye(n_sensors) * mean(diag(noise_cov));
     noise_cov = noise_cov / normalize_constant;
     
     L_perm = permute(L_backward,[1 3 2]); 
+    L_perm = L_perm / normalize_constant;
+    signal_sensor_n = signal_sensor./normalize_constant;
     
-    [~,~,~,~,W_Champ_Homoscedastic]= Champagne_Homoscedastic(L_perm(:,:),signal_sensor(:,:),...
+    [~,~,~,~,W_Champ_Homoscedastic]= Champagne_Homoscedastic(L_perm(:,:),signal_sensor_n(:,:),...
         'noise_cov',noise_cov,'noise_update_mode',1,'max_num_iterations',100,...
         'threshold_error',eps,'print_results',0,'print_figures',0);
 
@@ -196,7 +199,7 @@ for ipip = params.pips %most successful: ipip 1 to 3
     %10: sumVox
     %11: 90% corrected
     %12: 99% corrected
-    %13 to 20: equal to 1 to 8 but with zscoring
+    %13 to 20: equal to 1 to 8 but WITHOUT zscoring
     %21: sum, then MIM
     %22: central voxel
     
@@ -234,7 +237,7 @@ for ipip = params.pips %most successful: ipip 1 to 3
             %project sensor signal to voxels at the current roi (aroi)
             signal_source = A2{aroi}' * signal_sensor(:,:);
             
-            if ipip > 12 && ipip < 21 %zscoring pipelines
+            if ipip < 13 && ipip > 20 %zscoring all pipelines but 13 to 20 
                 signal_source = zscore(signal_source);
             end
             
@@ -357,12 +360,12 @@ for ipip = params.pips %most successful: ipip 1 to 3
 %             if ipip > 20
 %                 output = {'MIM','MIC','COH'};
 %             else
-            output = {'MIM','MIC','TRGC','COH'};
+            output = {'MIM','MIC','GC','TRGC','COH'};
 %             end
             conn = data2sctrgcmim(signal_roi, fres,30, 0,0, [], inds, output,0);
             
             % extract measures out of the conn struct
-            [MIM_, MIC_, DIFFGC_, iCOH_, aCOH_] = fp_unwrap_conn(conn,numel(npcs),filt,PCA_inds);
+            [MIM_, MIC_, GC_, DIFFGC_, iCOH_, aCOH_] = fp_unwrap_conn(conn,numel(npcs),filt,PCA_inds);
             
             if strcmp(params.ifilt(1),'c')
                 % fill active rois again into the full nroixnroi structure
@@ -375,6 +378,10 @@ for ipip = params.pips %most successful: ipip 1 to 3
                 mic = zeros(D.nroi,D.nroi);
                 mic(active_rois,active_rois) = MIC_;
                 MIC_ = mic;
+                
+                gc = zeros(D.nroi,D.nroi);
+                gc(active_rois,active_rois) = GC_;
+                GC_ = gc;
                 
                 diffgc = zeros(D.nroi,D.nroi);
                 diffgc(active_rois,active_rois) = DIFFGC_;
@@ -419,6 +426,7 @@ for ipip = params.pips %most successful: ipip 1 to 3
             
             if ipip ~= 11 && ipip ~= 12 
                 DIFFGC{ipip} = DIFFGC_;
+                GC{ipip} = GC_;
             end
             
             if ipip ~= 9 
@@ -443,8 +451,7 @@ for ipip = params.pips %most successful: ipip 1 to 3
         
         
         %% Evaluate
-        [pr_mic(ipip)] = fp_mrr_hk_short(MIC_,iroi_seed,iroi_tar,1);
-        
+        [pr_mic(ipip)] = fp_mrr_hk_short(MIC_,iroi_seed,iroi_tar,1);        
         [pr_mim(ipip)] = fp_mrr_hk_short(MIM_,iroi_seed,iroi_tar,1);        
                 
         
@@ -455,13 +462,20 @@ for ipip = params.pips %most successful: ipip 1 to 3
             if ipip ~= 11 && ipip ~= 12 
                 %absolute value of gc and only triu is considered. Metric neglects
                 %the direction of the interaction
-                [pr_absgc(ipip)] = fp_mrr_hk_short(abs(DIFFGC_),iroi_seed,iroi_tar,1);
+                [pr_abstrgc(ipip)] = fp_mrr_hk_short(abs(DIFFGC_),iroi_seed,iroi_tar,1);
+                [pr_absgc(ipip)] = fp_mrr_hk_short(abs(GC_),iroi_seed,iroi_tar,1);
                 
                 %only positive part of gc is submitted and the whole matrix is
                 %considered. Metric that is strongly influenced by the direction of
                 %the effect
+                clear pos_difftrgc
+                pos_difftrgc = DIFFGC_;
+                pos_difftrgc(pos_difftrgc< 0) = 0;
+                [pr_postrgc(ipip)]...
+                    = fp_mrr_hk_short(pos_difftrgc,iroi_seed,iroi_tar,0);
+                
                 clear pos_diffgc
-                pos_diffgc = DIFFGC_;
+                pos_diffgc = GC_;
                 pos_diffgc(pos_diffgc< 0) = 0;
                 [pr_posgc(ipip)]...
                     = fp_mrr_hk_short(pos_diffgc,iroi_seed,iroi_tar,0);
@@ -471,7 +485,7 @@ for ipip = params.pips %most successful: ipip 1 to 3
         end
               
         
-        clear MIM_ MIC_ DIFFGC_ aCOH_ iCOH_
+        clear MIM_ MIC_ DIFFGC_ GC_ aCOH_ iCOH_
         
     catch
         errorpipeline = [errorpipeline ipip];
@@ -494,5 +508,7 @@ save(outname1,...
     'pr_iCoh',...
     'pr_absgc',...
     'pr_posgc',...
+    'pr_abstrgc',...
+    'pr_postrgc',...
     '-v7.3')
 

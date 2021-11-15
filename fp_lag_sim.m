@@ -1,9 +1,9 @@
 function fp_lag_sim(params)
 
 % define folders for saving results
-DIROUT = '/home/bbci/data/haufe/Franziska/data/mim_sim4_lag/';
+DIROUT = '/home/bbci/data/haufe/Franziska/data/mim_sim5_lag/';
 if ~exist(DIROUT);mkdir(DIROUT); end
-DIROUT1 = '/home/bbci/data/haufe/Franziska/data/mim_save4_lag/';
+DIROUT1 = '/home/bbci/data/haufe/Franziska/data/mim_save5_lag/';
 if ~exist(DIROUT1);mkdir(DIROUT1); end
 
 %% signal generation
@@ -44,7 +44,7 @@ for ilag = 1:5 %in ms: 2,4,6,8,10
     
     %select only voxels that belong to any roi
     L_backward = L(:, D.ind_cortex, :);
-    ndim = size(L_backward,3);
+    ndim = size(L_backward,3);    
     
     %construct source filter
     if strcmp(params.ifilt,'e') %eloreta
@@ -52,7 +52,7 @@ for ilag = 1:5 %in ms: 2,4,6,8,10
         A = squeeze(mkfilt_eloreta_v2(L_backward,reg_param));
         A = permute(A,[1, 3, 2]);
         
-    elseif strcmp(params.ifilt,'l') %lcmv
+    elseif strcmp(params.ifilt,'l') %lcmv (default)
         cCS = cov(signal_sensor(:,:)');
         reg = 0.05*trace(cCS)/length(cCS);
         Cr = cCS + reg*eye(size(cCS,1));
@@ -77,8 +77,61 @@ for ilag = 1:5 %in ms: 2,4,6,8,10
         sigu = regu*eye(n_sensors);
         L_perm = permute(L_backward,[1 3 2]);
         
-        [~,~,w] = awsm_champ(signal_sensor(:, :), L_perm(:, :), sigu, 200, 3, 2, 0);
+        [~,~,w] = awsm_champ(signal_sensor(:, :), L_perm(:, :), sigu, 100, 3, 2, 0);
         A = real(reshape(w',size(L_perm)));
+        
+        
+    elseif strcmp(params.ifilt,'che') %champ hetero
+        
+        %estimate noise_cov
+        Y = mean(signal_sensor,3);
+        normalize_constant = norm(Y*Y','fro');
+        [~,~,noise_cov,~,~,~,~,~,~]=nut_reg_vbfa(Y,5,150,0);
+        noise_cov = noise_cov / normalize_constant;
+        
+        L_perm = permute(L_backward,[1 3 2]);
+        
+        [~,~,w_hetero,~,~,~,~]= champ_heteroscedastic_3D(signal_sensor(:, :),...
+            L_perm(:, :),noise_cov,100,ndim,0,0,0,3,1);
+        
+        A = real(reshape(w_hetero',size(L_perm)));
+        
+    elseif strcmp(params.ifilt,'cho') %chanp homo
+        
+        %estimate noise_cov
+        Y = mean(signal_sensor,3);
+        normalize_constant = norm(Y*Y','fro');
+        [~,~,noise_cov,~,~,~,~,~,~]=nut_reg_vbfa(Y,5,150,0);
+        noise_cov = eye(n_sensors) * mean(diag(noise_cov));
+        noise_cov = noise_cov / normalize_constant;
+        
+        L_perm = permute(L_backward,[1 3 2]);
+        L_perm = L_perm / normalize_constant;
+        signal_sensor_n = signal_sensor./normalize_constant;
+        
+        [~,~,~,~,W_Champ_Homoscedastic]= Champagne_Homoscedastic(L_perm(:,:),signal_sensor_n(:,:),...
+            'noise_cov',noise_cov,'noise_update_mode',1,'max_num_iterations',100,...
+            'threshold_error',eps,'print_results',0,'print_figures',0);
+        
+        A = real(reshape(W_Champ_Homoscedastic',size(L_perm)));
+        
+    elseif strcmp(params.ifilt,'cfun')
+        
+        %estimate noise_cov
+        Y = mean(signal_sensor,3);
+        normalize_constant = norm(Y*Y','fro');
+        [~,~,noise_cov,~,~,~,~,~,~]=nut_reg_vbfa(Y,5,150,0);
+        noise_cov = noise_cov / normalize_constant;
+        
+        L_perm = permute(L_backward,[1 3 2]);
+        
+        [~,~,~,~,W_FUN]= FUN_learning_func_3D(L_perm(:,:),signal_sensor(:,:),...
+            'noise_cov',noise_cov,'noise_update_mode','Diagonal',...
+            'source_update_mode','Diagonal','max_num_iterations',100,...
+            'threshold_error',eps,'print_results',0,'print_figures',0);
+        
+        
+        A = real(reshape(W_FUN',size(L_perm)));
         
     end
     
@@ -119,8 +172,10 @@ for ilag = 1:5 %in ms: 2,4,6,8,10
                 else
                     s_ = logical(ones(size(signal_source,1),1));
                 end
-                
-                
+               
+                %zscoring
+                signal_source = zscore(signal_source);
+                               
                 %do PCA
                 clear signal_roi_ S
                 [signal_roi_,S,~] = svd(double(signal_source(s_,:))','econ');
@@ -169,11 +224,11 @@ for ilag = 1:5 %in ms: 2,4,6,8,10
             clear inds PCA_inds
             [inds, PCA_inds] = fp_npcs2inds(npcs);
             
-            output = {'MIM','MIC','TRGC','COH'};
+            output = {'MIM','MIC','GC','TRGC','COH'};
             conn = data2sctrgcmim(signal_roi, fres,30, 0,0, [], inds, output,0);
             
             % extract measures out of the conn struct
-            [MIM_, MIC_, DIFFGC_, iCOH_, aCOH_] = fp_unwrap_conn(conn,numel(npcs),filt,PCA_inds);
+            [MIM_, MIC_, GC_, DIFFGC_, iCOH_, aCOH_] = fp_unwrap_conn(conn,numel(npcs),filt,PCA_inds);
             
             if strcmp(params.ifilt,'c') || strcmp(params.ifilt,'cr')
                 % fill active rois again into the full nroixnroi structure
@@ -213,6 +268,7 @@ for ilag = 1:5 %in ms: 2,4,6,8,10
             iCOH{ipip} = iCOH_;
             
             DIFFGC{ipip} = DIFFGC_;
+            GC{ipip} = GC_;
             
             try
                 to_save{ipip}.npcs = npcs;
@@ -230,49 +286,42 @@ for ilag = 1:5 %in ms: 2,4,6,8,10
             end
         end
         
-        
-        
-        
         %% Evaluate
+        [pr_mic(ipip)] = fp_mrr_hk_short(MIC_,iroi_seed,iroi_tar,1);        
+        [pr_mim(ipip)] = fp_mrr_hk_short(MIM_,iroi_seed,iroi_tar,1);        
+                
         
-        [mrr_mic(ipip), pr_mic(ipip),hk_mic(ipip),em1_mic(ipip),em2_mic(ipip),em3_mic(ipip)] ...
-            = fp_mrr_hk(MIC_,iroi_seed,iroi_tar,1);
-        [mrr_mim(ipip), pr_mim(ipip),hk_mim(ipip),em1_mim(ipip),em2_mim(ipip),em3_mim(ipip)] ...
-            = fp_mrr_hk(MIM_,iroi_seed,iroi_tar,1);
+        if ipip ~= 10
+            [pr_aCoh(ipip)] = fp_mrr_hk_short(aCOH_,iroi_seed,iroi_tar,1);                  
+            [pr_iCoh(ipip)] = fp_mrr_hk_short(iCOH_,iroi_seed,iroi_tar,1);
+                   
+            if ipip ~= 11 && ipip ~= 12 
+                %absolute value of gc and only triu is considered. Metric neglects
+                %the direction of the interaction
+                [pr_abstrgc(ipip)] = fp_mrr_hk_short(abs(DIFFGC_),iroi_seed,iroi_tar,1);
+                [pr_absgc(ipip)] = fp_mrr_hk_short(abs(GC_),iroi_seed,iroi_tar,1);
+                
+                %only positive part of gc is submitted and the whole matrix is
+                %considered. Metric that is strongly influenced by the direction of
+                %the effect
+                clear pos_difftrgc
+                pos_difftrgc = DIFFGC_;
+                pos_difftrgc(pos_difftrgc< 0) = 0;
+                [pr_postrgc(ipip)]...
+                    = fp_mrr_hk_short(pos_difftrgc,iroi_seed,iroi_tar,0);
+                
+                clear pos_diffgc
+                pos_diffgc = GC_;
+                pos_diffgc(pos_diffgc< 0) = 0;
+                [pr_posgc(ipip)]...
+                    = fp_mrr_hk_short(pos_diffgc,iroi_seed,iroi_tar,0);
+                
+            end
+            
+        end
+              
         
-        [mrr_aCoh(ipip), pr_aCoh(ipip),hk_aCoh(ipip),em1_aCoh(ipip),em2_aCoh(ipip),em3_aCoh(ipip)] ...
-            = fp_mrr_hk(aCOH_,iroi_seed,iroi_tar,1);
-        [mrr_iCoh(ipip), pr_iCoh(ipip),hk_iCoh(ipip),em1_iCoh(ipip),em2_iCoh(ipip),em3_iCoh(ipip)] ...
-            = fp_mrr_hk(iCOH_,iroi_seed,iroi_tar,1);
-        
-        %absolute value of gc and only triu is considered. Metric neglects
-        %the direction of the interaction
-        [mrr_absgc(ipip), pr_absgc(ipip),hk_absgc(ipip),...
-            em1_absgc(ipip),em2_absgc(ipip),em3_absgc(ipip)] ...
-            = fp_mrr_hk(abs(DIFFGC_),iroi_seed,iroi_tar,1);
-        
-        %only positive part of gc is submitted and the whole matrix is
-        %considered. Metric that is strongly influenced by the direction of
-        %the effect
-        clear pos_diffgc
-        pos_diffgc = DIFFGC_;
-        pos_diffgc(pos_diffgc< 0) = 0;
-        [mrr_posgc(ipip), pr_posgc(ipip),hk_posgc(ipip),...
-            em1_posgc(ipip),em2_posgc(ipip),em3_posgc(ipip)] ...
-            = fp_mrr_hk(pos_diffgc,iroi_seed,iroi_tar,0);
-        
-        %wrong directions
-        clear pos_diffgc_w
-        pos_diffgc_w = -DIFFGC_;
-        pos_diffgc_w(pos_diffgc_w < 0) = 0;
-        [mrr_posgc_w(ipip), pr_posgc_w(ipip),hk_posgc_w(ipip),...
-            em1_posgc_w(ipip),em2_posgc_w(ipip),em3_posgc_w(ipip)]...
-            = fp_mrr_hk(pos_diffgc_w,iroi_seed,iroi_tar,0);
-        
-        
-        
-        clear MIM_ MIC_ DIFFGC_ aCOH_ iCOH_
-        
+        clear MIM_ MIC_ DIFFGC_ GC_ aCOH_ iCOH_
         
     end %pips
     
@@ -283,16 +332,17 @@ for ilag = 1:5 %in ms: 2,4,6,8,10
     save(outname,'-v7.3')
     
     %save only evaluation parameters
-    outname1 = sprintf('%smrr_%s_lag%s.mat',DIROUT,params.logname,num2str(ilag));
+    outname1 = sprintf('%spr_%s_lag%s.mat',DIROUT,params.logname,num2str(ilag));
     save(outname1,...
-        'mrr_mic','pr_mic','hk_mic','em1_mic','em2_mic','em3_mic',...
-        'mrr_mim','pr_mim','hk_mim','em1_mim','em2_mim','em3_mim',...
-        'mrr_aCoh','pr_aCoh','hk_aCoh','em1_aCoh','em2_aCoh','em3_aCoh',...
-        'mrr_iCoh','pr_iCoh','hk_iCoh','em1_iCoh','em2_iCoh','em3_iCoh',...
-        'mrr_absgc','pr_absgc','hk_absgc','em1_absgc','em2_absgc','em3_absgc',...
-        'mrr_posgc','pr_posgc','hk_posgc','em1_posgc','em2_posgc','em3_posgc',...
-        'mrr_posgc_w','pr_posgc_w','hk_posgc_w','em1_posgc_w','em2_posgc_w','em3_posgc_w',...
-        '-v7.3')
+    'pr_mic',...
+    'pr_mim',...
+    'pr_aCoh',...
+    'pr_iCoh',...
+    'pr_absgc',...
+    'pr_posgc',...
+    'pr_abstrgc',...
+    'pr_postrgc',...
+    '-v7.3')
     
 end
 

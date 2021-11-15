@@ -2,7 +2,7 @@ function fp_eval_lagsim(ip)
 
 fp_addpath
 
-DIRLOG ='/home/bbci/data/haufe/Franziska/log/mim_sim4_lag/';
+DIRLOG ='/home/bbci/data/haufe/Franziska/log/mim_sim5_lag/';
 if ~exist(DIRLOG); mkdir(DIRLOG); end
 
 rng('shuffle')
