@@ -25,7 +25,7 @@ for iInt = nInteractions
                         ifilt = filtertype{ifi};
                         
                         iit
-                        %create logfile for parallization
+                        %create logfile for parallelization
                         logname = sprintf('iInt%d_iReg%d_snr0%d_iss0%d_filt%s_iter%d'...
                             ,iInt,iReg,isnr*10,iss*10,ifilt,iit);
                         %
