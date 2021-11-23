@@ -127,9 +127,15 @@ sig = sig ./ norm(sig_f, 'fro');
 
 %brain noise on sensor level 
 if no_reload
-    brain_noise = L_noise * noise_sources';
-    brain_noise_f = (filtfilt(bband, aband, brain_noise'))';
-    brain_noise = brain_noise ./ norm(brain_noise_f, 'fro');
+    try
+        brain_noise = L_noise * noise_sources';
+        brain_noise_f = (filtfilt(bband, aband, brain_noise'))';
+        brain_noise = brain_noise ./ norm(brain_noise_f, 'fro');
+    catch
+        size(L_noise)
+        size(noise_sources')
+    end
+        
 end
 
 %white noise on sensor level (sensor noise) 
