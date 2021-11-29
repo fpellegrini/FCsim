@@ -1,7 +1,7 @@
 function fp_figure2A
 
-DIRDATA = './mim_sim4/';
-DIRFIG = './figures/mimsim_ana/mim_sim4/Manuscript/';
+DIRDATA = './mim_sim5/';
+DIRFIG = './figures/mimsim_ana/mim_sim5/Manuscript/';
 if ~exist(DIRFIG); mkdir(DIRFIG); end
 
 name = {...
@@ -24,7 +24,7 @@ name = {...
     'ip8_ssd';...
     'ip7_dics'};
 
-labs = {'MIM','MIC','Coherence','iCOH','TRGC-det','TRGC-dir','posGCw'};
+labs = {'MIM','MIC','Coherence','iCOH','GC-det','GC-dir','TRGC-det','TRGC-dir'};
 %%
 iname = 1;
 
@@ -35,48 +35,11 @@ clearvars -except iname name DIRDATA DIRFIG labs
 nit = 100;
 iInt = 2;
 iReg=1;
-isnr=0.7;
+isnr=0.6;
 iss = 0.5;
 ilag=2;
 ifilt='l';
-
-if iname==2
-    iInt = 1;
-elseif iname>2 && iname<6
-    iInt = iname;
-else
-    switch iname
-        case 6
-            iReg = 2;
-        case 7
-            isnr = 0.5;
-        case 8
-            isnr = 0.9;
-        case 9
-            iss=0;
-        case 10
-            iss = 0.25;
-        case 11
-            iss = 0.75;
-        case 12
-            iss = 1;
-        case 13
-            ilag = 1;
-        case 14
-            ifilt = 'e';
-        case 15
-            ifilt = 'c';
-        case 16
-            ifilt = 'cr';
-        case 18
-            ifilt = 'd';
-        case 17
-            dimred = 's';
-    end
-end
-
-
-np = 6;
+dimred = 'p';
 
 its = [1:nit];
 a=[];
@@ -86,13 +49,13 @@ im = 2; %measure: PR
 for iit= its
     
     try
-        if iname == 18 | iname == 17
-            inname = sprintf('mrr_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_iter%d_%s'...
-                ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,iit,dimred);
-        else
-            inname = sprintf('mrr_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_iter%d'...
-                ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,iit);
-        end
+%         if iname == 18 | iname == 17
+        inname = sprintf('pr_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_%s_iter%d'...
+                ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,dimred, iit);
+%         else
+%             inname = sprintf('mrr_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_iter%d'...
+%                 ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,iit);
+%         end
         
         load([DIRDATA inname '.mat'])
         
@@ -102,7 +65,8 @@ for iit= its
         PR{4}(iit,:) = pr_iCoh;
         PR{5}(iit,:) = pr_absgc;
         PR{6}(iit,:) = pr_posgc;
-        PR{7}(iit,:) = pr_posgc_w;
+        PR{7}(iit,:) = pr_abstrgc;
+        PR{8}(iit,:) = pr_postrgc;
         
     catch
         a = [a iit];
@@ -116,19 +80,18 @@ end
 %%
 
 figure
-figone(8,18)
+figone(8,24)
 ipip = 3;
 oo = 1; 
-for icon = [3 4 1 2 5 6] %Coherence, iCOH, MIM, MIC, absgc,posgc
+for icon = [3 4 1 2 5 6 7 8 ] %Coherence, iCOH, MIM, MIC, absgc,posgc, abstrgc, postrgc
     
     data1 = PR{icon}(:,ipip);
-    imlab = 'PR';
     imlab1 = 'PR';
     
     cl = [0.8 0.7 0.6];
     
     
-    subplot(1,6,oo)
+    subplot(1,8,oo)
     
     [h, u] = fp_raincloud_plot_a(data1, cl, 1,0.2, 'ks');
     view([-90 -90]);
