@@ -132,8 +132,8 @@ if no_reload
         brain_noise_f = (filtfilt(bband, aband, brain_noise'))';
         brain_noise = brain_noise ./ norm(brain_noise_f, 'fro');
     catch
-        size(L_noise)
-        size(noise_sources')
+        iroi_seed 
+        iroi_tar
     end
         
 end
