@@ -67,17 +67,17 @@ elseif ip == 7
     SNR = 0.6;
     noise_mix = 0.5;
     nlag = 2;
-    filtertype= {'e','cr','d'}; %'c','che','cfun','cho'
+    filtertype= {'e','cr','d','cho'}; %'c','che','cfun'
     dimred = 'p';
     
-elseif ip == 8 
-    %ssd instead of pca
-    nInteractions = 2;
-    nRegionInts = 1;
-    SNR = 0.6;
-    noise_mix = 0.5;
-    nlag = 2;
-    filtertype= {'l'};
-    dimred = 's'; %ssd 
+% elseif ip == 8 
+%     %ssd instead of pca
+%     nInteractions = 2;
+%     nRegionInts = 1;
+%     SNR = 0.6;
+%     noise_mix = 0.5;
+%     nlag = 2;
+%     filtertype= {'l'};
+%     dimred = 's'; %ssd 
     
 end
