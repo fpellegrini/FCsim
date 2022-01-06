@@ -45,7 +45,7 @@ for iROI = 1:nroi
     ctr_ind_cortex(iROI) = ctr_ind_roi{iROI};
 end
 
-%maps roi indeices to voxels 
+%maps roi indices to voxels 
 nvox = length(ind_cortex);
 roi2vox = zeros(nvox,1); 
 for iroi = 1:nroi 
