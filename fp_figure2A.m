@@ -136,9 +136,12 @@ for icon = [3 4 1 2 5 6 7 8 ] %Coherence, iCOH, MIM, MIC, absgc,posgc, abstrgc, 
     
 end
 
-%
+
 outname = [DIRFIG 'figure2A.eps'];
 print(outname,'-depsc');
+% %%
+% outname = [DIRFIG 'figure2A'];
+% export_fig(outname, ['-r' '150'], '-a2', '-transparent'); 
 close all
 
 
