@@ -3,7 +3,7 @@ function [MIM_, MIC_, GC_, DIFFGC_, iCOH_, aCOH_] = fp_unwrap_conn(conn,nroi,fil
 %initialize output variables 
 MIM_ = [];
 MIC_ = [];
-GC=[];
+GC_=[];
 DIFFGC_ = [];
 iCOH_ =[];
 aCOH_ = [];
