@@ -1,7 +1,7 @@
 function fp_hist_mrr_noisemix
 
-DIRDATA = './mim_sim4/';
-DIRFIG = './figures/mimsim_ana/mim_sim4/Manuscript/';
+DIRDATA = './mim_sim5/';
+DIRFIG = './figures/mimsim_ana/mim_sim5/Manuscript/';
 if ~exist(DIRFIG); mkdir(DIRFIG); end
 
 name = {...
@@ -24,27 +24,28 @@ name = {...
     'ip8_ssd';...
     'ip7_dics'};
 
-labs = {'MIM','MIC','Mean abscoh','mean icoh','absGC','posGC','posGCw'};
+labs = {'MIM','MIC','Coherence','iCOH','GC-det','GC-dir','TRGC-det','TRGC-dir'};
 
-im = 2; %measures: MRR, PR, EM3    
-icon = 6; %:length(MRR) %MIM, MIC, aCoh, iCoh, absgc,posgc,posgc_w
+im = 2; %measures: MRR, PR, EM3
 ipip = 3;
 %%
+icon = 1; %labs = {'MIM','MIC','Coherence','iCOH','GC-det','GC-dir','TRGC-det','TRGC-dir'};
 o=1;
 figure
 figone(8,18)
 for iname = [9 10 1 11 12]
     
-    clearvars -except iname name DIRDATA DIRFIG labs o im icon ipip xt
+    clearvars -except iname name DIRDATA DIRFIG labs o im icon ipip xt mean_pr
     
     %default paramenters
     nit = 100;
     iInt = 2;
     iReg=1;
-    isnr=0.7;
+    isnr=0.6;
     iss = 0.5;
     ilag=2;
     ifilt='l';
+    dimred = 'p';
     
     if iname==2
         iInt = 1;
@@ -91,67 +92,31 @@ for iname = [9 10 1 11 12]
     %%
     for iit= its
         
-        try
-            if iname == 18 || iname == 17
-                inname = sprintf('mrr_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_iter%d_%s'...
-                    ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,iit,dimred);
-            else
-                inname = sprintf('mrr_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_iter%d'...
-                    ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,iit);
-            end
-            
-            load([DIRDATA inname '.mat'])
-            
-            MRR{1}(iit,:) = mrr_mim;
-            MRR{2}(iit,:) = mrr_mic;
-            MRR{3}(iit,:) = mrr_aCoh;
-            MRR{4}(iit,:) = mrr_iCoh;
-            MRR{5}(iit,:) = mrr_absgc;
-            MRR{6}(iit,:) = mrr_posgc;
-            
-            PR{1}(iit,:) = pr_mim;
-            PR{2}(iit,:) = pr_mic;
-            PR{3}(iit,:) = pr_aCoh;
-            PR{4}(iit,:) = pr_iCoh;
-            PR{5}(iit,:) = pr_absgc;
-            PR{6}(iit,:) = pr_posgc;
-            
-            EM3{1}(iit,:) = em3_mim;
-            EM3{2}(iit,:) = em3_mic;
-            EM3{3}(iit,:) = em3_aCoh;
-            EM3{4}(iit,:) = em3_iCoh;
-            EM3{5}(iit,:) = em3_absgc;
-            EM3{6}(iit,:) = em3_posgc;
-            
-            
-            
-        catch
-            a = [a iit];
-        end
-    end
-    
-    for ii = 1:length(MRR)
-        MRR{ii}(a,:) = [];
-        PR{ii}(a,:) = [];
-        EM3{ii}(a,:) = [];
-    end
+        inname = sprintf('pr_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_%s_iter%d'...
+            ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,dimred, iit);
         
-%%
-    
-    switch im
-        case 1
-            data1 = MRR{icon}(:,ipip);
-            imlab = 'MRR';
-            imlab1 = 'MRR';
-        case 2
-            data1 = PR{icon}(:,ipip);
-            imlab = 'PR';
-            imlab1 = 'PR';
-        case 3
-            data1 = EM3{icon}(:,ipip);
-            imlab = 'EM';
-            imlab1 = '1-EM';
+        load([DIRDATA inname '.mat'])
+        
+        PR{1}(iit,:) = pr_mim;
+        PR{2}(iit,:) = pr_mic;
+        PR{3}(iit,:) = pr_aCoh;
+        PR{4}(iit,:) = pr_iCoh;
+        PR{5}(iit,:) = pr_absgc;
+        PR{6}(iit,:) = pr_posgc;
+        PR{7}(iit,:) = pr_abstrgc;
+        PR{8}(iit,:) = pr_postrgc;
+        
+        
     end
+    
+    %%
+    
+    
+    data1 = PR{icon}(:,ipip);
+    mean_pr(o) = mean(data1);
+    imlab = 'PR';
+    imlab1 = 'PR';
+    
     
     if ipip<=np
         cl = [0.8 0.7 0.6];
@@ -178,7 +143,7 @@ for iname = [9 10 1 11 12]
     set(gca,'ytick',[])
     ylim([-0.75 2])
     box off
-
+    
     if o==1
         xlabel([labs{icon} ' ' imlab1])
         set(gca,'Clipping','Off')
@@ -210,12 +175,8 @@ end
 
 
 
-
-
-
-
-outname = [DIRFIG imlab '_' labs{icon} '_noisemix'];
-saveas(gcf,outname, 'png')
+outname = [DIRFIG imlab '_' labs{icon} '_noisemix.eps'];
+print(outname,'-depsc');
 close all
 
 

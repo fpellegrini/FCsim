@@ -1,7 +1,7 @@
 function fp_hist_mrr_iInts
 
-DIRDATA = './mim_sim4/';
-DIRFIG = './figures/mimsim_ana/mim_sim4/Manuscript/';
+DIRDATA = './mim_sim5/';
+DIRFIG = './figures/mimsim_ana/mim_sim5/Manuscript/';
 if ~exist(DIRFIG); mkdir(DIRFIG); end
 
 name = {...
@@ -24,27 +24,28 @@ name = {...
     'ip8_ssd';...
     'ip7_dics'};
 
-labs = {'MIM','MIC','Mean abscoh','mean icoh','absGC','posGC','posGCw'};
+labs = {'MIM','MIC','Coherence','iCOH','GC-det','GC-dir','TRGC-det','TRGC-dir'};
 
 im = 2; %measures: MRR, PR, EM3
-icon = 6; %:length(MRR) %MIM, MIC, aCoh, iCoh, absgc,posgc,posgc_w
 ipip = 3;
 %%
+icon = 1; %labs = {'MIM','MIC','Coherence','iCOH','GC-det','GC-dir','TRGC-det','TRGC-dir'};
 o=1;
 figure
 figone(8,18)
 for iname = [2 1 3:5]
     
-    clearvars -except iname name DIRDATA DIRFIG labs o im icon ipip xt
+    clearvars -except iname name DIRDATA DIRFIG labs o im icon ipip xt mean_pr
     
     %default paramenters
     nit = 100;
     iInt = 2;
     iReg=1;
-    isnr=0.7;
+    isnr=0.6;
     iss = 0.5;
     ilag=2;
     ifilt='l';
+    dimred = 'p';
     
     if iname==2
         iInt = 1;
@@ -86,42 +87,31 @@ for iname = [2 1 3:5]
     np = 6;
     
     its = [1:nit];
-    a=[];
     
     %%
     for iit= its
         
-        try
-            if iname == 18 || iname == 17
-                inname = sprintf('mrr_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_iter%d_%s'...
-                    ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,iit,dimred);
-            else
-                inname = sprintf('mrr_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_iter%d'...
-                    ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,iit);
-            end
-            
-            load([DIRDATA inname '.mat'])
-            
-            PR{1}(iit,:) = pr_mim;
-            PR{2}(iit,:) = pr_mic;
-            PR{3}(iit,:) = pr_aCoh;
-            PR{4}(iit,:) = pr_iCoh;
-            PR{5}(iit,:) = pr_absgc;
-            PR{6}(iit,:) = pr_posgc;
-            
-            
-        catch
-            a = [a iit];
-        end
+        inname = sprintf('pr_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_%s_iter%d'...
+            ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,dimred, iit);
+        
+        load([DIRDATA inname '.mat'])
+        
+        PR{1}(iit,:) = pr_mim;
+        PR{2}(iit,:) = pr_mic;
+        PR{3}(iit,:) = pr_aCoh;
+        PR{4}(iit,:) = pr_iCoh;
+        PR{5}(iit,:) = pr_absgc;
+        PR{6}(iit,:) = pr_posgc;
+        PR{7}(iit,:) = pr_abstrgc;
+        PR{8}(iit,:) = pr_postrgc;
+        
     end
     
-    for ii = 1:length(PR)
-        PR{ii}(a,:) = [];
-    end
     
     %%
     
     data1 = PR{icon}(:,ipip);
+    median_pr(o) = median(data1);
     imlab = 'PR';
     imlab1 = 'PR';
     
@@ -181,14 +171,8 @@ for iname = [2 1 3:5]
 end
 
 
-
-
-
-
-
-
-outname = [DIRFIG imlab '_' labs{icon} '_Ints'];
-saveas(gcf,outname, 'png')
+outname = [DIRFIG imlab '_' labs{icon} '_Ints.eps'];
+print(outname,'-depsc');
 close all
 
 

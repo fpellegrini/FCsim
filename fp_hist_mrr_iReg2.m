@@ -1,5 +1,5 @@
-DIRDATA = './mim_sim4/';
-DIRFIG = './figures/mimsim_ana/mim_sim4/';
+DIRDATA = './mim_sim5/';
+DIRFIG = './figures/mimsim_ana/mim_sim5/Manuscript/';
 if ~exist(DIRFIG); mkdir(DIRFIG); end
 
 name = {...
@@ -31,12 +31,12 @@ cb1 = cbrewer2('Set1',9);
 iname = 6;
 im = 2;
 %%
-clearvars -except iname name DIRDATA DIRFIG labs cb cb1
+clearvars -except iname name DIRDATA DIRFIG labs cb cb1 mean_pr
 
 %default paramenters
 nit = 100;
 iInt = 2;
-isnr=0.7;
+isnr=0.6;
 iss = 0.5;
 ilag=2;
 ihemi=0;
@@ -52,37 +52,25 @@ a=[];
 %%
 for iit= its
     
-    try
-        if iname == 18 | iname == 17 | iname == 6 | iname == 19 | iname == 20 | iname == 7
-            inname = sprintf('mrr_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_iter%d_%s'...
-                ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,iit,dimred);
-        else
-            inname = sprintf('mrr_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_iter%d'...
-                ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,iit);
-        end
-        
-        load([DIRDATA inname '.mat'])
-        
-        PR{1}(iit,:) = pr_mim;
-        PR{2}(iit,:) = pr_mic;
-        PR{3}(iit,:) = pr_aCoh;
-        PR{4}(iit,:) = pr_iCoh;
-        PR{5}(iit,:) = pr_absgc;
-        PR{6}(iit,:) = pr_posgc;
-        
-    catch
-        a = [a iit];
-    end
-end
-
-for ii = 1:length(PR)
-    PR{ii}(a,:) = [];
+    inname = sprintf('pr_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_%s_iter%d'...
+        ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,dimred, iit);
+    
+    load([DIRDATA inname '.mat'])
+    
+    PR{1}(iit,:) = pr_mim;
+    PR{2}(iit,:) = pr_mic;
+    PR{3}(iit,:) = pr_aCoh;
+    PR{4}(iit,:) = pr_iCoh;
+    PR{5}(iit,:) = pr_absgc;
+    PR{6}(iit,:) = pr_posgc;
+    PR{7}(iit,:) = pr_abstrgc;
+    PR{8}(iit,:) = pr_postrgc;
 end
 
 %%
 
 
-for icon = 1:length(PR) %MIM, MIC, aCoh, iCoh, absgc,posgc,posgc_w
+for icon = [1 8] %labs = {'MIM','MIC','Coherence','iCOH','GC-det','GC-dir','TRGC-det','TRGC-dir'};
     
     figure
     figone(8,24)
@@ -105,6 +93,7 @@ for icon = 1:length(PR) %MIM, MIC, aCoh, iCoh, absgc,posgc,posgc_w
         %22: central voxel
         
         data1 = PR{icon}(:,ipip);
+        mean_pr(pip1,icon) = mean(data1);
         imlab = 'PR';
         imlab1 = 'PR';
         
@@ -164,8 +153,8 @@ for icon = 1:length(PR) %MIM, MIC, aCoh, iCoh, absgc,posgc,posgc_w
     
     ylim([-0.75 2])
     %%
-    outname = [DIRFIG name{iname} '_' imlab '_' labs{icon}];
-    saveas(gcf,outname, 'png')
+    outname = [DIRFIG name{iname} '_' imlab '_' labs{icon} '.eps'];
+    print(outname,'-depsc');
     close all
     
     

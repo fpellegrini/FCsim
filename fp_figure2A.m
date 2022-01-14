@@ -48,44 +48,36 @@ im = 2; %measure: PR
 %%
 for iit= its
     
-    try
-%         if iname == 18 | iname == 17
-        inname = sprintf('pr_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_%s_iter%d'...
-                ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,dimred, iit);
-%         else
-%             inname = sprintf('mrr_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_iter%d'...
-%                 ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,iit);
-%         end
-        
-        load([DIRDATA inname '.mat'])
-        
-        PR{1}(iit,:) = pr_mim;
-        PR{2}(iit,:) = pr_mic;
-        PR{3}(iit,:) = pr_aCoh;
-        PR{4}(iit,:) = pr_iCoh;
-        PR{5}(iit,:) = pr_absgc;
-        PR{6}(iit,:) = pr_posgc;
-        PR{7}(iit,:) = pr_abstrgc;
-        PR{8}(iit,:) = pr_postrgc;
-        
-    catch
-        a = [a iit];
-    end
+    inname = sprintf('pr_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_%s_iter%d'...
+        ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,dimred, iit);
+    
+    
+    load([DIRDATA inname '.mat'])
+    
+    PR{1}(iit,:) = pr_mim;
+    PR{2}(iit,:) = pr_mic;
+    PR{3}(iit,:) = pr_aCoh;
+    PR{4}(iit,:) = pr_iCoh;
+    PR{5}(iit,:) = pr_absgc;
+    PR{6}(iit,:) = pr_posgc;
+    PR{7}(iit,:) = pr_abstrgc;
+    PR{8}(iit,:) = pr_postrgc;
+    
+    
 end
 
-for ii = 1:length(PR)
-    PR{ii}(a,:) = [];
-end
+
 
 %%
 
 figure
 figone(8,24)
 ipip = 3;
-oo = 1; 
+oo = 1;
 for icon = [3 4 1 2 5 6 7 8 ] %Coherence, iCOH, MIM, MIC, absgc,posgc, abstrgc, postrgc
     
     data1 = PR{icon}(:,ipip);
+    mean_pr(icon) = mean(data1);
     imlab1 = 'PR';
     
     cl = [0.8 0.7 0.6];
@@ -110,38 +102,38 @@ for icon = [3 4 1 2 5 6 7 8 ] %Coherence, iCOH, MIM, MIC, absgc,posgc, abstrgc, 
         set(gca,'Clipping','Off')
         xt = xticks;
         for ix = xt
-            hu = line([ix ix],[2 -18]); 
+            hu = line([ix ix],[2 -25]);
             set(hu, 'color',[0.9 0.9 0.9])
             uistack(hu,'bottom')
         end
-        hu1 = line([0 0],[2 -18]); 
+        hu1 = line([0 0],[2 -25]);
         set(hu1, 'color',[0 0 0])
     else
         set(gca,'xticklabel',{[]})
         set(gca,'XColor','none','YColor','none','TickDir','out')
         set(gca,'Clipping','Off')
         for ix = xt
-            hu = line([ix ix],[2.2 -0.75]); 
+            hu = line([ix ix],[2.2 -0.75]);
             set(hu, 'color',[0.9 0.9 0.9])
             uistack(hu,'bottom')
         end
-        hu = line([0 0],[2.2 -0.75]); 
+        hu = line([0 0],[2.2 -0.75]);
         set(hu, 'color',[0 0 0])
     end
     
- 
-%     grid on
+    
+    %     grid on
     oo=oo+1;
     
     
 end
 
 
-outname = [DIRFIG 'figure2A.eps'];
+outname = [DIRFIG 'figure2.eps'];
 print(outname,'-depsc');
 % %%
 % outname = [DIRFIG 'figure2A'];
-% export_fig(outname, ['-r' '150'], '-a2', '-transparent'); 
+% export_fig(outname, ['-r' '150'], '-a2', '-transparent');
 close all
 
 

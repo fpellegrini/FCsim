@@ -29,8 +29,12 @@ if nargin < 5
     density_type = 'ks';
 end
 
+%mean of the data 
+mean_X = mean(X); 
+
 %transform Y axis for better visibility 
 base=100; X = -log(1-X*(1-1/base))/log(base);
+mean_X_log = -log(1-mean_X*(1-1/base))/log(base);
 
 % calculate kernel density
 switch density_type
@@ -81,7 +85,7 @@ else
     Y = quartiles;
 end
 
-Y(end+1) = mean(X); 
+Y(end+1) = mean_X_log; 
 
 % raindrops
 h{2} = scatter(X, jit - 0.5);
@@ -101,7 +105,7 @@ if box_on
     
     % mean line    
     h{4} = line([Y(3) Y(3)], [b/10-(wdth*0.5) b/10+(wdth*0.5)], 'col', 'k', 'LineWidth', 1);
-    h{5} = line([Y(end) Y(end)], [b/10-(wdth*0.5) b/10+(wdth*0.5)], 'col', 'r', 'LineWidth', 1);
+  h{5} = line([Y(end) Y(end)], [b/10-(wdth*0.5) b/10+(wdth*0.5)], 'col', 'r', 'LineWidth', 1);
     %h{4} = line([Y(3) Y(3)], [-b/2-(wdth*0.5) -b/2+(wdth*0.5)], 'col', 'r', 'LineWidth', 2);
     
     % whiskers

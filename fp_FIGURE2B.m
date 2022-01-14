@@ -111,6 +111,7 @@ for icon = 1:length(PR) %MIM, MIC, aCoh, iCoh, absgc,posgc,abstrgc, postrgc
         %22: central voxel
         
         data1 = PR{icon}(:,ipip);
+        mean_pr(icon,ipip) = mean(data1); 
         imlab = 'PR';
         imlab1 = 'PR';
         
