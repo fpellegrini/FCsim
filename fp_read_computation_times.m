@@ -7,7 +7,7 @@ DIROUT_ctimes = '/home/bbci/data/haufe/Franziska/data/mim_sim5/computation_times
 if ~exist(DIROUT_ctimes); mkdir(DIROUT_ctimes); end
 
 %%
-for ip = [2:5 7]
+for ip = [4 5 7]
     
     clear nInteractions nRegionInts SNR noise_mix nlag filtertype hemisym    
     [nInteractions,nRegionInts,SNR,noise_mix,nlag,filtertype, dimred] = fp_get_params(ip);
@@ -29,11 +29,27 @@ for ip = [2:5 7]
                                     ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,dimred,iit);
                                 
                                 load([DIRIN 'mim_' logname '.mat'])
-        
-                                ta(1,iit) = t.signal;
-                                ta(2,iit) = t.snr;
-                                ta(3,iit) = t.filter;
-                                ta(4:numel(t.pips)+3,iit) = t.pips;      
+                
+                                try
+                                    ta(1,iit) = t.signal;
+                                catch
+                                    ta(1,iit) = nan;
+                                end
+                                try
+                                    ta(2,iit) = t.snr;
+                                catch
+                                    ta(2,iit) = nan;
+                                end
+                                try
+                                    ta(3,iit) = t.filter;
+                                catch
+                                    ta(3,iit) = nan;
+                                end
+                                try
+                                    ta(4:numel(t.pips)+3,iit) = t.pips;
+                                catch
+                                    ta(4,iit) = nan;
+                                end
                                 
                             end  %iit
                             
