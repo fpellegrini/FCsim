@@ -7,7 +7,7 @@ DIROUT_ctimes = '/home/bbci/data/haufe/Franziska/data/mim_sim5/computation_times
 if ~exist(DIROUT_ctimes); mkdir(DIROUT_ctimes); end
 
 %%
-for ip = [4 5 7]
+for ip = 1
     
     clear nInteractions nRegionInts SNR noise_mix nlag filtertype hemisym    
     [nInteractions,nRegionInts,SNR,noise_mix,nlag,filtertype, dimred] = fp_get_params(ip);
