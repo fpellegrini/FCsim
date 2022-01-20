@@ -356,6 +356,6 @@ for iit = 1:100
             'pr_postrgc',...
             '-v7.3')
         
-        eval(sprintf('!mv %s%s_work %s%s_done',DIRLOG,logname,DIRLOG,logname))
+        eval(sprintf('!mv %s%s_work %s%s_done',DIRLOG,params.logname,DIRLOG,params.logname))
     end
 end
