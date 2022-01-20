@@ -2,10 +2,12 @@ function fp_addpip
 
 fp_addpath
 
-DIRLOG ='/home/bbci/data/haufe/Franziska/log/mim_sim5/addFC+mean/';
+DIRLOG ='/home/bbci/data/haufe/Franziska/log/mim_sim5/mean+FC/';
 if ~exist(DIRLOG); mkdir(DIRLOG); end
 
 DIRIN = '/home/bbci/data/haufe/Franziska/data/mim_sim5/';
+DIROUT = '/home/bbci/data/haufe/Franziska/data/mim_sim5/addmean+FC/';
+if ~exist(DIROUT); mkdir(DIROUT); end
 
 
 %%
@@ -17,7 +19,7 @@ for iit = 1:100
     %default paramenters
     iInt = 2;
     iReg=1;
-    isnr=0.6;
+    isnr=0.3;
     iss = 0.5;
     ilag=2;
     ifilt='l';
@@ -32,7 +34,7 @@ for iit = 1:100
         eval(sprintf('!touch %s%s_work',DIRLOG,params.logname))
         fprintf('Working on %s. \n',params.logname)
         
-        for ipip = 10
+        for ipip = 21
             
             %1 to 6: fixed
             %7: 90%
@@ -42,7 +44,7 @@ for iit = 1:100
             %11: 90% corrected
             %12: 99% corrected
             %13 to 20: equal to 1 to 8 but WITHOUT zscoring
-            %21: sum, then MIM
+            %21: mean, then MIM
             %22: central voxel
             
             fprintf(['Testing pipeline ' num2str(ipip) '\n'])
@@ -338,11 +340,11 @@ for iit = 1:100
         %% Saving
         fprintf('Saving... \n')
         %save all
-        outname = sprintf('%smim_%s.mat',DIRIN,params.logname);
+        outname = sprintf('%smim_%s.mat',DIROUT,params.logname);
         save(outname,'-v7.3')
         
         %save only evaluation parameters
-        outname1 = sprintf('%spr_%s.mat',DIRIN,params.logname);
+        outname1 = sprintf('%spr_%s.mat',DIROUT,params.logname);
         save(outname1,...
             'pr_mic',...
             'pr_mim',...
@@ -353,5 +355,7 @@ for iit = 1:100
             'pr_abstrgc',...
             'pr_postrgc',...
             '-v7.3')
+        
+        eval(sprintf('!mv %s%s_work %s%s_done',DIRLOG,logname,DIRLOG,logname))
     end
 end
