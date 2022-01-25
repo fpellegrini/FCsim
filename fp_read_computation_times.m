@@ -51,13 +51,24 @@ for ip = 1
                                     ta(4,iit) = nan;
                                 end
                                 
+                                try
+                                    corr_voxmim_all(iit,:) = corr_voxmim;
+                                    corr_voxmic_all(iit,:) = corr_voxmic;
+                                end
+                                
+                                for oo = params.pips
+                                    try
+                                        varex_all(iit,oo) = mean(to_save{oo}.varex);
+                                    end
+                                end
+                                
                             end  %iit
                             
                             info = {'signal','snr','filter','pips'};
                             pips = params.pips; 
                             
                             outname = [DIROUT_ctimes logname '.mat'];
-                            save(outname,'ta','info','pips', '-v7.3')
+                            save(outname,'ta','info','pips','corr_voxmim_all','corr_voxmic_all', 'varex_all','-v7.3')
                             
                         end %filtertype
                     end %lag
