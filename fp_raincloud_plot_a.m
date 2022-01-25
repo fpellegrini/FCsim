@@ -119,6 +119,7 @@ end
 
 xlim([0 1])
 xticks1 = [0 0.5 0.7 0.9 0.95 0.97:0.01:1];
+% xticks1 = [0 0.7 0.9 0.95 0.99 1];
 xticks = -log(1-xticks1*(1-1/base))/log(base);
 xTickLabels = xticks1;
 % xTickLabels = -log(1-xTickLabels*(1-1/base))/log(base);

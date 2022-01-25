@@ -77,3 +77,14 @@ for ip = 1
         end %iReg
     end %iInt
 end%ip
+
+
+%%
+
+% figure; 
+% figone(10,12)
+% b=bar(varex(1:6));
+% grid on 
+% b.FaceColor = [0.8 0.7 0.6];
+% xlabel('Number of PCs')
+% ylabel('Variance explained')

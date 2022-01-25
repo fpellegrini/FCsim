@@ -6,8 +6,8 @@ DIRLOG ='/home/bbci/data/haufe/Franziska/log/mim_sim5/mean+FC/';
 if ~exist(DIRLOG); mkdir(DIRLOG); end
 
 DIRIN = '/home/bbci/data/haufe/Franziska/data/mim_sim5/';
-DIROUT = '/home/bbci/data/haufe/Franziska/data/mim_sim5/addmean+FC/';
-if ~exist(DIROUT); mkdir(DIROUT); end
+DIROUT_new = '/home/bbci/data/haufe/Franziska/data/mim_sim5/addmean+FC/';
+if ~exist(DIROUT_new); mkdir(DIROUT_new); end
 
 
 %%
@@ -340,11 +340,11 @@ for iit = 1:100
         %% Saving
         fprintf('Saving... \n')
         %save all
-        outname = sprintf('%smim_%s.mat',DIROUT,params.logname);
+        outname = sprintf('%smim_%s.mat',DIROUT_new,params.logname);
         save(outname,'-v7.3')
         
         %save only evaluation parameters
-        outname1 = sprintf('%spr_%s.mat',DIROUT,params.logname);
+        outname1 = sprintf('%spr_%s.mat',DIROUT_new,params.logname);
         save(outname1,...
             'pr_mic',...
             'pr_mim',...
