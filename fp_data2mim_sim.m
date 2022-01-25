@@ -208,7 +208,7 @@ for ipip = params.pips %most successful: ipip 1 to 3
         tic
         %% PCA
         
-        clear npcs
+        clear npcs  variance_explained
         signal_roi = [];
         empty_rois =[];
         active_rois = [];
@@ -237,7 +237,7 @@ for ipip = params.pips %most successful: ipip 1 to 3
             %project sensor signal to voxels at the current roi (aroi)
             signal_source = A2{aroi}' * signal_sensor(:,:);
             
-            if ipip < 13 && ipip > 20 %zscoring all pipelines but 13 to 20 
+            if ipip < 13 || ipip > 20 %zscoring all pipelines but 13 to 20 
                 signal_source = zscore(signal_source);
             end
             
