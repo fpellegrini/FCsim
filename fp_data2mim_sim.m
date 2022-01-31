@@ -8,7 +8,7 @@ if ~exist(DIROUT1);mkdir(DIROUT1); end
 
 %define which pipelines run with this configuration
 if params.ip == 1 %default version 
-    params.pips = [1:10 13:22];
+    params.pips = [1:7 9:10 13:22];
 elseif strcmp(params.ifilt(1),'c') %with champaign
     params.pips = [1:3 9];%1 to 3 fixed PCs and truevox
 elseif params.ip == 3 ||  params.ip == 8 
@@ -190,7 +190,7 @@ t.filter = toc;
 %% Loop over different pipelines
 
 errorpipeline = [];
-for ipip = params.pips %most successful: ipip 1 to 3
+for ipip = params.pips 
     
     %1 to 6: fixed
     %7: 90%
@@ -238,7 +238,7 @@ for ipip = params.pips %most successful: ipip 1 to 3
             signal_source = A2{aroi}' * signal_sensor(:,:);
             
             if ipip < 13 || ipip > 20 %zscoring all pipelines but 13 to 20 
-                signal_source = zscore(signal_source);
+                signal_source = zscore(signal_source')';
             end
             
             clear s_

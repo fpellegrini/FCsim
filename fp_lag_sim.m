@@ -174,7 +174,7 @@ for ilag = 1:5 %in ms: 2,4,6,8,10
                 end
                
                 %zscoring
-                signal_source = zscore(signal_source);
+                signal_source = zscore(signal_source')';
                                
                 %do PCA
                 clear signal_roi_ S
