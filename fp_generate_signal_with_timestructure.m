@@ -41,7 +41,7 @@ if no_reload
     
     %be sure that no region is selected twice 
     for ii = 1:params.iInt
-        while any(iroi_seed==iroi_tar(ii))
+        while any(iroi_seed==iroi_tar(ii)) || sum(iroi_tar==iroi_tar(ii))>1
             iroi_tar(ii) = randi(D.nroi,1,1);
         end
     end   
