@@ -84,14 +84,7 @@ for ipip = params.pips %most successful: ipip 1 to 3
                 CS_source(:,:,ifq) = squeeze(A2{aroi}(:,:,ifq))' * squeeze(CS_sensor(:,:,ifq))...
                     * squeeze(A2{aroi}(:,:,ifq));
             end
-            %%
-            ZS{aroi} = diag(sqrt(mean(diag(squeeze(sum(real(CS_source), 3))))./diag(squeeze(sum(real(CS_source), 3)))));
-            
-            %apply ZS
-            for ifreq = 1:fres+1
-                CSz(:,:, ifreq) = ZS{aroi}'*squeeze(CS_source(:, :,ifreq))*ZS{aroi};
-            end
-            
+           
             %%
             
             
@@ -99,7 +92,7 @@ for ipip = params.pips %most successful: ipip 1 to 3
                 
                 %PCA
                 clear CSs v v5 in V_ D_
-                CSs = squeeze(sum(real(CSz),3)); %covariance
+                CSs = squeeze(sum(real(CS_soure),3)); %covariance
                 [V_, D_] = eig(CSs);
                 [D_, in] = sort(real(diag(D_)), 'descend');
                 V{aroi} = V_(:,in);
@@ -134,7 +127,7 @@ for ipip = params.pips %most successful: ipip 1 to 3
                 
                 clear p
                 for ifq = 1:fres+1
-                    p(:,:,ifq) = squeeze(A2{aroi}(:,:,ifq)) * ZS{aroi} * V{aroi};
+                    p(:,:,ifq) = squeeze(A2{aroi}(:,:,ifq)) * V{aroi};
                 end
                 P = cat(2,P,p);
                 

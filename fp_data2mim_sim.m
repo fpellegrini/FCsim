@@ -237,7 +237,7 @@ for ipip = params.pips
             %project sensor signal to voxels at the current roi (aroi)
             signal_source = A2{aroi}' * signal_sensor(:,:);
             
-            if ipip < 13 || ipip > 20 %zscoring all pipelines but 13 to 20 
+            if ipip > 12 && ipip < 21 %zscoring only pipelines 13 to 20 
                 signal_source = zscore(signal_source')';
             end
             
