@@ -48,7 +48,7 @@ t.filter = toc;
 %% Loop over different pipelines
 
 errorpipeline = [];
-for ipip = params.pips %most successful: ipip 1 to 3
+for ipip = 3 %most successful: ipip 1 to 3
     
     %1 to 6: fixed
     %7: 90%
@@ -63,7 +63,7 @@ for ipip = params.pips %most successful: ipip 1 to 3
         clear npcs A2 V ZS CS_roi
         P=[];
         
-        %loop over regions
+        %% loop over regions
         for aroi = 1:D.nroi
             
             clear A_ CS_source CSz
@@ -92,7 +92,7 @@ for ipip = params.pips %most successful: ipip 1 to 3
                 
                 %PCA
                 clear CSs v v5 in V_ D_
-                CSs = squeeze(sum(real(CS_soure),3)); %covariance
+                CSs = squeeze(sum(real(CS_source),3)); %covariance
                 [V_, D_] = eig(CSs);
                 [D_, in] = sort(real(diag(D_)), 'descend');
                 V{aroi} = V_(:,in);
