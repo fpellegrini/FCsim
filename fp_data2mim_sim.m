@@ -1,9 +1,9 @@
 function fp_data2mim_sim(params)
 
 % define folders for saving results
-DIROUT = '/home/bbci/data/haufe/Franziska/data/mim_sim6/';
+DIROUT = '/home/bbci/data/haufe/Franziska/data/mim_sim5/';
 if ~exist(DIROUT);mkdir(DIROUT); end
-DIROUT1 = '/home/bbci/data/haufe/Franziska/data/mim_save6/';
+DIROUT1 = '/home/bbci/data/haufe/Franziska/data/mim_save5/';
 if ~exist(DIROUT1);mkdir(DIROUT1); end
 
 %define which pipelines run with this configuration
