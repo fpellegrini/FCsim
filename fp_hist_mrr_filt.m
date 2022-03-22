@@ -30,7 +30,7 @@ titles = {'eLORETA','LCMV','DICS','Champagne'};
 im = 2; %measures: MRR, PR, EM3
 ipip = 3;
 %%
-icon = 8; %{'MIM','MIC','Coherence','iCOH','GC-det','GC-dir','TRGC-det','TRGC-dir'};
+icon = 1; %{'MIM','MIC','Coherence','iCOH','GC-det','GC-dir','TRGC-det','TRGC-dir'};
 o=1;
 figure
 figone(8,18)
