@@ -77,7 +77,7 @@ oo = 1;
 for icon = [3 4 1 2 5 6 7 8 ] %Coherence, iCOH, MIM, MIC, absgc,posgc, abstrgc, postrgc
     
     data1 = PR{icon}(:,ipip);
-    mean_pr(icon) = mean(data1);
+    mean_pr(oo) = mean(data1);
     imlab1 = 'PR';
     
     cl = [0.8 0.7 0.6];
@@ -127,7 +127,7 @@ for icon = [3 4 1 2 5 6 7 8 ] %Coherence, iCOH, MIM, MIC, absgc,posgc, abstrgc, 
     
     
 end
-
+%%
 
 outname = [DIRFIG 'figure2.eps'];
 print(outname,'-depsc');

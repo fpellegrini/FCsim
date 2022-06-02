@@ -20,7 +20,7 @@ end
 assert(noverlap < window,'overlap must be shorter than window');
 
 if nargin < 3 || isempty(method)
-   method = 'MT';    % default is multi-taper
+   method = 'WELCH';    % default is multi-taper
 end
 
 if ~isequal(sort(ind_1),sort(unique(ind_1))) || ~isequal(sort(ind_2), sort(unique(ind_2)))

@@ -62,7 +62,8 @@ end
 
 
 
-%%
+%% Ewald's implementation 
+
 iroi = 1; 
 jroi = 2; 
 ifq = 5;
