@@ -1,7 +1,7 @@
 function fp_addpath
 
-restoredefaultpath
-rehash toolboxcache
+% restoredefaultpath
+% rehash toolboxcache
 
 addpath(genpath('/home/bbci/data/haufe/Franziska'))
 addpath(genpath('~/matlab/fp/'))
