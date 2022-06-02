@@ -81,6 +81,11 @@ for ii = 1:params.iInt*params.iReg
     s2(:,ii) = circshift(squeeze(s1(:,ii)), lag(ii));
 end
 
+if params.ip == 9 %correlated sources case 
+   s1(:,2) = s1(:,1);
+   s2(:,2) = s1(:,1); 
+end
+
 %concenate seed and target voxel activity
 s1 = cat(2,s1,s2);
 s1 = s1 / norm(s1, 'fro');

@@ -67,7 +67,7 @@ elseif ip == 7
     SNR = 0.6;
     noise_mix = 0.5;
     nlag = 2;
-    filtertype= {'d'}; %{'e','d','cr','cho'}; %'c','che','cfun'
+    filtertype= {'e','d','cr','cho'}; %'c','che','cfun'
     dimred = 'p';
     
 % elseif ip == 8 
@@ -79,5 +79,16 @@ elseif ip == 7
 %     nlag = 2;
 %     filtertype= {'l'};
 %     dimred = 's'; %ssd 
+
+elseif ip == 9
+    
+    %correlated sources setting (everything else default)
+    nInteractions = 2;
+    nRegionInts = 1;
+    SNR = 0.6;
+    noise_mix = 0.5;
+    nlag = 2;
+    filtertype= {'l','e'}; %lcmv
+    dimred = 'p'; %pca
     
 end
