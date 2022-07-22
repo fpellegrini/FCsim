@@ -39,7 +39,7 @@ if no_reload
     iroi_seed = randperm(D.nroi,params.iInt)';
     iroi_tar = randperm(D.nroi,params.iInt)';
     
-    %be sure that no region is selected twice 
+    %make sure that no region is selected twice 
     for ii = 1:params.iInt
         while any(iroi_seed==iroi_tar(ii)) || sum(iroi_tar==iroi_tar(ii))>1
             iroi_tar(ii) = randi(D.nroi,1,1);
@@ -83,7 +83,7 @@ end
 
 if params.ip == 9 %correlated sources case 
    s1(:,2) = s1(:,1);
-   s2(:,2) = s1(:,1); 
+   s2(:,2) = s2(:,1); 
 end
 
 %concenate seed and target voxel activity
@@ -102,7 +102,6 @@ end
 signal_sources = coupling_snr*s1 + (1-coupling_snr)*backg;
 
 %% non-interacting sources
-
 if no_reload
     %activity at all voxels but the seed and target voxels 
     noise_sources = mkpinknoise(N, params.iReg*D.nroi-(params.iReg*params.iInt*2), 1);
@@ -132,15 +131,9 @@ sig = sig ./ norm(sig_f, 'fro');
 
 %brain noise on sensor level 
 if no_reload
-    try
-        brain_noise = L_noise * noise_sources';
-        brain_noise_f = (filtfilt(bband, aband, brain_noise'))';
-        brain_noise = brain_noise ./ norm(brain_noise_f, 'fro');
-    catch
-        iroi_seed 
-        iroi_tar
-    end
-        
+    brain_noise = L_noise * noise_sources';
+    brain_noise_f = (filtfilt(bband, aband, brain_noise'))';
+    brain_noise = brain_noise ./ norm(brain_noise_f, 'fro');
 end
 
 %white noise on sensor level (sensor noise) 
@@ -153,6 +146,7 @@ end
 % if ip1, save this state of s1 for ip6
 if params.ip==1 
     fprintf('Saving lag stuff... \n')
+    
     dir1 =  sprintf('%smim_lag/',DIROUT1);
     if ~exist(dir1); mkdir(dir1); end
     outname = sprintf('%smim_lag/%d.mat',DIROUT1,params.iit);
