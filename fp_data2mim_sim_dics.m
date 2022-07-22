@@ -3,7 +3,7 @@ function fp_data2mim_sim_dics(params)
 % define folders for saving results
 DIROUT = '/home/bbci/data/haufe/Franziska/data/mim_sim5/';
 if ~exist(DIROUT);mkdir(DIROUT); end
-DIROUT1 = '/home/bbci/data/haufe/Franziska/data/mim_save5/';
+DIROUT1 = '/home/bbci/data/haufe/Franziska/data/mim_save5/'; %to save interim results 
 if ~exist(DIROUT1);mkdir(DIROUT1); end
 
 %define which pipelines run with this configuration
@@ -26,7 +26,7 @@ tic
 L_backward = L(:, D.ind_cortex, :);
 ndim = size(L_backward,3);
 
-%CS
+%Sensor cross-spectrum 
 CSpara = [];
 CSpara.subave = 0;
 CSpara.mywindow = hanning(l_epoch)./sqrt(hanning(l_epoch)'*hanning(l_epoch));
@@ -39,21 +39,16 @@ for ifreq = 1:fres+1
     reg = 0.05*trace(cCS)/length(cCS);
     Cr = cCS + reg*eye(n_sensors);
     
+    %A1 is DICS filter 
     [~, A1(:, :, :, ifreq)] = lcmv(Cr, L_backward, struct('alpha', 0, 'onedim', 0));
 end
 A1 = permute(A1,[1, 3, 2, 4]);
 
 t.filter = toc;
-
-%% Loop over different pipelines
+%%
 
 errorpipeline = [];
-for ipip = 3 %most successful: ipip 1 to 3
-    
-    %1 to 6: fixed
-    %7: 90%
-    %8: 99%
-    %9: baseline
+for ipip = 3 % FIXPC3 pipeline 
     
     fprintf(['Testing pipeline ' num2str(ipip) '\n'])
     try
@@ -61,11 +56,12 @@ for ipip = 3 %most successful: ipip 1 to 3
         %% PCA
         
         clear npcs A2 V ZS CS_roi
-        P=[];
+        P=[]; %filter including both source projection and PCA 
         
-        %% loop over regions
+        %loop over regions
         for aroi = 1:D.nroi
             
+            %% Source projection 
             clear A_ CS_source CSz
             
             %A_ is the lcmv filter at aroi
@@ -79,14 +75,13 @@ for ipip = 3 %most successful: ipip 1 to 3
             nvoxroi(aroi) = size(A_,3);
             A2{aroi} = reshape(A_, [n_sensors, ndim*nvoxroi(aroi),fres+1]);
             
-            %project sensor signal to voxels at the current roi (aroi)
+            %project sensor signal (cross-spectrum) to voxels at the current roi (aroi)
             for ifq = 1:fres+1
                 CS_source(:,:,ifq) = squeeze(A2{aroi}(:,:,ifq))' * squeeze(CS_sensor(:,:,ifq))...
                     * squeeze(A2{aroi}(:,:,ifq));
             end
            
-            %%
-            
+            %% Dimensionality reduction             
             
             if ~(ipip == 9) && ~(ipip == 10) && ipip < 21
                 
@@ -118,7 +113,7 @@ for ipip = 3 %most successful: ipip 1 to 3
                 elseif ipip <= 6
                     %fixed number of pcs
                     npcs(aroi) = ipip;
-                    try %may not be possible with the champaign filter
+                    try %may not be possible with the champagne filter
                         var_explained(aroi) = varex(npcs(aroi));
                     end
                 end
@@ -140,12 +135,12 @@ for ipip = 3 %most successful: ipip 1 to 3
             
         end
         
+        %% Apply source projection and PCA filter on sensor cross-spectrum 
         CS_roi = [];
         for ifreq = 1:fres+1
             CS_roi(:, :, ifreq) = P(:, :, ifreq)' * CS_sensor(:, :, ifreq) * P(:, :, ifreq);
         end
-        
-        
+               
         
         %% calculate connectivity scores
         
@@ -153,9 +148,8 @@ for ipip = 3 %most successful: ipip 1 to 3
         clear inds PCA_inds
         [inds, PCA_inds] = fp_npcs2inds(npcs);
         
-        output = {'MIM','MIC','GC','TRGC','COH'};
-        
-        %calculation of output of data2sctrgcmim based on CS
+        %calculate connectivity with equivalent of data2sctrgcmim function 
+        output = {'MIM','MIC','GC','TRGC','COH'};       
         conn = fp_cs2sctrgcmim(CS_roi, fres, 30, inds, output);
         
         % extract measures out of the conn struct
@@ -200,41 +194,38 @@ for ipip = 3 %most successful: ipip 1 to 3
         
         
         %% Evaluate
-        [pr_mic(ipip)] = fp_mrr_hk_short(MIC_,iroi_seed,iroi_tar,1);
         
-        [pr_mim(ipip)] = fp_mrr_hk_short(MIM_,iroi_seed,iroi_tar,1);
-        
+        %percentile rank 
+        [pr_mic(ipip)] = fp_pr(MIC_,iroi_seed,iroi_tar,1);       
+        [pr_mim(ipip)] = fp_pr(MIM_,iroi_seed,iroi_tar,1);        
         
         if ipip ~= 10
-            [pr_aCoh(ipip)] = fp_mrr_hk_short(aCOH_,iroi_seed,iroi_tar,1);
-            [pr_iCoh(ipip)] = fp_mrr_hk_short(iCOH_,iroi_seed,iroi_tar,1);
+            [pr_aCoh(ipip)] = fp_pr(aCOH_,iroi_seed,iroi_tar,1);
+            [pr_iCoh(ipip)] = fp_pr(iCOH_,iroi_seed,iroi_tar,1);
             
             if ipip ~= 11 && ipip ~= 12
-                %absolute value of gc and only triu is considered. Metric neglects
+                %absolute value of gc and only the upper triangle is considered. Metric neglects
                 %the direction of the interaction
-                [pr_abstrgc(ipip)] = fp_mrr_hk_short(abs(DIFFGC_),iroi_seed,iroi_tar,1);
-                [pr_absgc(ipip)] = fp_mrr_hk_short(abs(GC_),iroi_seed,iroi_tar,1);
+                [pr_abstrgc(ipip)] = fp_pr(abs(DIFFGC_),iroi_seed,iroi_tar,1);
+                [pr_absgc(ipip)] = fp_pr(abs(GC_),iroi_seed,iroi_tar,1);
                 
                 %only positive part of gc is submitted and the whole matrix is
-                %considered. Metric that is strongly influenced by the direction of
-                %the effect
+                %considered. (Metric that is strongly influenced by the direction of
+                %the effect)
                 clear pos_difftrgc
                 pos_difftrgc = DIFFGC_;
                 pos_difftrgc(pos_difftrgc< 0) = 0;
                 [pr_postrgc(ipip)]...
-                    = fp_mrr_hk_short(pos_difftrgc,iroi_seed,iroi_tar,0);
+                    = fp_pr(pos_difftrgc,iroi_seed,iroi_tar,0);
                 
                 clear pos_diffgc
                 pos_diffgc = GC_;
                 pos_diffgc(pos_diffgc< 0) = 0;
                 [pr_posgc(ipip)]...
-                    = fp_mrr_hk_short(pos_diffgc,iroi_seed,iroi_tar,0);
-                
-            end
-            
+                    = fp_pr(pos_diffgc,iroi_seed,iroi_tar,0);               
+            end           
         end
-        
-        
+                
         clear MIM_ MIC_ DIFFGC_ GC_ aCOH_ iCOH_
         
         

@@ -50,15 +50,15 @@ elseif ip == 5
     filtertype= {'l'}; %lcmv
     dimred = 'p';
     
-% elseif ip == 6
-%     %vary lag size
-%     nInteractions = 2;
-%     nRegionInts = 1;
-%     SNR = 0.6;
-%     noise_mix = 0.5;
-%     nlag = 1; %small (0 to 5 samples (=1)) or large (5 to 20 samples (=2))
-%     filtertype= {'l'}; %lcmv
-%     dimred = 'p';
+elseif ip == 6
+    %vary lag size
+    nInteractions = 2;
+    nRegionInts = 1;
+    SNR = 0.6;
+    noise_mix = 0.5;
+    nlag = 1; %small (0 to 5 samples (=1)) or large (5 to 20 samples (=2))
+    filtertype= {'l'}; %lcmv
+    dimred = 'p';
     
 elseif ip == 7
     %vary filter
@@ -70,15 +70,15 @@ elseif ip == 7
     filtertype= {'e','d','cr','cho'}; %'c','che','cfun'
     dimred = 'p';
     
-% elseif ip == 8 
-%     %ssd instead of pca
-%     nInteractions = 2;
-%     nRegionInts = 1;
-%     SNR = 0.6;
-%     noise_mix = 0.5;
-%     nlag = 2;
-%     filtertype= {'l'};
-%     dimred = 's'; %ssd 
+elseif ip == 8 
+    %ssd instead of pca
+    nInteractions = 2;
+    nRegionInts = 1;
+    SNR = 0.6;
+    noise_mix = 0.5;
+    nlag = 2;
+    filtertype= {'l'};
+    dimred = 's'; %ssd 
 
 elseif ip == 9
     

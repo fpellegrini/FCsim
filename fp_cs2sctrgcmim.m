@@ -1,7 +1,7 @@
 function conn = fp_cs2sctrgcmim(CS, fres, nlags, inds, output)
 
+%set parameters 
 ninds = length(inds);
-
 freqs = linspace(0, 1, fres+1);
 freqs = freqs(1:fres+1);
 z = exp(-i*pi*freqs);

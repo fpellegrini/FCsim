@@ -1,4 +1,5 @@
 function [MIM_, MIC_] = fp_sumVox_pip(signal_roi, nroi, ndim, nvoxroi, fres, filt)
+%FCMEAN pipeline
 
 output = {'MIM','MIC'};
 
