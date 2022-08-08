@@ -13,8 +13,8 @@ elseif strcmp(params.ifilt(1),'c') %with champaign
     params.pips = [1:3];%FICPC1 to FIXPC3
 elseif params.ip == 3 ||  params.ip == 8 
     params.pips = [1:6 9 21];
-elseif params.ip == 9
-    params.pips = 3; 
+elseif params.ip == 9 || params.ip==12 
+    params.pips = [1 3]; 
 else % run only fixed, 90% and 99% pipelines and baseline
     params.pips = 1:9;
 end

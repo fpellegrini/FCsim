@@ -1,4 +1,14 @@
 function fp_eval_mim_struct_sim(ip)
+% Starts FC simulation. 
+% ip1 (defaults): 2 interactions, 1 source/region, SNR 0.6, noise_mix 0.5, lag 5-200, LCMV source projection.
+% ip2: vary interaction number (1 to 5)
+% ip3: vary number of sources/ region (2)
+% ip4: vary SNR (0.3 and 0.9)
+% ip5: vary noise mix (0 0.25 0.75 1)
+% ip6: vary lag size (0 to 5 samples; not in paper)
+% ip7: vary inverse filter: eLORETA, DICS, Champagne
+% ip8: ssd dimensionality reduction instead of pca (not in paper, not recommended) 
+% ip9: experiment with correlated sources 
 
 fp_addpath
 

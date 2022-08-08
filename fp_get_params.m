@@ -91,4 +91,14 @@ elseif ip == 9
     filtertype= {'l','e'}; %lcmv
     dimred = 'p'; %pca
     
+elseif ip == 12
+    %test lmcv vs eloreta in high noise setting 
+    nInteractions = 2;
+    nRegionInts = 1;
+    SNR = 0.1;
+    noise_mix = 0.5;
+    nlag = 2;
+    filtertype= {'e','l'}; 
+    dimred = 'p';
+    
 end
