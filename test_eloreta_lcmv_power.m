@@ -1,6 +1,7 @@
 clear all
 
-DIRFIG = '/Users/franziskapellegrini/Dropbox/Franziska/Data_MEG_Project/figures/mimsim_ana/mim_sim5/eLORETAvsLCMV3/';
+rng(5)
+DIRFIG = '/Users/franziskapellegrini/Dropbox/Franziska/Data_MEG_Project/figures/mimsim_ana/mim_sim5/eLORETAvsLCMV6/';
 if ~exist(DIRFIG); mkdir(DIRFIG); end
 
 DIROUT1=[];
@@ -74,14 +75,14 @@ load('processed_bs_wzb_90_2000/bs_results.mat')
 data = zeros(2002,1);
 data(D.ind_cortex)=sp;
 % data = sp';
-allplots_cortex_BS(cortex_highres,data(in_normal_to_high), [0 max(abs(sp))], cm17a ,'.', 0.3,[])
+outname1 = [DIRFIG 'eLORETA_power_snr0' num2str(params.isnr*10)];
+allplots_cortex_BS(cortex_highres,data(in_normal_to_high), [0 max(abs(sp))], cm17a ,'Power', 0.3,outname1)
 
-outname1 = [DIRFIG 'eLORETA_power_snr0' num2str(params.isnr*10) '.png'];
-print(outname1,'-dpng');
+
       
 
 
-% LCMV
+%% LCMV
 
 cCS = cov(signal_sensor(:,:)');
 reg = 0.05*trace(cCS)/length(cCS);
@@ -117,12 +118,10 @@ load('processed_bs_wzb_90_2000/bs_results.mat')
 data_l = zeros(2002,1);
 data_l(D.ind_cortex)=sp_l;
 % data_l = sp_l';
-allplots_cortex_BS(cortex_highres,data_l(in_normal_to_high), [0 max(abs(sp_l))], cm17a ,'.', 0.3,[])
-%
-outname1 = [DIRFIG 'LCMV_power_snr0' num2str(params.isnr*10) '.png'];
-print(outname1,'-dpng');
+outname1 = [DIRFIG 'LCMV_power_snr0' num2str(params.isnr*10)];
+allplots_cortex_BS(cortex_highres,data_l(in_normal_to_high), [0 max(abs(sp_l))], cm17a ,'Power', 0.3,outname1);
 %%%%%%%%%%%%%%%%%%%%%%%%%%
-%
+%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % eloreta
@@ -189,9 +188,8 @@ conn = data2sctrgcmim(signal_roi, fres,30, 0,0, [], inds, output,0);
 [MIM_, MIC_, GC_, DIFFGC_, iCOH_, aCOH_] = fp_unwrap_conn(conn,numel(npcs),filt,PCA_inds);
 
 data_mim = sum(MIM_,2);
-allplots_cortex_BS(cortex_highres,data_mim, [0 max(abs(data_mim))], cm17a ,'.', 0.3,[])
-outname1 = [DIRFIG 'eLORETA_netMIM_snr0' num2str(params.isnr*10) '.png'];
-print(outname1,'-dpng');
+outname1 = [DIRFIG 'eLORETA_netMIM_snr0' num2str(params.isnr*10)];
+allplots_cortex_BS(cortex_highres,data_mim, [0 max(abs(data_mim))], cm17a ,'netMIM score', 0.3,outname1)
 %
 % LCMV
 
@@ -270,9 +268,8 @@ end
 %
 close all
 data_mim_l = sum(MIM_l,2);
-allplots_cortex_BS(cortex_highres,data_mim_l, [0 max(abs(data_mim_l))], cm17a ,'.', 0.3,[])
-outname1 = [DIRFIG 'LCMV_netMIM_snr0' num2str(params.isnr*10) '.png'];
-print(outname1,'-dpng');
+outname1 = [DIRFIG 'LCMV_netMIM_snr0' num2str(params.isnr*10)];
+allplots_cortex_BS(cortex_highres,data_mim_l, [0 max(abs(data_mim_l))], cm17a ,'netMIM score', 0.3,outname1)
 close all
 
 [pr_mim_e(ipip)] = fp_pr(MIM_,iroi_seed,iroi_tar,1)
@@ -282,27 +279,23 @@ close all
 %
 
 data_mim = squeeze(MIM_(iroi_seed,:));
-allplots_cortex_BS(cortex_highres,data_mim, [0 max(abs(data_mim))], cm17a ,'.', 0.3,[])
-outname1 = [DIRFIG 'eLORETA_seedMIM_snr0' num2str(params.isnr*10) '.png'];
-print(outname1,'-dpng');
+outname1 = [DIRFIG 'eLORETA_seedMIM_snr0' num2str(params.isnr*10)];
+allplots_cortex_BS(cortex_highres,data_mim, [0 max(abs(data_mim))], cm17a ,'MIM score', 0.3,outname1)
 close all
 
 data_mim_l = squeeze(MIM_l(iroi_seed,:));
-allplots_cortex_BS(cortex_highres,data_mim_l, [0 max(abs(data_mim_l))], cm17a ,'.', 0.3,[])
-outname1 = [DIRFIG 'LCMV_seedMIM_snr0' num2str(params.isnr*10) '.png'];
-print(outname1,'-dpng')
+outname1 = [DIRFIG 'LCMV_seedMIM_snr0' num2str(params.isnr*10)];
+allplots_cortex_BS(cortex_highres,data_mim_l, [0 max(abs(data_mim_l))], cm17a ,'MIM score', 0.3,outname1)
 close all
 
 data_mim = squeeze(MIM_(iroi_tar,:));
-allplots_cortex_BS(cortex_highres,data_mim, [0 max(abs(data_mim))], cm17a ,'.', 0.3,[])
-outname1 = [DIRFIG 'eLORETA_tarMIM_snr0' num2str(params.isnr*10) '.png'];
-print(outname1,'-dpng')
+outname1 = [DIRFIG 'eLORETA_tarMIM_snr0' num2str(params.isnr*10)];
+allplots_cortex_BS(cortex_highres,data_mim, [0 max(abs(data_mim))], cm17a ,'MIM score', 0.3,outname1)
 close all
 
 data_mim_l = squeeze(MIM_l(iroi_tar,:));
-allplots_cortex_BS(cortex_highres,data_mim_l, [0 max(abs(data_mim_l))], cm17a ,'.', 0.3,[])
-outname1 = [DIRFIG 'LCMV_tarMIM_snr0' num2str(params.isnr*10) '.png'];
-print(outname1,'-dpng')
+outname1 = [DIRFIG 'LCMV_tarMIM_snr0' num2str(params.isnr*10)];
+allplots_cortex_BS(cortex_highres,data_mim_l, [0 max(abs(data_mim_l))], cm17a ,'MIM score', 0.3,outname1)
 close all
 % corrs 
 
@@ -323,25 +316,20 @@ end
 
 
 data = abs(squeeze(ce(:,1)));
-allplots_cortex_BS(cortex_highres,data, [0 max(abs(data))], cm17a ,'.', 0.3,[])
-outname1 = [DIRFIG 'eLORETA_seedcorr_snr0' num2str(params.isnr*10) '.png'];
-print(outname1,'-dpng')
+outname1 = [DIRFIG 'eLORETA_seedcorr_snr0' num2str(params.isnr*10)];
+allplots_cortex_BS(cortex_highres,data, [0 max(abs(data))], cm17a ,'corr coeff', 0.3,outname1)
 close all
 
 data = abs(squeeze(ce(:,2)));
-allplots_cortex_BS(cortex_highres,data, [0 max(abs(data))], cm17a ,'.', 0.3,[])
-outname1 = [DIRFIG 'eLORETA_tarcorr_snr0' num2str(params.isnr*10) '.png'];
-print(outname1,'-dpng')
-close all
+outname1 = [DIRFIG 'eLORETA_tarcorr_snr0' num2str(params.isnr*10)];
+allplots_cortex_BS(cortex_highres,data, [0 max(abs(data))], cm17a ,'.', 0.3,outname1)
 
 data = abs(squeeze(cl(:,1)));
-allplots_cortex_BS(cortex_highres,data, [0 max(abs(data))], cm17a ,'.', 0.3,[])
-outname1 = [DIRFIG 'LCMV_seedcorr_snr0' num2str(params.isnr*10) '.png'];
-print(outname1,'-dpng')
+outname1 = [DIRFIG 'LCMV_seedcorr_snr0' num2str(params.isnr*10)];
+allplots_cortex_BS(cortex_highres,data, [0 max(abs(data))], cm17a ,'.', 0.3,outname1)
 close all
 
 data = abs(squeeze(cl(:,2)));
-allplots_cortex_BS(cortex_highres,data, [0 max(abs(data))], cm17a ,'.', 0.3,[])
-outname1 = [DIRFIG 'LCMV_tarcorr_snr0' num2str(params.isnr*10) '.png'];
-print(outname1,'-dpng')
+outname1 = [DIRFIG 'LCMV_tarcorr_snr0' num2str(params.isnr*10)];
+allplots_cortex_BS(cortex_highres,data, [0 max(abs(data))], cm17a ,'.', 0.3,outname1)
 close all
