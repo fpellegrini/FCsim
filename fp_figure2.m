@@ -79,6 +79,7 @@ for icon = [3 4 1 2 5 6 7 8 ] %Coherence, iCOH, MIM, MIC, absgc,posgc, abstrgc, 
     
     data1 = PR{icon}(:,ipip);
     mean_pr(oo) = mean(data1);
+    pr_all(oo,:) = data1; 
     imlab1 = 'PR';
     
     cl = [0.8 0.7 0.6];
@@ -137,8 +138,25 @@ print(outname,'-depsc');
 % export_fig(outname, ['-r' '150'], '-a2', '-transparent');
 close all
 
+%% test performance differences
+
+%Coherence, iCOH, MIM, MIC, absgc,posgc, abstrgc, postrgc
+
+%coherence vs mim 
+d_coh = pr_all(1,:); 
+d_mim = pr_all(3,:); 
+[p1,~,stats] = signrank(d_coh,d_mim,'tail','left')
+t1 = sign(stats.zval);
+
+d_gcdet = pr_all(5,:); 
+[p2,~,stats] = signrank(d_gcdet,d_mim,'tail','left')
+t2 = sign(stats.zval);
 
 
+d_gcdir = pr_all(6,:);
+d_trgcdir = pr_all(8,:);
+[p3,~,stats] = signrank(d_gcdir,d_trgcdir,'tail','left')
+t3 = sign(stats.zval);
 
 
 

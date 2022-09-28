@@ -80,8 +80,7 @@ for ii = 1:length(PR)
     PR{ii}(a,:) = [];
 end
 
-%%
-
+%% 
 for icon = 1:length(PR) %MIM, MIC, aCoh, iCoh, absgc,posgc,abstrgc, postrgc
     
     
@@ -90,7 +89,7 @@ for icon = 1:length(PR) %MIM, MIC, aCoh, iCoh, absgc,posgc,abstrgc, postrgc
     figone(8,37)
     
     if icon < 3 %MIC, MIM
-        pips = [1:8 21 22 10 9]; %fixed, sumvox, summim, central, baseline
+        pips = [1:8 21 22 10 9]; %fixed, sumvox, central,summim, baseline
         npips = 12;
     else %GC
         pips = [1:8 21 22 9];
@@ -112,7 +111,8 @@ for icon = 1:length(PR) %MIM, MIC, aCoh, iCoh, absgc,posgc,abstrgc, postrgc
         %22: central voxel
         
         data1 = PR{icon}(:,ipip);
-        mean_pr(icon,ipip) = mean(data1); 
+        mean_pr(icon,ipip1) = mean(data1);
+        pr_all(icon,ipip1,:) = data1; 
         imlab = 'PR';
         imlab1 = 'PR';
         
@@ -193,13 +193,80 @@ for icon = 1:length(PR) %MIM, MIC, aCoh, iCoh, absgc,posgc,abstrgc, postrgc
     
 
     %%
-    outname = [DIRFIG name{iname} '_' imlab '_' labs{icon} '.eps'];
-    print(outname,'-depsc');
-    close all
+%     outname = [DIRFIG name{iname} '_' imlab '_' labs{icon} '.eps'];
+%     print(outname,'-depsc');
+%     close all
     
     
 end
 
+%% test performance differences
+%mim 
+%3 vs 6 PCs
+d3 = squeeze(pr_all(1,3,:)); 
+d6 = squeeze(pr_all(1,6,:)); 
+[p1,~,stats] = signrank(d6,d3,'tail','left')
+t1 = sign(stats.zval);
+
+%3 vs 5 PCs
+d5 = squeeze(pr_all(1,5,:)); 
+[p2,~,stats] = signrank(d5,d3,'tail','left')
+
+%3 PCs vs truevox 
+dt = squeeze(pr_all(1,end,:)); 
+[p3,~,stats] = signrank(d3,dt,'tail','left')
+
+%VAR90 vs 3 PCs 
+d90 = squeeze(pr_all(1,7,:)); 
+[p4,~,stats] = signrank(d90,d3,'tail','left')
+
+%VAR99 vs 3 PCs 
+d99 = squeeze(pr_all(1,8,:)); 
+[p5,~,stats] = signrank(d99,d3,'tail','left')
+
+%MeanFC vs 3 PCs 
+dMFC = squeeze(pr_all(1,9,:)); 
+[p6,~,stats] = signrank(dMFC,d3,'tail','left')
+
+%Central vs 3 PCs 
+dc = squeeze(pr_all(1,10,:)); 
+[p7,~,stats] = signrank(dc,d3,'tail','left')
+
+%FCMEAN vs 3 PCs 
+dFCM = squeeze(pr_all(1,11,:)); 
+[p8,~,stats] = signrank(dFCM,d3,'tail','left')
+
+
+%% trgc
+
+%3 vs 6 PCs
+d3 = squeeze(pr_all(8,3,:)); 
+d6 = squeeze(pr_all(8,6,:)); 
+[p1,~,stats] = signrank(d6,d3,'tail','left')
+
+%3 vs 5 PCs
+d5 = squeeze(pr_all(8,5,:)); 
+[p2,~,stats] = signrank(d5,d3,'tail','left')
+
+%3 PCs vs truevox 
+dt = squeeze(pr_all(8,11,:)); 
+[p3,~,stats] = signrank(d3,dt,'tail','left')
+
+%VAR90 vs 3 PCs 
+d90 = squeeze(pr_all(8,7,:)); 
+[p4,~,stats] = signrank(d90,d3,'tail','left')
+
+%VAR99 vs 3 PCs 
+d99 = squeeze(pr_all(8,8,:)); 
+[p5,~,stats] = signrank(d99,d3,'tail','left')
+
+%MeanFC vs 3 PCs 
+dMFC = squeeze(pr_all(8,9,:)); 
+[p6,~,stats] = signrank(dMFC,d3,'tail','left')
+
+%Central vs 3 PCs 
+dc = squeeze(pr_all(8,10,:)); 
+[p7,~,stats] = signrank(dc,d3,'tail','left')
 
 
 

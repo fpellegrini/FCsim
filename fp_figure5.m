@@ -17,7 +17,7 @@ for icon = [1 8] %{'MIM','MIC','Coherence','iCOH','GC-det','GC-dir','TRGC-det','
     figone(8,10)
     for iname = [14 1]
         
-        clearvars -except iname name DIRDATA DIRFIG labs o im icon ipip titles xt mean_pr
+        clearvars -except iname name DIRDATA DIRFIG labs o im icon ipip titles xt pr_all mean_pr
         
         %default paramenters
         nit = 100;
@@ -95,6 +95,7 @@ for icon = [1 8] %{'MIM','MIC','Coherence','iCOH','GC-det','GC-dir','TRGC-det','
         %%
         data1 = PR{icon}(:,ipip);
         mean_pr(o) = mean(data1);
+        pr_all(o,:) = data1;
         imlab = 'PR';
         imlab1 = 'PR';
         
@@ -160,6 +161,11 @@ for icon = [1 8] %{'MIM','MIC','Coherence','iCOH','GC-det','GC-dir','TRGC-det','
     
 end
 
+
+%eloreta vs LCMV 
+de = pr_all(1,:); 
+dl = pr_all(2,:); 
+[p1,~,stats] = signrank(de,dl)
 
 
 

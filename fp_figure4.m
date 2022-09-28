@@ -31,13 +31,13 @@ titles = {'eLORETA','LCMV','DICS','Champagne'};
 im = 2; %measures: MRR, PR, EM3
 ipip = 3;
 %%
-icon = 1; %{'MIM','MIC','Coherence','iCOH','GC-det','GC-dir','TRGC-det','TRGC-dir'};
+icon = 8; %{'MIM','MIC','Coherence','iCOH','GC-det','GC-dir','TRGC-det','TRGC-dir'};
 o=1;
 figure
 figone(8,18)
 for iname = [14 1 18 16]
     
-    clearvars -except iname name DIRDATA DIRFIG labs o im icon ipip titles xt mean_pr
+    clearvars -except iname name DIRDATA DIRFIG labs o im icon ipip titles xt mean_pr pr_all
     
     %default paramenters
     nit = 100;
@@ -115,6 +115,7 @@ for iname = [14 1 18 16]
     %%
     data1 = PR{icon}(:,ipip);
     mean_pr(o) = mean(data1);
+    pr_all(o,:) = data1; 
     imlab = 'PR';
     imlab1 = 'PR';
     
@@ -177,6 +178,23 @@ outname = [DIRFIG imlab '_' labs{icon} '_filters_3pcs.eps'];
 print(outname,'-depsc');
 
 close all
+
+
+%% test performance differences
+
+%eloreta vs LCMV 
+de = pr_all(1,:); 
+dl = pr_all(2,:); 
+[p1,~,~] = signrank(de,dl,'tail','left')
+
+%DICS vs LCMV
+dd = pr_all(3,:); 
+[p2,~,~] = signrank(dd,dl,'tail','left')
+
+
+%Champ vs LCMV
+dc = pr_all(4,:); 
+[p3,~,~] = signrank(dc,dl,'tail','left')
 
 
 
