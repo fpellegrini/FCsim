@@ -118,7 +118,7 @@ elseif strcmp(params.ifilt,'c') %champ with non-realistically good conditions
     sigu = regu*eye(n_sensors);
     L_perm = permute(L_backward,[1 3 2]);
     
-    [~,~,w] = awsm_champ(signal_sensor(:, :), L_perm(:, :), sigu, 200, 3, 2, 0);
+    [~,~,w] = awsm_champ(signal_sensor(:, :), L_perm(:, :), sigu, 200, 3, 1, 0);
     A = real(reshape(w',size(L_perm)));
     
 elseif strcmp(params.ifilt,'cr') %champ with regulaization 
@@ -128,7 +128,7 @@ elseif strcmp(params.ifilt,'cr') %champ with regulaization
     sigu = regu*eye(n_sensors);
     L_perm = permute(L_backward,[1 3 2]);
     
-    [~,~,w] = awsm_champ(signal_sensor(:, :), L_perm(:, :), sigu, 100, 3, 2, 0);
+    [~,~,w] = awsm_champ(signal_sensor(:, :), L_perm(:, :), sigu, 100, 3, 1, 0);
     A = real(reshape(w',size(L_perm)));
     
         
