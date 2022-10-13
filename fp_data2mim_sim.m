@@ -121,7 +121,7 @@ elseif strcmp(params.ifilt,'c') %champ with non-realistically good conditions
     [~,~,w] = awsm_champ(signal_sensor(:, :), L_perm(:, :), sigu, 200, 3, 0, 0);
     A = real(reshape(w',size(L_perm)));
     
-elseif strcmp(params.ifilt,'cr') %champ with regulaization 
+elseif strcmp(params.ifilt,'cr') %champ with regularization 
     
     regu = fp_champ_crossval(signal_sensor,L_backward,5);
     
