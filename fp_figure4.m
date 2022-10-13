@@ -92,7 +92,7 @@ for iname = [14 1 18 16]
     a=[];
     
     %%
-    for iit= its
+    for iit= [1:100]
         
         
         inname = sprintf('pr_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_%s_iter%d'...
