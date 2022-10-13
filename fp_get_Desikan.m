@@ -1,5 +1,8 @@
 function D = fp_get_Desikan(iReg)
 
+% Copyright (c) 2022 Franziska Pellegrini and Stefan Haufe
+
+%%
 %load leadfield and cortex structures 
 load('processed_bs_wzb_90_2000/bs_results.mat')
 

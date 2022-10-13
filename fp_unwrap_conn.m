@@ -1,5 +1,8 @@
 function [MIM_, MIC_, GC_, DIFFGC_, iCOH_, aCOH_] = fp_unwrap_conn(conn,nroi,filt,PCA_inds)
 
+% Copyright (c) 2022 Franziska Pellegrini and Stefan Haufe
+
+%%
 %initialize output variables 
 MIM_ = [];
 MIC_ = [];

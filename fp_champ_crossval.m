@@ -1,5 +1,7 @@
 function reg_param = fp_champ_crossval(signal_sensor,leadfield,nfold)
 
+% Copyright (c) 2022 Franziska Pellegrini and Stefan Haufe
+
 [n_sensors, n_voxels,n_dims] = size(leadfield);
 
 regs = logspace(-2,0,15) * mean(diag(cov(signal_sensor(:,:)')));

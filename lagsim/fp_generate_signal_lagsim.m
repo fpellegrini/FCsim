@@ -1,6 +1,9 @@
 function [sig,brain_noise,sensor_noise, L_save,iroi_seed,iroi_tar,D, fres, n_trials,filt] = fp_generate_signal_lagsim...
     (params,D,DIROUT1,lag)
 
+% Copyright (c) 2022 Franziska Pellegrini and Stefan Haufe
+
+%%
 no_reload = true;
 if lag > 1 && params.ip~=1
     %reload data from ip1 to keep them constant and only vary the lag size

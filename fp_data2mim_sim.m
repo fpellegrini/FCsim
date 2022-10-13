@@ -1,5 +1,8 @@
 function fp_data2mim_sim(params)
 
+% Copyright (c) 2022 Franziska Pellegrini and Stefan Haufe
+
+%%
 % define folders for saving results
 DIROUT = '/home/bbci/data/haufe/Franziska/data/mim_sim5/';
 if ~exist(DIROUT);mkdir(DIROUT); end

@@ -1,4 +1,8 @@
 function fp_eval_mim_struct_sim(ip)
+
+% Copyright (c) 2022 Franziska Pellegrini and Stefan Haufe
+
+%%
 % Starts FC simulation. 
 % ip1 (defaults): 2 interactions, 1 source/region, SNR 0.6, noise_mix 0.5, lag 5-200, LCMV source projection.
 % ip2: vary interaction number (1 to 5)

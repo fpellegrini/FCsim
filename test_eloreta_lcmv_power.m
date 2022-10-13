@@ -1,3 +1,6 @@
+% Copyright (c) 2022 Franziska Pellegrini and Stefan Haufe
+
+%%
 clear all
 
 rng(5)

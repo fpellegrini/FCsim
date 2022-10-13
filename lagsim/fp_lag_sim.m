@@ -1,5 +1,8 @@
 function fp_lag_sim(params)
 
+% Copyright (c) 2022 Franziska Pellegrini and Stefan Haufe
+
+%%
 % define folders for saving results
 DIROUT = '/home/bbci/data/haufe/Franziska/data/mim_sim5_lag/';
 if ~exist(DIROUT);mkdir(DIROUT); end

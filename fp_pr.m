@@ -1,5 +1,8 @@
 function [pm] = fp_pr(cc,iroi_seed,iroi_tar,half_m)
 
+% Copyright (c) 2022 Franziska Pellegrini and Stefan Haufe
+
+%%
 if norm(iroi_seed(:)- iroi_tar(:),'fro')==0
     pm = 0;
 else

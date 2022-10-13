@@ -1,5 +1,8 @@
 function reg_param = fp_eloreta_crossval(signal_sensor,leadfield,nfold)
 
+% Copyright (c) 2022 Franziska Pellegrini and Stefan Haufe
+
+%%
 [n_sensors, n_voxels,n_dims] = size(leadfield);
 %logarithmic spacing between 0.001 and 0.5
 % a = [0.001 0.5];

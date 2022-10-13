@@ -1,5 +1,5 @@
 function fp_figure2
-%plot figure 2
+% Plot figure 2.
 
 DIRDATA = './mim_sim5/';
 DIRFIG = './figures/mimsim_ana/mim_sim5/Manuscript/';

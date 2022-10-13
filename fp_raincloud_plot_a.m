@@ -9,6 +9,7 @@
 % Inspired by https://m.xkcd.com/1967/
 % Written by Tom Marshall. www.tomrmarshall.com
 % Thanks to Jacob Bellmund for some improvements
+% Modified by Franziska Pellegrini
 
 
 function [h, u] = fp_raincloud_plot_a(X, cl, box_on, bandwidth, density_type)

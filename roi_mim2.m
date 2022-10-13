@@ -1,5 +1,8 @@
 function [mic,mim]= roi_mim(Cohroi, subinds1, subinds2)
 
+% Copyright (c) 2022 Franziska Pellegrini and Stefan Haufe
+
+%%
 regu = 0.000001; 
 [~,~,nfreq] = size(Cohroi);
 

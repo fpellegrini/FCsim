@@ -1,6 +1,9 @@
 function [sig,brain_noise,sensor_noise, L_save,iroi_seed,iroi_tar,D, fres, n_trials,filt,signal_sources] = fp_u...
     (params,D,DIROUT1)
 
+% Copyright (c) 2022 Franziska Pellegrini and Stefan Haufe
+
+%%
 %if second condition of lag, then load parameters of first condition
 no_reload = true;
 if params.ip==6 %vary lag size

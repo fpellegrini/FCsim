@@ -1,5 +1,8 @@
 function [inds, PCA_inds] = fp_npcs2inds(npcs)
 
+% Copyright (c) 2022 Franziska Pellegrini and Stefan Haufe
+
+%%
 beg_inds = cumsum([1 npcs(1:end-1)]);
 end_inds = cumsum([npcs]);
 

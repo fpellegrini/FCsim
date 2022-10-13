@@ -1,5 +1,8 @@
 function fp_gc_lag_check 
 
+% Copyright (c) 2022 Franziska Pellegrini and Stefan Haufe
+
+%%
 fs= 500; 
 fres = fs; 
 frqs = sfreqs(fres, fs); % freqs in Hz

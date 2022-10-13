@@ -1,5 +1,8 @@
 function [nInteractions, nRegionInts,SNR,noise_mix,nlag,filtertype, dimred] = fp_get_params(ip)
 
+% Copyright (c) 2022 Franziska Pellegrini and Stefan Haufe
+
+%%
 if ip == 1
     %defaults
     nInteractions = 2;

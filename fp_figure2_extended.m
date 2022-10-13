@@ -1,5 +1,5 @@
 function fp_figure2_extended
-%plot supplementary figure
+% Plot supplementary figure.
 
 DIRDATA = './mim_sim5/';
 DIRFIG = './figures/mimsim_ana/mim_sim5/Manuscript/';
@@ -52,14 +52,9 @@ im = 2; %measure: PR
 for iit= its
     
     try
-        %         if iname == 18 | iname == 17
         inname = sprintf('pr_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_%s_iter%d'...
             ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,dimred, iit);
-        %         else
-        %             inname = sprintf('mrr_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_iter%d'...
-        %                 ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,iit);
-        %         end
-        %
+
         load([DIRDATA inname '.mat'])
         
         PR{1}(iit,:) = pr_mim;
