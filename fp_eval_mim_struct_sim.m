@@ -20,11 +20,10 @@ fp_addpath
 DIRLOG ='/home/bbci/data/haufe/Franziska/log/mim_sim5/';
 if ~exist(DIRLOG); mkdir(DIRLOG); end
 
-rng('shuffle')
-
 %%
 %iteration number equals cluster job number 
 iit = str2num(getenv('SGE_TASK_ID'));
+rng(iit)
 
 clear nInteractions nRegionInts SNR noise_mix nlag filtertype hemisym
 
