@@ -20,7 +20,9 @@ clear inds PCA_inds
 ninds = length(inds);
    
 for iit = 1:nit %one iteration takes ~90 sec on my local laptop
-
+    
+    iit
+    
     %shuffle trials
     shuf_inds = randperm(nepo);   
     
