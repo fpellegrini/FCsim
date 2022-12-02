@@ -12,6 +12,7 @@ rng(iit)
 tic
 nit = 1000;
 [nchan, ~, nepo] = size(signal_roi);
+fres = 100;
 maxfreq = fres+1;
 
 % calculate indices
