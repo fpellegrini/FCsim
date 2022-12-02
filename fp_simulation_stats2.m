@@ -1,5 +1,7 @@
 function fp_simulation_stats2
 
+fp_addpath
+
 DIRIN = '/home/bbci/data/haufe/Franziska/data/mim_sim5_stats/';
 load([DIRIN 'signal.mat'])
 
