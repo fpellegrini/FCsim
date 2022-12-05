@@ -63,7 +63,7 @@ end
 % end
 t = toc; 
 %% save 
-outname1 = [DIROUT 'result_' num2str(iit) '.mat'];
+outname1 = [DIRIN 'result_' num2str(iit) '.mat'];
 save(outname1,'MIM_s','t','-v7.3')
 
 
