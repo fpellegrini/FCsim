@@ -10,7 +10,7 @@ rng(iit)
 
 %% calculate true MIM and do statistics 
 tic
-nit = 1000;
+nshuf = 1000;
 [nchan, ~, nepo] = size(signal_roi);
 fres = 100;
 maxfreq = fres+1;
@@ -20,9 +20,9 @@ clear inds PCA_inds
 [inds, PCA_inds] = fp_npcs2inds(npcs);
 ninds = length(inds);
    
-for iit = 1:nit %one iteration takes ~90 sec on my local laptop
+for ishuf = 1:nshuf %one iteration takes ~90 sec on my local laptop
     
-    iit
+    ishuf
     
     %shuffle trials
     shuf_inds = randperm(nepo);   
@@ -52,7 +52,7 @@ for iit = 1:nit %one iteration takes ~90 sec on my local laptop
     clear conn
     conn.MIM = MIM2;
     conn.inds = inds;  
-    [MIM_s(:,:,iit), ~, ~, ~, ~, ~] = fp_unwrap_conn(conn,D.nroi,filt,PCA_inds);
+    [MIM_s(:,:,ishuf), ~, ~, ~, ~, ~] = fp_unwrap_conn(conn,D.nroi,filt,PCA_inds);
 
 end
 
