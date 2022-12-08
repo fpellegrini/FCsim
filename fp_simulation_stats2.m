@@ -10,7 +10,7 @@ rng(iit)
 
 %% calculate true MIM and do statistics 
 tic
-nshuf = 1000;
+nshuf = 100;
 [nchan, ~, nepo] = size(signal_roi);
 fres = 100;
 maxfreq = fres+1;
