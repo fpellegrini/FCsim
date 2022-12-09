@@ -17,10 +17,6 @@ params.dimred='p';
 params.iit = 1;
 params.ip = NaN;
 
-logname = sprintf('iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_%s_iter%d'...
-    ,iInt,iReg,isnr*10,iss*10, ilag,ifilt{1},dimred,1);
-params.logname = logname;
-
                             
 %% signal generation
 
