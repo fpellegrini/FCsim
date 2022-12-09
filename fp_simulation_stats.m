@@ -16,6 +16,7 @@ params.ifilt='l';
 params.dimred='p';
 params.iit = 1;
 params.ip = NaN;
+ipip=3;
 
                             
 %% signal generation
