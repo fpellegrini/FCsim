@@ -3,25 +3,24 @@ fp_addpath
 DIROUT = '/home/bbci/data/haufe/Franziska/data/mim_sim5_stats/';
 if ~exist(DIROUT);mkdir(DIROUT); end
 
-rng(1)
+rng(5)
 
-params.pips = 3;
-ipip = 3;
-[iInt,iReg,isnr,iss,ilag,ifilt, dimred] = fp_get_params(3);
-
-params.iInt = iInt; %number of interactions
-params.iReg = iReg; %number of active voxels per region
-params.isnr = isnr; %signal-to-noise ratio
-params.iss = iss; %noise mix
-params.ilag = ilag; %magitude of time delay (ilag=2 -> time delay between 50 and 200 Hz)
-params.ifilt = ifilt{1}; %source projection filter type
-params.dimred = dimred; %type of dimensionality reduction (pca vs ssd, but ssd not properly investigated here)
+DIROUT1=[];
+params.iReg=1; %number of interacting voxels in interacting regions 
+params.iInt = 1; %number of interacting regions
+params.ilag = 2; %lag size
+params.isnr = 0.6; %SNR
+params.iss = 0.5; %noise mix
+t=[]; %run time
+params.ifilt='l';
+params.dimred='p';
 params.iit = 1;
 params.ip = NaN;
 
 logname = sprintf('iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_%s_iter%d'...
     ,iInt,iReg,isnr*10,iss*10, ilag,ifilt{1},dimred,1);
 params.logname = logname;
+
                             
 %% signal generation
 
@@ -32,8 +31,8 @@ D = fp_get_Desikan(params.iReg);
 
 %signal generation
 fprintf('Signal generation... \n')
-[sig,brain_noise,sensor_noise,L,iroi_seed, iroi_tar,D, fres, n_trials,filt] = ...
-    fp_generate_signal_with_timestructure(params,D,[]);
+[sig,brain_noise,sensor_noise,L,iroi_seed, iroi_tar,D, fres, n_trials,filt,~] = ...
+    fp_u(params,D,[]);
 
 %combine noise sources
 noise = params.iss*brain_noise + (1-params.iss)*sensor_noise;
