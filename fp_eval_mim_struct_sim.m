@@ -17,7 +17,7 @@ function fp_eval_mim_struct_sim(ip)
 fp_addpath
 
 %logfile to faciliatate parallel computing on the cluster 
-DIRLOG ='/home/bbci/data/haufe/Franziska/log/mim_sim5/';
+DIRLOG ='/home/bbci/data/haufe/Franziska/log/mim_sim6/';
 if ~exist(DIRLOG); mkdir(DIRLOG); end
 
 %%
