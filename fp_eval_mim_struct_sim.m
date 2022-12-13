@@ -22,9 +22,8 @@ if ~exist(DIRLOG); mkdir(DIRLOG); end
 
 %%
 %iteration number equals cluster job number 
-% iit = str2num(getenv('SGE_TASK_ID'));
-% rng(iit)
-iit =1; 
+iit = str2num(getenv('SGE_TASK_ID'));
+rng(iit)
 
 clear nInteractions nRegionInts SNR noise_mix nlag filtertype hemisym
 
