@@ -209,7 +209,7 @@ for ipip = params.pips
     %22: CENTRAL
     
     fprintf(['Testing pipeline ' num2str(ipip) '\n'])
-    try
+%     try
         tic
         %% PCA
         
@@ -490,9 +490,9 @@ for ipip = params.pips
                      
         clear MIM_ MIC_ DIFFGC_ GC_ aCOH_ iCOH_
         
-    catch
-        errorpipeline = [errorpipeline ipip];
-    end
+%     catch
+%         errorpipeline = [errorpipeline ipip]
+%     end
     
 end %pips
 
