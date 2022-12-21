@@ -35,7 +35,7 @@ for iInt = nInteractions
         for isnr = SNR
             for iss = noise_mix
                 for ilag = nlag
-                    for ifi = 1:numel(filtertype)
+                    for ifi = 1%:numel(filtertype)
                         
                         clear ifilt
                         ifilt = filtertype{ifi};
