@@ -1,15 +1,14 @@
-fp_addpath
+function fp_simulation_stats
 
-DIROUT = '/home/bbci/data/haufe/Franziska/data/mim_sim5_stats/';
-if ~exist(DIROUT);mkdir(DIROUT); end
+% Copyright (c) 2022 Franziska Pellegrini and Stefan Haufe
 
+rng('default')
 rng(5)
 
-DIROUT1=[];
 params.iReg=1; %number of interacting voxels in interacting regions 
 params.iInt = 1; %number of interacting regions
 params.ilag = 2; %lag size
-params.isnr = 0.4; %SNR
+params.isnr = 0.6; %SNR
 params.iss = 0.5; %noise mix
 t=[]; %run time
 params.ifilt='l';
@@ -118,6 +117,6 @@ output = {'MIM'};
 conn = data2sctrgcmim(signal_roi, fres, 30, 0,0, [], inds, output);
 [MIM_t, ~, ~, ~, ~,~] = fp_unwrap_conn(conn,D.nroi,filt,PCA_inds);
 
-outname1 = [DIROUT 'signal.mat'];
+outname1 = ['~/Desktop/signal.mat'];
 save(outname1,'signal_roi','iroi_seed','iroi_tar','npcs','MIM_t','D','filt','-v7.3')
 

@@ -1,3 +1,5 @@
+%submit t TU cluster 
+
 fp_addpath
 cd ~/matlab/fp/meg_lfp/
 nit = 100;

@@ -1,12 +1,14 @@
-function fp_simulation_stats2
+function fp_simulation_stats2(seed,iit)
 
-fp_addpath
+% Copyright (c) 2022 Franziska Pellegrini and Stefan Haufe
 
-DIRIN = '/home/bbci/data/haufe/Franziska/data/mim_sim5_stats/';
+addpath(genpath('./'))
+
+rng('default')
+rng(seed)
+DIRIN = './';
+
 load([DIRIN 'signal.mat'])
-
-iit = str2num(getenv('SGE_TASK_ID'));
-rng(iit)
 
 %% calculate true MIM and do statistics 
 tic
@@ -52,16 +54,13 @@ for ishuf = 1:nshuf %one iteration takes ~90 sec on my local laptop
     clear conn
     conn.MIM = MIM2;
     conn.inds = inds;  
-    [MIM_s(:,:,ishuf), ~, ~, ~, ~, ~] = fp_unwrap_conn(conn,D.nroi,filt,PCA_inds);
+    filt 
+    filt1.band_inds = [17:25]';
+    [MIM_s(:,:,ishuf), ~, ~, ~, ~, ~] = fp_unwrap_conn(conn,D.nroi,filt1,PCA_inds);
 
 end
-
-% for iroi = 1:D.nroi 
-%     for jroi = 1:D.nroi
-%         MIM_p(iroi,jroi) = sum(squeeze(MIM_s(iroi,jroi,:))>MIM_t(iroi,jroi))/nit;
-%     end
-% end
 t = toc; 
+
 %% save 
 outname1 = [DIRIN 'result_' num2str(iit) '.mat'];
 save(outname1,'MIM_s','t','-v7.3')
