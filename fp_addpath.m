@@ -1,4 +1,5 @@
 function fp_addpath
+%for TU cluster 
 
 addpath(genpath('/home/bbci/data/haufe/Franziska'))
 addpath(genpath('~/matlab/fp/'))

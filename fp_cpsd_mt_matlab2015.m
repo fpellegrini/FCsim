@@ -1,5 +1,7 @@
 function S = fp_cpsd_mt(X1,X2,ind_1,ind_2,h,window,noverlap,nchunks,taparray)
 
+% Copyright (c) 2022 Franziska Pellegrini and Stefan Haufe
+
 ind_pow = intersect(ind_1, ind_2);
 nfft = 2*(h-1);
 

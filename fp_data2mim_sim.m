@@ -211,7 +211,7 @@ for ipip = params.pips
     fprintf(['Testing pipeline ' num2str(ipip) '\n'])
     try
         tic
-        %% PCA
+        %% dimensionality reduction
         
         clear npcs  variance_explained
         signal_roi = [];

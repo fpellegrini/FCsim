@@ -1,23 +1,23 @@
-function fp_figure5
-%plot figure 5
+function fp_figure8CD
+%plot different BSRs
+
+% Copyright (c) 2022 Franziska Pellegrini and Stefan Haufe
 
 DIRDATA = './mim_sim5/';
 DIRFIG = './figures/mimsim_ana/mim_sim5/Manuscript/';
 if ~exist(DIRFIG); mkdir(DIRFIG); end
 
-
 labs = {'MIM','MIC','Coherence','iCOH','GC-det','GC-dir','TRGC-det','TRGC-dir'};
-titles = {'eLORETA','LCMV','DICS','Champagne'};
+ipip = 3; %only for fixPC pipeline with 3 PCs
 
-ipip = 3;
 %%
-for icon = [1 8] %{'MIM','MIC','Coherence','iCOH','GC-det','GC-dir','TRGC-det','TRGC-dir'};
+for icon = [1 8] %plot only for MIM and TRGC
     o=1;
     figure
-    figone(8,10)
-    for iname = [14 1]
+    figone(8,18)
+    for iname = [9 10 1 11 12]
         
-        clearvars -except iname name DIRDATA DIRFIG labs o im icon ipip titles xt pr_all mean_pr
+        clearvars -except iname name DIRDATA DIRFIG labs o im icon ipip xt mean_pr
         
         %default paramenters
         nit = 100;
@@ -65,17 +65,11 @@ for icon = [1 8] %{'MIM','MIC','Coherence','iCOH','GC-det','GC-dir','TRGC-det','
             end
         end
         
-        
+        %% load data
         np = 6;
-        
-        its = [1:nit];
-        a=[];
-        
-        %%
-        for iit= its
+        for iit= 1:nit
             
-            
-            inname = sprintf('pr_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_%s_corr_iter%d'...
+            inname = sprintf('pr_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_%s_iter%d'...
                 ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,dimred, iit);
             
             load([DIRDATA inname '.mat'])
@@ -88,18 +82,16 @@ for icon = [1 8] %{'MIM','MIC','Coherence','iCOH','GC-det','GC-dir','TRGC-det','
             PR{6}(iit,:) = pr_posgc;
             PR{7}(iit,:) = pr_abstrgc;
             PR{8}(iit,:) = pr_postrgc;
-            
         end
         
+        %% plot
         
-        %%
         data1 = PR{icon}(:,ipip);
         mean_pr(o) = mean(data1);
-        pr_all(o,:) = data1;
         imlab = 'PR';
         imlab1 = 'PR';
         
-        
+        %select color
         if ipip<=np
             cl = [0.8 0.7 0.6];
         elseif ipip <np+3 || ipip == 11 || ipip == 12
@@ -112,13 +104,14 @@ for icon = [1 8] %{'MIM','MIC','Coherence','iCOH','GC-det','GC-dir','TRGC-det','
             cl = [0.8 0.8 0.8];
         end
         
-        subplot(1,2,o)
+        subplot(1,5,o)
         
         [h, u] = fp_raincloud_plot_a(data1, cl, 1,0.2, 'ks');
         view([-90 -90]);
         set(gca, 'Xdir', 'reverse');
         set(gca, 'XLim', [0 1]);
         
+        titles = {'0% bn','25% bn','50% bn','75% bn','100% bn'};
         htit = title(titles{o});
         htit.Position(1) = -0.12;
         set(gca,'ytick',[])
@@ -130,11 +123,11 @@ for icon = [1 8] %{'MIM','MIC','Coherence','iCOH','GC-det','GC-dir','TRGC-det','
             set(gca,'Clipping','Off')
             xt = xticks;
             for ix = xt
-                hu = line([ix ix],[2 -10]);
+                hu = line([ix ix],[2 -13]);
                 set(hu, 'color',[0.9 0.9 0.9])
                 uistack(hu,'bottom')
             end
-            hu1 = line([0 0],[2 -10]);
+            hu1 = line([0 0],[2 -13]);
             set(hu1, 'color',[0 0 0])
         else
             set(gca,'xticklabel',{[]})
@@ -153,19 +146,17 @@ for icon = [1 8] %{'MIM','MIC','Coherence','iCOH','GC-det','GC-dir','TRGC-det','
         
     end
     
-    %%
-    outname = [DIRFIG imlab '_' labs{icon} '_correlated_sources_3pcs.eps'];
+    %% save
+    outname = [DIRFIG imlab '_' labs{icon} '_noisemix.eps'];
     print(outname,'-depsc');
-    
     close all
-    
 end
 
 
-%eloreta vs LCMV 
-de = pr_all(1,:); 
-dl = pr_all(2,:); 
-[p1,~,stats] = signrank(de,dl)
+
+
+
+
 
 
 

@@ -1,4 +1,4 @@
-function [mic,mim]= roi_mim(Cohroi, subinds1, subinds2)
+function [mic,mim]= roi_mim2(Cohroi, subinds1, subinds2)
 
 % Copyright (c) 2022 Franziska Pellegrini and Stefan Haufe
 

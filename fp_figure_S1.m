@@ -1,3 +1,8 @@
+function fp_figure_S1
+% loads results from the fp_read_computation_times function 
+
+% Copyright (c) 2022 Franziska Pellegrini and Stefan Haufe
+
 DIRIN = './mim_sim5/c_times/';
 DIRFIG = './figures/mimsim_ana/mim_sim5/Manuscript/';
 for ip = [1]
@@ -16,7 +21,6 @@ for ip = [1]
                             ifilt = filtertype{ifi};
                             
                             iit=100;
-                            %create logfile for parallelization
                             logname = sprintf('iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_%s_iter%d'...
                                 ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,dimred,iit);
                             

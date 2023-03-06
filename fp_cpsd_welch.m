@@ -3,7 +3,9 @@ function S = fp_cpsd_welch(X_1, X_2,ind_1,ind_2,h,window,noverlap)
 %calculated. Otherwise X_2 should contain data from another trial than
 %X_1. ind_1 and ind_2 contain channels of interest. The output S will be of 
 %size length(ind_1) x length(ind_2) x nfreq. 
-% keyboard
+
+% Copyright (c) 2022 Franziska Pellegrini and Stefan Haufe
+
 ind_pow = intersect(ind_1, ind_2);
 nfft = 2*(h-1);
 

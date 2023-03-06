@@ -1,4 +1,4 @@
-
+%submit to TU cluster
 
 fp_addpath
 cd ~/matlab/fp/meg_lfp/

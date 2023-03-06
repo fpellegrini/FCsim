@@ -1,5 +1,7 @@
 function [MIM, MIC, iCOH, aCOH] = fp_correct_mim(signal_roi,inds,fres,D,filt,PCA_inds)
 
+% Copyright (c) 2022 Franziska Pellegrini and Stefan Haufe
+
 nit = 50;
 [nchan, ~, nepo] = size(signal_roi);
 

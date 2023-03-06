@@ -1,5 +1,5 @@
-function fp_figure9
-%plot different interaction numbers
+function fp_figure8AB
+%plot different SNRs
 
 % Copyright (c) 2022 Franziska Pellegrini and Stefan Haufe
 
@@ -8,14 +8,14 @@ DIRFIG = './figures/mimsim_ana/mim_sim5/Manuscript/';
 if ~exist(DIRFIG); mkdir(DIRFIG); end
 
 labs = {'MIM','MIC','Coherence','iCOH','GC-det','GC-dir','TRGC-det','TRGC-dir'};
-ipip = 3; %only for fixPC pipeline with 3 PCs
+ipip = 3;%only for fixPC pipeline with 3 PCs
 
 %%
 for icon = [1 8] %plot only for MIM and TRGC
     o=1;
     figure
     figone(8,18)
-    for iname = [2 1 3:5] %loop over iInts 
+    for iname = [7 1 8]
         
         clearvars -except iname name DIRDATA DIRFIG labs o im icon ipip xt mean_pr
         
@@ -27,7 +27,7 @@ for icon = [1 8] %plot only for MIM and TRGC
         iss = 0.5;
         ilag=2;
         ifilt='l';
-        dimred = 'p';
+        dimred='p';
         
         if iname==2
             iInt = 1;
@@ -38,7 +38,7 @@ for icon = [1 8] %plot only for MIM and TRGC
                 case 6
                     iReg = 2;
                 case 7
-                    isnr = 0.5;
+                    isnr = 0.3;
                 case 8
                     isnr = 0.9;
                 case 9
@@ -64,14 +64,11 @@ for icon = [1 8] %plot only for MIM and TRGC
                     dimred = 's';
             end
         end
-        
-        
         np = 6;
         
-        its = [1:nit];
-        
-        %% load data
-        for iit= its
+        %% load
+        for iit= 1:nit
+            
             inname = sprintf('pr_iInt%d_iReg%d_snr0%d_iss0%d_lag%d_filt%s_%s_iter%d'...
                 ,iInt,iReg,isnr*10,iss*10, ilag,ifilt,dimred, iit);
             
@@ -87,15 +84,12 @@ for icon = [1 8] %plot only for MIM and TRGC
             PR{8}(iit,:) = pr_postrgc;
         end
         
-        
         %% plot
-        
         data1 = PR{icon}(:,ipip);
-        median_pr(o) = median(data1);
+        mean_pr(o) = mean(data1);
         imlab = 'PR';
         imlab1 = 'PR';
         
-        %select color
         if ipip<=np
             cl = [0.8 0.7 0.6];
         elseif ipip <np+3 || ipip == 11 || ipip == 12
@@ -108,14 +102,13 @@ for icon = [1 8] %plot only for MIM and TRGC
             cl = [0.8 0.8 0.8];
         end
         
-        subplot(1,5,o)
-        
+        subplot(1,4,o)
         [h, u] = fp_raincloud_plot_a(data1, cl, 1,0.2, 'ks');
         view([-90 -90]);
         set(gca, 'Xdir', 'reverse');
         set(gca, 'XLim', [0 1]);
         
-        titles = {'1 interaction','2 interactions','3 interactions','4 interactions','5 interactions'};
+        titles = {'-7.4 dB', '3.5 dB','19.1 dB'};
         htit = title(titles{o});
         htit.Position(1) = -0.12;
         set(gca,'ytick',[])
@@ -127,11 +120,11 @@ for icon = [1 8] %plot only for MIM and TRGC
             set(gca,'Clipping','Off')
             xt = xticks;
             for ix = xt
-                hu = line([ix ix],[2 -13]);
+                hu = line([ix ix],[2 -8]);
                 set(hu, 'color',[0.9 0.9 0.9])
                 uistack(hu,'bottom')
             end
-            hu1 = line([0 0],[2 -13]);
+            hu1 = line([0 0],[2 -8]);
             set(hu1, 'color',[0 0 0])
         else
             set(gca,'xticklabel',{[]})
@@ -151,7 +144,7 @@ for icon = [1 8] %plot only for MIM and TRGC
     end
     
     %% save
-    outname = [DIRFIG imlab '_' labs{icon} '_Ints.eps'];
+    outname = [DIRFIG imlab '_' labs{icon} '_snr_3pcs.eps'];
     print(outname,'-depsc');
     close all
 end
