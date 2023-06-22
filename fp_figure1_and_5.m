@@ -81,15 +81,6 @@ end
 
 noise_ind = setdiff(1:params.iReg*D.nroi,sig_ind(:));
 
-%% indices of signal and noise
-
-sig_ind = [];
-for ii = 1:params.iReg
-    sig_ind = [sig_ind; (iroi_seed.*params.iReg)-(ii-1), (iroi_tar.*params.iReg)-(ii-1)];
-end
-
-noise_ind = setdiff(1:params.iReg*D.nroi,sig_ind(:));
-
 %% generate interacting sources
 
 if no_reload
