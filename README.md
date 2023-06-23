@@ -13,4 +13,4 @@ The following Matlab toolboxes are required:
 The recommended methods and pipelines introduced in this project have been implemented in the ROIconn plugin to the free and open source [EEGlab toolbox](https://github.com/arnodelorme/roiconnect).
 
 The authors would be grateful if published reports of research using this code (or a modified version, maintaining a significant portion of the original code) would cite the following article: 
-> Pellegrini, F., Delorme, A., Nikulin, V. & Haufe, S., 2022. Identifying best practices for detecting inter-regional functional connectivity from EEG. bioRxiv 2022.10.05.510753. https://doi.org/10.1101/2022.10.05.510753
+> Pellegrini, F., Delorme, A., Nikulin, V., & Haufe, S. (2023). Identifying good practices for detecting inter-regional linear functional connectivity from EEG. NeuroImage, 120218. https://doi.org/10.1016/j.neuroimage.2023.120218 
